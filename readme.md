@@ -42,35 +42,13 @@ Reboot!
 
 #### SDR++
 
++ Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
+
 + As of the time of writing (23 April 2024) there is no binary for 64-bit Raspberry Pi OS, so we have to build it from source.
 
-+ First install cmake, ninja-build and vcpkg
-```bash
-cd ~
-sudo apt install cmake ninja-build
-git clone https://github.com/microsoft/vcpkg
-export VCPKG_FORCE_SYSTEM_BINARIES=1 # fix for ARM based systems
-./vcpkg/bootstrap-vcpkg.sh
-```
-
-Installing vcpkg this way put its files here: /home/openweather/vcpkg/buildtrees/_vcpkg/build
++ In order to do this quickly and easily, run the install-sdrpp.sh script from this directory
 
 ```bash
-cmake .. "-DCMAKE_TOOLCHAIN_FILE=/home/openweather/vcpkg/buildtrees/_vcpkg/build/scripts/buildsystems/vcpkg.cmake" -G "Visual Studio 16 2019"
-cmake --build . --config Release
+chmod +x install-sdrpp.sh
+./install-sdrpp.sh
 ```
-
-```bash
-git clone https://github.com/AlexandreRouma/SDRPlusPlus.git
-cd SDRPlusPlus/
-mkdir build
-cd build
-```
-
-+ Install nightly [SDR++](https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb) and dependencies
-```bash
-wget https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb
-sudo apt install libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev
-sudo dpkg -i sdrpp_debian_bookworm_amd64.deb
-```
-+ Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
