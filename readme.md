@@ -74,3 +74,7 @@ sudo apt install libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-
 sudo dpkg -i sdrpp_debian_bookworm_amd64.deb
 ```
 + Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
+
+## helpful links etc
++ [10-day predictions for NOAA-19 satelite pass](https://www.n2yo.com/passes/?s=33591#)
++ [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
