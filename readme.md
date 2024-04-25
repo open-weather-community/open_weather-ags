@@ -56,3 +56,13 @@ chmod +x install-sdrpp.sh
 + [10-day predictions for NOAA-19 satelite pass](https://www.n2yo.com/passes/?s=33591#)
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
+
+## other SDR software options...
++ [rfsoapyfile](https://github.com/roseengineering/rfsoapyfile)
++ https://github.com/ha7ilm/csdr
++ [rtl_fm](https://osmocom-sdr.osmocom.narkive.com/lDN2mcET/rtl-fm-problem-with-capture-audio)
++ [rx_tools](https://github.com/rxseger/rx_tools)
++ [AltiWx](https://github.com/altillimity/AltiWx)
++ GNURadio
++ GQRX
++ [more info here...](https://inst.eecs.berkeley.edu/~ee123/fa12/rtl_sdr.html)
