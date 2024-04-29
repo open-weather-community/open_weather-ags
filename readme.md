@@ -9,7 +9,7 @@
 
 ### software
 
-#### RTL-SDR v4
+#### RTL-SDR v4 (driver etc)
 
 + According to the [official quick start guide](https://www.rtl-sdr.com/V4/) we must purge existing RTL-SDR drivers and install v4 ones anew.
 
@@ -40,7 +40,15 @@ echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-
 Reboot!
 ```reboot```
 
-#### SDR++
+#### SoapySDR
+
+In broad strokes,
+[First install SoapySDR from GitHub](https://github.com/pothosware/SoapyRTLSDR)
+[Then follow instructions for the RTLSDR device](https://github.com/pothosware/SoapyRTLSDR/wiki)
+
+
+
+#### SDR++ (no longer used)
 
 + Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
 
