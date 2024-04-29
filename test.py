@@ -1,39 +1,42 @@
-import numpy as np
-import soapysdr
-import time
-import wave
+import SoapySDR
+from SoapySDR import *  # SOAPY_SDR_ constants
+import numpy  # use numpy for buffers
 
-# Set up SoapySDR device
-sdr = soapysdr.Device.make("driver=rtlsdr")
+# enumerate devices
+results = SoapySDR.Device.enumerate()
+for result in results:
+    print(result)
 
-# Set up recording parameters
-frequency = 100e6  # tuning frequency in Hz
-sample_rate = 2e6  # sample rate in Hz
-duration = 10  # recording duration in seconds
+# create device instance
+# args can be user defined or from the enumeration result
+args = dict(driver="rtlsdr")
+sdr = SoapySDR.Device(args)
 
-# Set up SoapySDR stream
-stream = sdr.setupStream([soapysdr.Stream.complex(frequency, sample_rate)])
-stream.activate(True)
+# query device info
+print(sdr.listAntennas(SOAPY_SDR_RX, 0))
+print(sdr.listGains(SOAPY_SDR_RX, 0))
+freqs = sdr.getFrequencyRange(SOAPY_SDR_RX, 0)
+for freqRange in freqs:
+    print(freqRange)
 
-# Set up WAV file
-wav_file = wave.open("radio_recording.wav", "wb")
-wav_file.setnchannels(1)
-wav_file.setsampwidth(2)
-wav_file.setframerate(int(sample_rate))
+# apply settings
+sdr.setSampleRate(SOAPY_SDR_RX, 0, 1e6)
+sdr.setFrequency(SOAPY_SDR_RX, 0, 912.3e6)
 
-# Record radio to WAV file
-start_time = time.time()
-while time.time() - start_time < duration:
-    # Read samples from SoapySDR stream
-    samples = stream.read(int(sample_rate / 10))
+# setup a stream (complex floats)
+rxStream = sdr.setupStream(SOAPY_SDR_RX, SOAPY_SDR_CF32)
+sdr.activateStream(rxStream)  # start streaming
 
-    # Convert samples to 16-bit PCM
-    pcm_samples = (np.real(samples) * 32767).astype(np.int16)
+# create a re-usable buffer for rx samples
+buff = numpy.array([0] * 1024, numpy.complex64)
 
-    # Write samples to WAV file
-    wav_file.writeframes(pcm_samples.tobytes())
+# receive some samples
+for i in range(10):
+    sr = sdr.readStream(rxStream, [buff], len(buff))
+    print(sr.ret)  # num samples or error code
+    print(sr.flags)  # flags set by receive operation
+    print(sr.timeNs)  # timestamp for receive buffer
 
-# Stop SoapySDR stream and close WAV file
-stream.activate(False)
-sdr.closeStream(stream)
-wav_file.close()
+# shutdown the stream
+sdr.deactivateStream(rxStream)  # stop streaming
+sdr.closeStream(rxStream)

@@ -43,10 +43,19 @@ Reboot!
 #### SoapySDR
 
 In broad strokes,
+First install SWIG so that the Python bindings are created when you build SoapySDR
+```bash
+sudo apt-get install python-dev-is-python3 swig
+```
 [First install SoapySDR from GitHub](https://github.com/pothosware/SoapyRTLSDR)
 [Then follow instructions for the RTLSDR device](https://github.com/pothosware/SoapyRTLSDR/wiki)
 
+```bash
+python3 -m venv myenv
+source myenv/bin/activate
+pip install soapysdr
 
+```
 
 #### SDR++ (no longer used)
 
