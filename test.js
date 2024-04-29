@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const cron = require('node-cron');
 
 // Schedule the task to run at 5pm every day
-cron.schedule('0 17 * * *', () => {
+cron.schedule('42 22 * * *', () => {
     console.log('Starting recording...');
 
     // Spawn the rtl_fm command and pipe the output to sox
