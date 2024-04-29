@@ -9,9 +9,9 @@
 
 ### software
 
-#### RTL-SDR v4 (driver etc)
+#### RTL-SDR v4 driver
 
-+ According to the [official quick start guide](https://www.rtl-sdr.com/V4/) we must purge existing RTL-SDR drivers and install v4 ones anew.
++ According to the [official quick start guide](https://www.rtl-sdr.com/V4/) we must purge existing RTL-SDR drivers and install v4 ones anew. Note we are using rtl-sdr-blog drivers and not standard rtl-sdr which do not work with v4.
 
 Purge:
 ```bash
@@ -38,18 +38,8 @@ echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-
 ```
 
 Reboot!
-```reboot```
-
-#### Node, nvm and NPM
-
 ```bash
-sudo apt install -y build-essential libssl-dev
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-nvm install v18.20.2
-npm install stl-sdr
+reboot
 ```
 
 #### SoapySDR
@@ -74,6 +64,39 @@ source myenv/bin/activate
 pip install soapysdr
 
 ```
+
+Once SoapySDR is installed
+```
+sudo apt install sox
+rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - test_rtl.wav
+```
+
+
+#### Node, nvm and NPM
+
+```bash
+sudo apt install -y build-essential libssl-dev
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+nvm install v18.20.2
+```
+
+#### rtl-sdr (not working...)
+```bash
+git clone https://gitea.osmocom.org/sdr/rtl-sdr.git
+cd rtl-sdr/
+mkdir build
+cd build
+cmake ../
+make
+sudo make install
+sudo ldconfig
+cmake ../ -DINSTALL_UDEV_RULES=ON
+```
+
+
 
 #### SDR++ (no longer used)
 
