@@ -40,6 +40,18 @@ echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-
 Reboot!
 ```reboot```
 
+#### Node, nvm and NPM
+
+```bash
+sudo apt install -y build-essential libssl-dev
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+nvm install v18.20.2
+
+```
+
 #### SoapySDR
 
 In broad strokes,
