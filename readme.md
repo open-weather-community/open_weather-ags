@@ -50,6 +50,12 @@ sudo apt-get install python-dev-is-python3 swig
 [First install SoapySDR from GitHub](https://github.com/pothosware/SoapyRTLSDR)
 [Then follow instructions for the RTLSDR device](https://github.com/pothosware/SoapyRTLSDR/wiki)
 
+To do.. get it working with Python
+https://github.com/pothosware/SoapySDR/wiki/PythonSupport
+https://gist.github.com/songritk/b0ac5cde818d42d61a9848f3f2a5a797
+https://stackoverflow.com/questions/49371699/no-modules-found-when-installing-soapysdr-on-raspberry-pi-3
+
+
 ```bash
 python3 -m venv myenv
 source myenv/bin/activate
