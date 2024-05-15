@@ -66,9 +66,11 @@ pip install soapysdr
 ```
 
 Once SoapySDR is installed
-```
+```bash
 sudo apt install sox
-rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - test_rtl.wav
+rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - fm104-6.wav # FM radio station in Berlin
+rtl_fm -f 137.1M -M fm -s 15k -r 15k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 15000 - noaa19.wav # NOAA19
+
 ```
 
 
@@ -80,7 +82,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-nvm install v18.20.2
+nvm install node
 ```
 
 #### rtl-sdr (not working...)
