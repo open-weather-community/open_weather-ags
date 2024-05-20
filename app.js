@@ -110,6 +110,8 @@ cron.schedule('* * * * *', () => {
     });
 });
 
+
+
 function startRecording(f, timestamp, satellite, durationMinutes) {
     console.log('Starting recording of ', satellite, ' at ', timestamp);
 

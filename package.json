@@ -1,5 +1,17 @@
 {
+  "name": "usb-auto-save",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scheduler.js",
+  "scripts": {
+    "start": "node scheduler.js"
+  },
   "dependencies": {
-    "node-cron": "^3.0.3"
-  }
+    "child_process": "^1.0.2",
+    "cron": "^1.8.2",
+    "https": "^1.0.0",
+    "fs": "^0.0.1-security"
+  },
+  "author": "",
+  "license": "ISC"
 }

@@ -1,5 +1,9 @@
 # open-weather automated ground station
 
+## usage
+
+npm start
+
 ## setup
 
 ### raspberry pi
@@ -83,6 +87,13 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 nvm install node
+```
+
+Then install ...
+```bash
+npm install chokidar usb-detection
+sudo apt update
+sudo apt install libudev-dev
 ```
 
 #### rtl-sdr (not working...)
