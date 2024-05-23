@@ -7,10 +7,14 @@
     "start": "node scheduler.js"
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "child_process": "^1.0.2",
     "cron": "^1.8.2",
+    "fs": "^0.0.1-security",
+    "geolib": "^3.3.4",
     "https": "^1.0.0",
-    "fs": "^0.0.1-security"
+    "luxon": "^3.4.4",
+    "satellite.js": "^5.0.0"
   },
   "author": "",
   "license": "ISC"
