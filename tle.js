@@ -7,20 +7,17 @@ const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
 
-const maximumDistance = 2000000; // was 500000
-const locLat = 52.495480;
-const locLon = 13.468430;
-const noaaFrequencies = {
-    'NOAA 19': '137.1M',
-    'NOAA 18': '137.9125M',
-    'NOAA 15': '137.62M'
-};
-const passesFile = 'passes.json';
-const daysToPropagate = 10;
-const bufferMinutes = 3;    // buffer on either side of the pass to start/stop recording
+const config = require('./config.json');
+const maxDistance = config.maxDistance;
+const locLat = config.locLat;
+const locLon = config.locLon;
+const noaaFrequencies = config.noaaFrequencies;
+const passesFile = config.passesFile;
+const daysToPropagate = config.daysToPropagate;
+const bufferMinutes = config.bufferMinutes;
 
 // check if the satellite passes over the given location within a certain distance
-function isOverLocation(satLat, satLon, locLat, locLon, maxDistance = maximumDistance) {
+function isOverLocation(satLat, satLon, locLat, locLon) {
     const distance = geolib.getDistance(
         { latitude: satLat, longitude: satLon },
         { latitude: locLat, longitude: locLon }

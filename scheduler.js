@@ -15,7 +15,7 @@ cron.schedule('0 17 * * *', () => {
 // Schedule the task to run every minute
 cron.schedule('* * * * *', () => {
     // Read the JSON file
-    fs.readFile(path.resolve(__dirname, config.file), 'utf8', (err, data) => {
+    fs.readFile(path.resolve(__dirname, config.passesFile), 'utf8', (err, data) => {
         if (err) {
             console.error(err);
             return;
@@ -38,7 +38,7 @@ cron.schedule('* * * * *', () => {
         });
 
         // Write updated JSON data back to the file
-        fs.writeFile(path.resolve(__dirname, config.file), JSON.stringify(jsonData, null, 2), err => {
+        fs.writeFile(path.resolve(__dirname, config.passesFile), JSON.stringify(jsonData, null, 2), err => {
             if (err) {
                 console.error('Error writing file:', err);
             }

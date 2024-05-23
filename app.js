@@ -1,10 +1,5 @@
 /*
-    + How will the API work? Is it a list of ALL satellite passes, just upcoming ones?
-        + assuming it is a list of upcoming satellite passes, I should check it against
-        the schedule.json to see if there is a new pass to add to the stack
-        + then just keep a long list of all passes and add recorded: true when necessary
 
-    + 11025 samples for the wav encoding
     + get shared doc of bill's adjustments
     + how long should the wave form be recorded for?
         + is it possible to start recording when there is a good signal to noise ratio?
@@ -25,13 +20,6 @@ Estimate Noise Floor:
 
     Lizzie and Dan: will API be responsive to lat/long of the device? what exactly will it return?
 
-    // api for the satellite passes
-    https://www.n2yo.com/api/
-
-    https://api.n2yo.com/rest/v1/satellite/radiopasses/4/52.495480/13.468430/0/2/40/&apiKey=KQ4CJL-PH6TLP-NK99WQ-4O14
-    my lat: 52.495480
-    my long: 13.468430
-
 */
 
 const { spawn } = require('child_process');
@@ -39,6 +27,8 @@ const cron = require('node-cron');
 const https = require('https');
 const fs = require('fs');
 const config = require('./config.json');
+const axios = require('axios');
+require('dotenv').config(); // Load environment variables from .env file
 
 const apiOptions = {
     hostname: 'api.example.com',
@@ -51,42 +41,47 @@ const apiOptions = {
     }
 };
 
-// json data with time and date
-const dummyData = [{
-    satellite: 'NOAA 19',
-    frequency: '137.1M',
-    time: '5:00 PM',
-    date: '2021-09-01'
-}];
+// schedule
+cron.schedule('11 12 * * *', () => {
 
-// download the API data at 5pm daily
-cron.schedule('0 17 * * *', () => {
+    // do a git pull
+    // this should also happen at a more system-foundational level like on restart though...
+    const { exec } = require('child_process');
+    exec('git pull', (err, stdout, stderr) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        console.log(stdout);
+    }
+    );
+
 
     // api request json data
-    const req = https.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`);
+    // const req = https.request(options, res => {
+    //     console.log(`statusCode: ${res.statusCode}`);
 
-        res.on('data', d => {
-            const data = JSON.parse(d);
-            console.log(data);
+    //     res.on('data', d => {
+    //         const data = JSON.parse(d);
+    //         console.log(data);
 
-            // save to config.file
-            fs.writeFileSync(`${config.file}`, JSON.stringify(data));
-        });
-    });
+    //         // save to config.file
+    //         fs.writeFileSync(`${config.file}`, JSON.stringify(data));
+    //     });
+    // });
 
-    req.on('error', error => {
-        console.error(error);
-    });
+    // req.on('error', error => {
+    //     console.error(error);
+    // });
 
-    req.end();
+    // req.end();
 
 });
 
 // Schedule the task to run every minute
 cron.schedule('* * * * *', () => {
     // read the JSON file
-    fs.readFile(`${config.file}`, 'utf8', (err, data) => {
+    fs.readFile(`${config.passesFile}`, 'utf8', (err, data) => {
         if (err) {
             console.error(err);
             return;
@@ -102,7 +97,7 @@ cron.schedule('* * * * *', () => {
         jsonData.forEach(item => {
             const recordTime = new Date(item.date + ' ' + item.time);
             if (now >= recordTime && !item.recorded) {
-                startRecording(item.frequency, recordTime, item.satellite, 15);
+                startRecording(item.frequency, recordTime, item.satellite, item.duration);
                 // make item as recorded
                 item.recorded = true;
             }
@@ -113,7 +108,8 @@ cron.schedule('* * * * *', () => {
 
 
 function startRecording(f, timestamp, satellite, durationMinutes) {
-    console.log('Starting recording of ', satellite, ' at ', timestamp);
+    const fileName = `recordings/${satellite}-${timestamp}.wav`;
+    console.log('Starting recording of ', satellite, ' at ', timestamp, ' for ', durationMinutes, ' minutes', ' to ', fileName);
 
     // Spawn the rtl_fm command and pipe the output to sox
     const rtlFm = spawn('rtl_fm', [
@@ -127,8 +123,6 @@ function startRecording(f, timestamp, satellite, durationMinutes) {
         '-g', '10'
     ]);
 
-
-
     const sox = spawn('sox', [
         '-t', 'raw',
         '-e', 'signed',
@@ -136,21 +130,54 @@ function startRecording(f, timestamp, satellite, durationMinutes) {
         '-b', '16',
         '-r', '11025',
         '-',
-        `recordings/${satellite}-${timestamp}.wav`
+        fileName
     ]);
 
     rtlFm.stdout.pipe(sox.stdin);
 
-    // Stop the recording after 5 minutes
+    // Stop the recording after x minutes
     setTimeout(() => {
         console.log('Stopping recording...');
         rtlFm.kill();
         sox.kill();
 
         // find matching entry in the JSON file and set recorded to true
+        // ...
 
-
+        // upload the file to the server
+        uploadFile(fileName, 'https://api.example.com/upload', satellite, config.locLat, config.locLon);
 
 
     }, durationMinutes * 60 * 1000);
+}
+
+async function uploadFile(filePath, url, satelliteName, lat, lon) {
+    // read the file as a buffer
+    const fileData = fs.readFileSync(filePath);
+
+    // create a FormData object to include the file data and additional fields
+    const formData = new FormData();
+    formData.append('file', fileData, {
+        filename: 'file.txt',
+        contentType: 'application/octet-stream'
+    });
+    formData.append('satelliteName', satelliteName);
+    formData.append('latitude', lat);
+    formData.append('longitude', lon);
+
+    try {
+        // make a POST request to the server with the FormData and authentication headers
+        const response = await axios.post(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // set the content type to multipart/form-data
+                'Authorization': `Bearer ${process.env.AUTH_TOKEN}` // use the authentication token from environment variables
+            },
+        });
+
+        // log the response from the server
+        console.log(response.data);
+    } catch (error) {
+        // log any errors
+        console.error('Error uploading file:', error);
+    }
 }

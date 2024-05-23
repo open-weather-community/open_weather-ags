@@ -4,6 +4,26 @@
 
 npm start
 
+## Explanation
+
+### Files
+
+#### .env
+
+Hidden file with AUTH_TOKEN property which is assigned to each device by open-weather.
+
+#### config.json
+
+This holds the basic configuration for each ground station. Properties include latitude and longitude, maximum distance from satellite to consider a "good pass", etc.
+
+#### passes.json
+
+This file contains information for upcoming and past NOAA satellite passes. It is updated using tle.js, and a cron job checks every minute in app.js to see if it should be recording based on this info. When it finishes, the recorded flag should be set to true.
+
+#### recordings
+
+WAV files are saved to this directory...
+
 ## setup
 
 ### raspberry pi
@@ -77,7 +97,6 @@ rtl_fm -f 137.1M -M fm -s 15k -r 15k -A fast -l 0 -E deemp -g 10 | sox -t raw -e
 
 ```
 
-
 #### Node, nvm and NPM
 
 ```bash
@@ -109,8 +128,6 @@ sudo ldconfig
 cmake ../ -DINSTALL_UDEV_RULES=ON
 ```
 
-
-
 #### SDR++ (no longer used)
 
 + Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
@@ -124,7 +141,9 @@ chmod +x install-sdrpp.sh
 ./install-sdrpp.sh
 ```
 ## helpful links etc
-+ [10-day predictions for NOAA-19 satelite pass](https://www.n2yo.com/passes/?s=33591#)
++ [10-day predictions for NOAA-19](https://www.n2yo.com/passes/?s=33591#)
++ [10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)
++ [10-day predictions for NOAA-15](https://www.n2yo.com/passes/?s=25338)
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
 

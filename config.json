@@ -1,3 +1,13 @@
 {
-    "file": "passes.json"
+    "maxDistance": 1500000,
+    "locLat": 52.495480,
+    "locLon": 13.468430,
+    "noaaFrequencies": {
+        "NOAA 19": "137.1M",
+        "NOAA 18": "137.9125M",
+        "NOAA 15": "137.62M"
+    },
+    "passesFile": "passes.json",
+    "daysToPropagate": 10,
+    "bufferMinutes": 3
 }
