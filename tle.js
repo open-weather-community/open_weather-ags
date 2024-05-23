@@ -17,6 +17,7 @@ const noaaFrequencies = {
 };
 const passesFile = 'passes.json';
 const daysToPropagate = 10;
+const bufferMinutes = 3;    // buffer on either side of the pass to start/stop recording
 
 // Function to check if the satellite passes over the given location within a certain distance
 function isOverLocation(satLat, satLon, locLat, locLon, maxDistance = maximumDistance) {
@@ -139,14 +140,19 @@ async function processPasses() {
         passes.forEach(pass => {
             const formattedStart = DateTime.fromISO(pass.start.toISO());
             const formattedEnd = DateTime.fromISO(pass.end.toISO());
-            const duration = Math.round((formattedEnd - formattedStart) / (1000 * 60)); // duration in minutes
+            // const duration = Math.round((formattedEnd - formattedStart) / (1000 * 60)); // duration in minutes
+
+            // Apply buffer
+            const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
+            const bufferEnd = formattedEnd.plus({ minutes: bufferMinutes });
+            const bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60)); // buffer duration in minutes
 
             const newPass = {
                 frequency: noaaFrequencies[satName],
                 satellite: satName,
-                date: formattedStart.toFormat('dd LLL yyyy'),
-                time: formattedStart.toFormat('HH:mm'),
-                duration: duration,
+                date: bufferStart.toFormat('dd LLL yyyy'),
+                time: bufferStart.toFormat('HH:mm'),
+                duration: bufferDuration,
                 recorded: false
             };
 
