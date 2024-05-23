@@ -19,7 +19,7 @@ const passesFile = 'passes.json';
 const daysToPropagate = 10;
 const bufferMinutes = 3;    // buffer on either side of the pass to start/stop recording
 
-// Function to check if the satellite passes over the given location within a certain distance
+// check if the satellite passes over the given location within a certain distance
 function isOverLocation(satLat, satLon, locLat, locLon, maxDistance = maximumDistance) {
     const distance = geolib.getDistance(
         { latitude: satLat, longitude: satLon },
@@ -28,14 +28,14 @@ function isOverLocation(satLat, satLon, locLat, locLon, maxDistance = maximumDis
     return distance <= maxDistance;
 }
 
-// Function to fetch TLE data from Celestrak
+// fetch TLE data from Celestrak
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
     const response = await axios.get(url);
     return response.data;
 }
 
-// Function to read existing passes from the file
+// read existing passes from the file
 function readExistingPasses() {
     if (fs.existsSync(passesFile)) {
         const data = fs.readFileSync(passesFile, 'utf8');
@@ -52,7 +52,7 @@ function readExistingPasses() {
     return [];
 }
 
-// Function to save passes to the file
+// save passes to the file
 function savePasses(passes) {
     passes.sort((a, b) => {
         const dateTimeA = DateTime.fromFormat(`${a.date} ${a.time}`, 'dd LLL yyyy HH:mm');
@@ -62,17 +62,17 @@ function savePasses(passes) {
     fs.writeFileSync(passesFile, JSON.stringify(passes, null, 2));
 }
 
-// Function to find satellite passes over a specific location
+// find satellite passes over a specific location
 async function findSatellitePasses(satName, tleLine1, tleLine2) {
-    // Create a satellite record
+    // create a satellite record
     const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
 
-    // Time range for propagation
+    // time range for propagation
     const startTime = DateTime.utc();
     const endTime = startTime.plus({ days: daysToPropagate }); // Propagate for specified days
     const timeStep = { minutes: 1 }; // Propagation step
 
-    // Loop through the time range and propagate the satellite's position
+    // loop through the time range and propagate the satellite's position
     let currentTime = startTime;
     let passStart = null;
     const passes = [];
@@ -103,7 +103,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
         currentTime = currentTime.plus(timeStep);
     }
 
-    // Check if there was an ongoing pass at the end of the time range
+    // check if there was an ongoing pass at the end of the time range
     if (passStart) {
         passes.push({ start: passStart, end: endTime });
     }
@@ -111,7 +111,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     return passes;
 }
 
-// Function to process passes and save to file
+// process passes and save to file
 async function processPasses() {
     const tleData = await fetchTLEData();
     const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
@@ -142,7 +142,7 @@ async function processPasses() {
             const formattedEnd = DateTime.fromISO(pass.end.toISO());
             // const duration = Math.round((formattedEnd - formattedStart) / (1000 * 60)); // duration in minutes
 
-            // Apply buffer
+            // apply buffer
             const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
             const bufferEnd = formattedEnd.plus({ minutes: bufferMinutes });
             const bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60)); // buffer duration in minutes
@@ -156,7 +156,7 @@ async function processPasses() {
                 recorded: false
             };
 
-            // Check for duplicates before adding
+            // check for duplicates before adding
             const duplicate = existingPasses.some(
                 existingPass =>
                     existingPass.satellite === newPass.satellite &&
@@ -170,11 +170,11 @@ async function processPasses() {
         });
     }
 
-    // Save updated passes
+    // save updated passes
     savePasses(existingPasses);
 
     console.log('Satellite passes have been updated and saved.');
 }
 
-// Execute the function to process passes
+// execute the process passes
 processPasses().catch(console.error);
