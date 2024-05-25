@@ -8,7 +8,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes) {
     const rtlFm = spawn('rtl_fm', [
         '-f', frequency,
         '-M', 'fm',
-        '-s', '170k',
+        '-s', '44k',
         '-r', '11025',
         '-A', 'fast',
         '-l', '0',
