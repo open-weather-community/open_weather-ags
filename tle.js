@@ -84,11 +84,23 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
 
             const satLat = satellite.degreesLat(positionGd.latitude);
             const satLon = satellite.degreesLong(positionGd.longitude);
+            const satHeight = positionGd.height;
 
             if (isOverLocation(satLat, satLon, locLat, locLon)) {
+                const observerGd = {
+                    longitude: satellite.degreesToRadians(locLon),
+                    latitude: satellite.degreesToRadians(locLat),
+                    height: 0 // height in meters
+                };
+                const lookAngles = satellite.ecfToLookAngles(observerGd, positionEci);
+                const elevation = satellite.degrees(lookAngles.elevation);
+
                 if (!passStart) {
                     passStart = currentTime;
                 }
+
+                passes.push({ start: passStart, end: currentTime, elevation: elevation.toFixed(2) });
+                passStart = null;
             } else {
                 if (passStart) {
                     passes.push({ start: passStart, end: currentTime });
@@ -137,8 +149,8 @@ async function processPasses() {
         passes.forEach(pass => {
             const formattedStart = DateTime.fromISO(pass.start.toISO());
             const formattedEnd = DateTime.fromISO(pass.end.toISO());
-            // const duration = Math.round((formattedEnd - formattedStart) / (1000 * 60)); // duration in minutes
-
+            const elevation = pass.elevation || 'N/A';
+            
             // apply buffer
             const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
             const bufferEnd = formattedEnd.plus({ minutes: bufferMinutes });
@@ -150,6 +162,7 @@ async function processPasses() {
                 date: bufferStart.toFormat('dd LLL yyyy'),
                 time: bufferStart.toFormat('HH:mm'),
                 duration: bufferDuration,
+                elevation: elevation,
                 recorded: false
             };
 
