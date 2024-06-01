@@ -9,5 +9,7 @@
     },
     "passesFile": "passes.json",
     "daysToPropagate": 10,
-    "bufferMinutes": 3
+    "bufferMinutes": 3,
+    "usbPath": "/media/openweather/INTENSO2",
+    "logFile": "log.txt"
 }

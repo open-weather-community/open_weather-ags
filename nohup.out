@@ -1,0 +1,9 @@
+
+> usb-auto-save@1.0.0 start
+> node scheduler.js
+
+File has been saved successfully to /media/openweather/INTENSO2/test.txt
+
+> usb-auto-save@1.0.0 start
+> node scheduler.js
+

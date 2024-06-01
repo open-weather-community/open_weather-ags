@@ -2,119 +2,119 @@
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "23 May 2024",
+    "date": "31 May 2024",
     "time": "12:46",
     "duration": 13,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "23 May 2024",
-    "time": "18:42",
+    "date": "31 May 2024",
+    "time": "18:35",
     "duration": 12,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "23 May 2024",
-    "time": "20:21",
+    "date": "31 May 2024",
+    "time": "20:14",
     "duration": 13,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
-    "date": "23 May 2024",
-    "time": "21:22",
-    "duration": 14,
-    "recorded": false
+    "date": "31 May 2024",
+    "time": "21:24",
+    "duration": 13,
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "23 May 2024",
+    "date": "31 May 2024",
     "time": "22:37",
     "duration": 14,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "24 May 2024",
+    "date": "01 Jun 2024",
     "time": "00:21",
     "duration": 8,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "24 May 2024",
-    "time": "08:30",
-    "duration": 12,
-    "recorded": false
+    "date": "01 Jun 2024",
+    "time": "08:23",
+    "duration": 13,
+    "recorded": true
   },
   {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
-    "date": "24 May 2024",
-    "time": "09:40",
-    "duration": 8,
-    "recorded": false
+    "date": "01 Jun 2024",
+    "time": "09:41",
+    "duration": 9,
+    "recorded": true
   },
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "24 May 2024",
-    "time": "10:10",
+    "date": "01 Jun 2024",
+    "time": "10:03",
     "duration": 12,
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
-    "date": "24 May 2024",
-    "time": "11:18",
-    "duration": 14,
-    "recorded": false
+    "date": "01 Jun 2024",
+    "time": "11:20",
+    "duration": 13,
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "24 May 2024",
+    "date": "01 Jun 2024",
     "time": "12:33",
     "duration": 14,
+    "recorded": true
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "01 Jun 2024",
+    "time": "18:11",
+    "duration": 9,
     "recorded": false
   },
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "24 May 2024",
-    "time": "18:18",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "24 May 2024",
-    "time": "19:55",
+    "date": "01 Jun 2024",
+    "time": "19:48",
     "duration": 14,
     "recorded": false
   },
   {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
-    "date": "24 May 2024",
-    "time": "21:10",
-    "duration": 13,
+    "date": "01 Jun 2024",
+    "time": "21:11",
+    "duration": 14,
     "recorded": false
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "24 May 2024",
+    "date": "01 Jun 2024",
     "time": "22:25",
     "duration": 13,
     "recorded": false
@@ -122,15 +122,15 @@
   {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
-    "date": "24 May 2024",
-    "time": "22:54",
+    "date": "01 Jun 2024",
+    "time": "22:55",
     "duration": 8,
     "recorded": false
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
-    "date": "25 May 2024",
+    "date": "02 Jun 2024",
     "time": "00:07",
     "duration": 11,
     "recorded": false
@@ -138,713 +138,9 @@
   {
     "frequency": "137.62M",
     "satellite": "NOAA 15",
-    "date": "25 May 2024",
-    "time": "08:04",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "25 May 2024",
-    "time": "09:44",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "25 May 2024",
-    "time": "11:06",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "25 May 2024",
-    "time": "12:21",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "25 May 2024",
-    "time": "14:04",
-    "duration": 8,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "25 May 2024",
-    "time": "19:29",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "25 May 2024",
-    "time": "20:58",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "25 May 2024",
-    "time": "22:13",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "25 May 2024",
-    "time": "22:40",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "25 May 2024",
-    "time": "23:54",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "26 May 2024",
-    "time": "09:18",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "26 May 2024",
-    "time": "10:54",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "26 May 2024",
-    "time": "12:08",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "26 May 2024",
-    "time": "12:36",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "26 May 2024",
-    "time": "13:50",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "26 May 2024",
-    "time": "19:04",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "26 May 2024",
-    "time": "20:45",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "26 May 2024",
-    "time": "20:46",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "26 May 2024",
-    "time": "22:01",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "26 May 2024",
-    "time": "22:27",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "26 May 2024",
-    "time": "23:41",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "27 May 2024",
-    "time": "08:52",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "27 May 2024",
-    "time": "10:33",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "27 May 2024",
-    "time": "10:41",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "27 May 2024",
-    "time": "11:56",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "27 May 2024",
-    "time": "12:23",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "27 May 2024",
-    "time": "13:37",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "27 May 2024",
-    "time": "18:39",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "27 May 2024",
-    "time": "20:18",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "27 May 2024",
-    "time": "20:34",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "27 May 2024",
-    "time": "21:49",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "27 May 2024",
-    "time": "22:14",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "27 May 2024",
-    "time": "23:28",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "28 May 2024",
-    "time": "08:27",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "28 May 2024",
-    "time": "10:07",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "28 May 2024",
-    "time": "10:29",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "28 May 2024",
-    "time": "11:44",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "28 May 2024",
-    "time": "12:11",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "28 May 2024",
-    "time": "13:25",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "28 May 2024",
-    "time": "18:15",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "28 May 2024",
-    "time": "19:52",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "28 May 2024",
-    "time": "20:22",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "28 May 2024",
-    "time": "21:37",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "28 May 2024",
-    "time": "22:02",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "28 May 2024",
-    "time": "23:16",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "29 May 2024",
-    "time": "08:02",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "29 May 2024",
-    "time": "09:41",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "29 May 2024",
-    "time": "10:17",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "29 May 2024",
-    "time": "11:31",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "29 May 2024",
-    "time": "11:58",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "29 May 2024",
-    "time": "13:12",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "29 May 2024",
-    "time": "19:26",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "29 May 2024",
-    "time": "20:10",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "29 May 2024",
-    "time": "21:25",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "29 May 2024",
-    "time": "21:49",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "29 May 2024",
-    "time": "23:03",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "30 May 2024",
-    "time": "09:15",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "30 May 2024",
-    "time": "10:05",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "30 May 2024",
-    "time": "11:19",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "30 May 2024",
-    "time": "11:45",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "30 May 2024",
-    "time": "12:59",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "30 May 2024",
-    "time": "19:01",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "30 May 2024",
-    "time": "19:59",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "30 May 2024",
-    "time": "20:42",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "30 May 2024",
-    "time": "21:37",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "30 May 2024",
-    "time": "22:50",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "31 May 2024",
-    "time": "08:49",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "31 May 2024",
-    "time": "09:53",
-    "duration": 11,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "31 May 2024",
-    "time": "10:30",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "31 May 2024",
-    "time": "11:07",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "31 May 2024",
-    "time": "11:33",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "31 May 2024",
-    "time": "12:46",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "31 May 2024",
-    "time": "18:36",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "31 May 2024",
-    "time": "20:15",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "31 May 2024",
-    "time": "21:24",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "31 May 2024",
-    "time": "22:38",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "01 Jun 2024",
-    "time": "00:22",
-    "duration": 8,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "01 Jun 2024",
-    "time": "08:24",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "01 Jun 2024",
-    "time": "09:42",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "01 Jun 2024",
-    "time": "10:04",
-    "duration": 12,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "01 Jun 2024",
-    "time": "11:21",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "01 Jun 2024",
-    "time": "12:34",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "01 Jun 2024",
-    "time": "18:12",
-    "duration": 9,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "01 Jun 2024",
-    "time": "19:49",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "01 Jun 2024",
-    "time": "21:12",
-    "duration": 14,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
-    "date": "01 Jun 2024",
-    "time": "22:26",
-    "duration": 13,
-    "recorded": false
-  },
-  {
-    "frequency": "137.1M",
-    "satellite": "NOAA 19",
-    "date": "01 Jun 2024",
-    "time": "22:56",
-    "duration": 8,
-    "recorded": false
-  },
-  {
-    "frequency": "137.9125M",
-    "satellite": "NOAA 18",
     "date": "02 Jun 2024",
-    "time": "00:08",
-    "duration": 10,
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "02 Jun 2024",
-    "time": "07:59",
-    "duration": 10,
+    "time": "07:58",
+    "duration": 11,
     "recorded": false
   },
   {
@@ -860,7 +156,735 @@
     "satellite": "NOAA 19",
     "date": "02 Jun 2024",
     "time": "11:08",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "02 Jun 2024",
+    "time": "12:21",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "02 Jun 2024",
+    "time": "14:04",
+    "duration": 8,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "02 Jun 2024",
+    "time": "19:23",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "02 Jun 2024",
+    "time": "20:59",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "02 Jun 2024",
+    "time": "21:06",
+    "duration": 8,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "02 Jun 2024",
+    "time": "22:13",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "02 Jun 2024",
+    "time": "22:42",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "02 Jun 2024",
+    "time": "23:54",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "03 Jun 2024",
+    "time": "09:11",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "03 Jun 2024",
+    "time": "10:55",
     "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "03 Jun 2024",
+    "time": "12:08",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "03 Jun 2024",
+    "time": "12:38",
+    "duration": 8,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "03 Jun 2024",
+    "time": "13:50",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "03 Jun 2024",
+    "time": "18:57",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "03 Jun 2024",
+    "time": "20:38",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "03 Jun 2024",
+    "time": "20:47",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "03 Jun 2024",
+    "time": "22:01",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "03 Jun 2024",
+    "time": "22:29",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "03 Jun 2024",
+    "time": "23:41",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "04 Jun 2024",
+    "time": "08:45",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "04 Jun 2024",
+    "time": "10:26",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "04 Jun 2024",
+    "time": "10:43",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "04 Jun 2024",
+    "time": "11:56",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "04 Jun 2024",
+    "time": "12:25",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "04 Jun 2024",
+    "time": "13:37",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "04 Jun 2024",
+    "time": "18:32",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "04 Jun 2024",
+    "time": "20:11",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "04 Jun 2024",
+    "time": "20:35",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "04 Jun 2024",
+    "time": "21:48",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "04 Jun 2024",
+    "time": "22:16",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "04 Jun 2024",
+    "time": "23:28",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "05 Jun 2024",
+    "time": "08:20",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "05 Jun 2024",
+    "time": "10:00",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "05 Jun 2024",
+    "time": "10:31",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "05 Jun 2024",
+    "time": "11:43",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "05 Jun 2024",
+    "time": "12:12",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "05 Jun 2024",
+    "time": "13:24",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "05 Jun 2024",
+    "time": "18:08",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "05 Jun 2024",
+    "time": "19:45",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "05 Jun 2024",
+    "time": "20:23",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "05 Jun 2024",
+    "time": "21:37",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "05 Jun 2024",
+    "time": "22:03",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "05 Jun 2024",
+    "time": "23:15",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "06 Jun 2024",
+    "time": "07:55",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "06 Jun 2024",
+    "time": "09:34",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "06 Jun 2024",
+    "time": "10:19",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "06 Jun 2024",
+    "time": "11:31",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "06 Jun 2024",
+    "time": "12:00",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "06 Jun 2024",
+    "time": "13:12",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "06 Jun 2024",
+    "time": "19:20",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "06 Jun 2024",
+    "time": "20:12",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "06 Jun 2024",
+    "time": "21:02",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "06 Jun 2024",
+    "time": "21:25",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "06 Jun 2024",
+    "time": "21:51",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "06 Jun 2024",
+    "time": "23:03",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "07 Jun 2024",
+    "time": "09:08",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "07 Jun 2024",
+    "time": "10:07",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "07 Jun 2024",
+    "time": "11:19",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "07 Jun 2024",
+    "time": "11:47",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "07 Jun 2024",
+    "time": "12:59",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "07 Jun 2024",
+    "time": "18:54",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "07 Jun 2024",
+    "time": "20:00",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "07 Jun 2024",
+    "time": "20:35",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "07 Jun 2024",
+    "time": "21:38",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "07 Jun 2024",
+    "time": "22:50",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "08 Jun 2024",
+    "time": "08:42",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "08 Jun 2024",
+    "time": "09:55",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "08 Jun 2024",
+    "time": "10:23",
+    "duration": 11,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "08 Jun 2024",
+    "time": "11:07",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "08 Jun 2024",
+    "time": "11:35",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "08 Jun 2024",
+    "time": "12:46",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "08 Jun 2024",
+    "time": "18:29",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "08 Jun 2024",
+    "time": "20:08",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "08 Jun 2024",
+    "time": "21:26",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "08 Jun 2024",
+    "time": "22:38",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "09 Jun 2024",
+    "time": "00:22",
+    "duration": 8,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "09 Jun 2024",
+    "time": "08:17",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "09 Jun 2024",
+    "time": "09:43",
+    "duration": 9,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "09 Jun 2024",
+    "time": "09:57",
+    "duration": 12,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "09 Jun 2024",
+    "time": "11:22",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "09 Jun 2024",
+    "time": "12:34",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "09 Jun 2024",
+    "time": "18:06",
+    "duration": 8,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "09 Jun 2024",
+    "time": "19:42",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "09 Jun 2024",
+    "time": "21:14",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "09 Jun 2024",
+    "time": "22:25",
+    "duration": 14,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "09 Jun 2024",
+    "time": "22:58",
+    "duration": 7,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "10 Jun 2024",
+    "time": "00:08",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "10 Jun 2024",
+    "time": "07:52",
+    "duration": 10,
+    "recorded": false
+  },
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "10 Jun 2024",
+    "time": "09:31",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.1M",
+    "satellite": "NOAA 19",
+    "date": "10 Jun 2024",
+    "time": "11:10",
+    "duration": 13,
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "10 Jun 2024",
+    "time": "12:21",
+    "duration": 12,
     "recorded": false
   }
 ]
