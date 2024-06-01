@@ -73,6 +73,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     let currentTime = startTime;
     let passStart = null;
     const passes = [];
+    let elevations = [];
 
     while (currentTime < endTime) {
         const positionAndVelocity = satellite.propagate(satrec, currentTime.toJSDate());
@@ -86,12 +87,25 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
             const satLon = satellite.degreesLong(positionGd.longitude);
 
             if (isOverLocation(satLat, satLon, locLat, locLon)) {
+                const observerGd = {
+                    longitude: satellite.degreesToRadians(locLon),
+                    latitude: satellite.degreesToRadians(locLat),
+                    height: 0 // height in meters
+                };
+                const positionEcf = satellite.eciToEcf(positionEci, gmst);
+                const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
+                const elevation = satellite.radiansToDegrees(lookAngles.elevation);
+
                 if (!passStart) {
                     passStart = currentTime;
+                    elevations = []; // reset elevations for the new pass
                 }
+
+                elevations.push(elevation);
             } else {
                 if (passStart) {
-                    passes.push({ start: passStart, end: currentTime });
+                    const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
+                    passes.push({ start: passStart, end: currentTime, elevation: avgElevation.toFixed(2) });
                     passStart = null;
                 }
             }
@@ -102,11 +116,13 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
 
     // check if there was an ongoing pass at the end of the time range
     if (passStart) {
-        passes.push({ start: passStart, end: endTime });
+        const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
+        passes.push({ start: passStart, end: endTime, elevation: avgElevation.toFixed(2) });
     }
 
     return passes;
 }
+
 
 // process passes and save to file
 async function processPasses() {
@@ -137,7 +153,7 @@ async function processPasses() {
         passes.forEach(pass => {
             const formattedStart = DateTime.fromISO(pass.start.toISO());
             const formattedEnd = DateTime.fromISO(pass.end.toISO());
-            // const duration = Math.round((formattedEnd - formattedStart) / (1000 * 60)); // duration in minutes
+            const elevation = pass.elevation || 'N/A';
 
             // apply buffer
             const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
@@ -150,6 +166,7 @@ async function processPasses() {
                 date: bufferStart.toFormat('dd LLL yyyy'),
                 time: bufferStart.toFormat('HH:mm'),
                 duration: bufferDuration,
+                elevation: elevation,
                 recorded: false
             };
 
