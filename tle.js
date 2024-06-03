@@ -17,12 +17,16 @@ const daysToPropagate = config.daysToPropagate;
 const bufferMinutes = config.bufferMinutes;
 
 // check if the satellite passes over the given location within a certain distance
-function isOverLocation(satLat, satLon, locLat, locLon) {
-    const distance = geolib.getDistance(
+function isOverLocation(distance) {
+    return distance <= maxDistance;
+}
+
+// function to calculate distance between two points
+function calculateDistance(satLat, satLon, locLat, locLon) {
+    return geolib.getDistance(
         { latitude: satLat, longitude: satLon },
         { latitude: locLat, longitude: locLon }
     );
-    return distance <= maxDistance;
 }
 
 // fetch TLE data from Celestrak
@@ -74,19 +78,22 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     let passStart = null;
     const passes = [];
     let elevations = [];
+    let distances = [];
 
+    // find satellite passes over the location, with a resolution of 1 minute
     while (currentTime < endTime) {
         const positionAndVelocity = satellite.propagate(satrec, currentTime.toJSDate());
         const positionEci = positionAndVelocity.position;
 
         if (positionEci) {
             const gmst = satellite.gstime(currentTime.toJSDate());
+            // convert to lat/long coords (geodetic)
             const positionGd = satellite.eciToGeodetic(positionEci, gmst);
-
             const satLat = satellite.degreesLat(positionGd.latitude);
             const satLon = satellite.degreesLong(positionGd.longitude);
+            const distance = calculateDistance(satLat, satLon, locLat, locLon);
 
-            if (isOverLocation(satLat, satLon, locLat, locLon)) {
+            if (isOverLocation(distance)) {
                 const observerGd = {
                     longitude: satellite.degreesToRadians(locLon),
                     latitude: satellite.degreesToRadians(locLat),
@@ -102,10 +109,15 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                 }
 
                 elevations.push(elevation);
+                distances.push(distance);
             } else {
                 if (passStart) {
                     const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
-                    passes.push({ start: passStart, end: currentTime, elevation: avgElevation.toFixed(2) });
+                    const maxElevation = Math.max(...elevations);
+                    const avgDistance = distances.reduce((sum, el) => sum + el, 0) / distances.length;
+                    const minDistance = Math.min(...distances);
+
+                    passes.push({ start: passStart, end: currentTime, maxElevation: maxElevation.toFixed(2), avgElevation: avgElevation.toFixed(2), avgDistance: avgDistance.toFixed(2), minDistance: minDistance.toFixed(2) });
                     passStart = null;
                 }
             }
@@ -117,7 +129,8 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     // check if there was an ongoing pass at the end of the time range
     if (passStart) {
         const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
-        passes.push({ start: passStart, end: endTime, elevation: avgElevation.toFixed(2) });
+        const maxElevation = Math.max(...elevations);
+        passes.push({ start: passStart, end: currentTime, maxElevation: maxElevation.toFixed(2), avgElevation: avgElevation.toFixed(2) });
     }
 
     return passes;
@@ -153,7 +166,10 @@ async function processPasses() {
         passes.forEach(pass => {
             const formattedStart = DateTime.fromISO(pass.start.toISO());
             const formattedEnd = DateTime.fromISO(pass.end.toISO());
-            const elevation = pass.elevation || 'N/A';
+            const maxElevation = pass.maxElevation || 'N/A';
+            const avgElevation = pass.avgElevation || 'N/A';
+            const avgDistance = pass.avgDistance || 'N/A';
+            const minDistance = pass.minDistance || 'N/A';
 
             // apply buffer
             const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
@@ -166,7 +182,10 @@ async function processPasses() {
                 date: bufferStart.toFormat('dd LLL yyyy'),
                 time: bufferStart.toFormat('HH:mm'),
                 duration: bufferDuration,
-                elevation: elevation,
+                avgElevation: avgElevation,
+                maxElevation: maxElevation,
+                avgDistance: avgDistance,
+                minDistance: minDistance,
                 recorded: false
             };
 
