@@ -7,10 +7,8 @@ const { startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
 
-
 // log boot
 Logger.info('Project booting up');
-
 
 // Schedule to download the API data at 5pm daily
 cron.schedule('0 17 * * *', () => {
@@ -23,12 +21,14 @@ cron.schedule('* * * * *', () => {
     fs.readFile(path.resolve(__dirname, config.passesFile), 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading file:', err);
+            Logger.error('Error reading file: ' + err);
             return;
         }
 
         // Check if the file content is empty
         if (!data || data.trim() === '') {
             console.log('No passes found. Running TLE data...');
+            Logger.error('No passes found. Retrieving TLE data...');
             processPasses();
             return;
         }
@@ -40,6 +40,7 @@ cron.schedule('* * * * *', () => {
             jsonData = JSON.parse(data);
         } catch (parseErr) {
             console.error('Error parsing JSON:', parseErr);
+            Logger.error('Error parsing JSON:', parseErr);
             return;
         }
 
