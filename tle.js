@@ -190,5 +190,16 @@ async function processPasses() {
     console.log('Satellite passes have been updated and saved.');
 }
 
-// execute the process passes
-processPasses().catch(console.error);
+
+if (require.main === module) {
+    console.log("tle script was executed directly.");
+    // execute the process passes
+    processPasses().catch(console.error);
+} else {
+    console.log("tle script was not executed directly, not downloading data...");
+}
+
+
+module.exports = {
+    processPasses
+};
