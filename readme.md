@@ -81,7 +81,6 @@ https://github.com/pothosware/SoapySDR/wiki/PythonSupport
 https://gist.github.com/songritk/b0ac5cde818d42d61a9848f3f2a5a797
 https://stackoverflow.com/questions/49371699/no-modules-found-when-installing-soapysdr-on-raspberry-pi-3
 
-
 ```bash
 python3 -m venv myenv
 source myenv/bin/activate
@@ -89,7 +88,7 @@ pip install soapysdr
 
 ```
 
-Once SoapySDR is installed
+Once SoapySDR is installed, test it out on an FM station or NOAA satellite
 ```bash
 sudo apt install sox
 rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - fm104-6.wav # FM radio station in Berlin
@@ -115,20 +114,61 @@ sudo apt update
 sudo apt install libudev-dev
 ```
 
-#### rtl-sdr (not working...)
-```bash
-git clone https://gitea.osmocom.org/sdr/rtl-sdr.git
-cd rtl-sdr/
-mkdir build
-cd build
-cmake ../
-make
-sudo make install
-sudo ldconfig
-cmake ../ -DINSTALL_UDEV_RULES=ON
+#### Raspberry Pi misc setup
+
+##### Nvim
+```
+sudo apt update
+sudo apt install neovim curl
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+mkdir -p ~/.config/nvim
+nano ~/.config/nvim/init.vim
 ```
 
-#### SDR++ (no longer used)
+init.vm:
+```
+" Specify a directory for plugins
+call plug#begin('~/.local/share/nvim/plugged')
+
+" Add plugins here
+Plug 'morhetz/gruvbox' " Gruvbox theme
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " Fuzzy finder
+Plug 'junegunn/fzf.vim' " FZF Vim integration
+Plug 'tpope/vim-sensible' " Basic sensible settings
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'preservim/nerdtree'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'sheerun/vim-polyglot'
+Plug 'sbdchd/neoformat'
+
+" Initialize plugin system
+call plug#end()
+
+let g:neoformat_enabled_javascript = ['prettier']
+
+" Enable Gruvbox theme
+syntax enable
+set background=dark
+colorscheme gruvbox
+
+" Basic settings
+set number " Show line numbers
+set relativenumber " Show relative line numbers
+set tabstop=4 " Number of spaces that a <Tab> in the file counts for
+set shiftwidth=4 " Number of spaces to use for each step of (auto)indent
+set expandtab " Use spaces instead of tabs
+set smartindent " Smart auto-indenting
+set clipboard=unnamedplus " Use the system clipboard
+set mouse=a " Enable mouse support
+
+" Key binding to toggle NERDTree
+map <C-n> :Ntree<CR>
+```
+
+#### SDR++ (no longer used but useful for anyone trying to install it on an RPi)
 
 + Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
 
