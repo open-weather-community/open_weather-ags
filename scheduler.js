@@ -17,69 +17,58 @@ cron.schedule('0 17 * * *', () => {
 
 // Schedule the task to run every minute
 cron.schedule('* * * * *', () => {
-    // Read the JSON file
-    fs.readFile(path.resolve(__dirname, config.passesFile), 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading file:', err);
-            Logger.error('Error reading file: ' + err);
-            return;
-        }
-
-        // Check if the file content is empty
-        if (!data || data.trim() === '') {
-            console.log('No passes found. Running TLE data...');
-            Logger.error('No passes found. Retrieving TLE data...');
-            processPasses();
-            return;
-        }
-
-        let jsonData;
-
+    async function processData() {
         try {
+            // Read the JSON file
+            const data = await fs.promises.readFile(path.resolve(__dirname, config.passesFile), 'utf8');
+
+            // Check if the file content is empty
+            if (!data || data.trim() === '') {
+                Logger.error('No passes found. Retrieving TLE data...');
+                await processPasses();
+                return;
+            }
+
             // Parse the JSON data
-            jsonData = JSON.parse(data);
-        } catch (parseErr) {
-            console.error('Error parsing JSON:', parseErr);
-            Logger.error('Error parsing JSON:', parseErr);
-            return;
-        }
+            const jsonData = JSON.parse(data);
 
-        // Check if the parsed JSON data has entries
-        const hasEntries = Array.isArray(jsonData) ? jsonData.length > 0 : Object.keys(jsonData).length > 0;
+            // Check if the parsed JSON data has entries
+            const hasEntries = Array.isArray(jsonData) ? jsonData.length > 0 : Object.keys(jsonData).length > 0;
 
-        if (!hasEntries) {
-            console.log('No passes found. Running TLE data...');
-            processPasses();
-            return;
-        }
-
-        // Get the current time
-        const now = new Date();
-        // Check if it's time to start recording
-   
-        jsonData.forEach(item => {
-            const recordTime = new Date(`${item.date} ${item.time}`);
-            if (now >= recordTime && !item.recorded) {
-                startRecording(item.frequency, recordTime, item.satellite, item.duration);
-                // write to log file that it is recording this pass
-                fs.appendFile(logPath
-                    , `${new Date().toISOString()} - Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`
-                    , err => {
-                        if (err) {
-                            console.error('Error writing to log file:', err);
-                        }
-                    });
-
-                // Mark item as recorded
-                item.recorded = true;
+            if (!hasEntries) {
+                Logger.info('No passes found. Running TLE data...');
+                await processPasses();
+                return;
             }
-        });
 
-        // Write updated JSON data back to the file
-        fs.writeFile(path.resolve(__dirname, config.passesFile), JSON.stringify(jsonData, null, 2), err => {
-            if (err) {
-                console.error('Error writing file:', err);
-            }
-        });
-    });
+            // Get the current time
+            const now = new Date();
+            // Check if it's time to start recording
+
+            jsonData.forEach(item => {
+                const recordTime = new Date(`${item.date} ${item.time}`);
+                if (now >= recordTime && !item.recorded) {
+                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
+                    // write to log file that it is recording this pass
+                    fs.appendFile(logPath
+                        , `${new Date().toISOString()} - Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`
+                        , err => {
+                            if (err) {
+                                Logger.error('Error writing to log file: ' + err);
+                            }
+                        });
+
+                    // Mark item as recorded
+                    item.recorded = true;
+                }
+            });
+
+            // Write updated JSON data back to the file
+            await fs.promises.writeFile(path.resolve(__dirname, config.passesFile), JSON.stringify(jsonData, null, 2));
+        } catch (err) {
+            Logger.error('Error processing data:', err);
+        }
+    }
+
+    processData();
 });
