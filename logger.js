@@ -22,7 +22,6 @@ class Logger {
     if (!fs.existsSync(logFilePath))
       fs.writeFileSync(logFilePath, "Log file created\n");
 
-
     //const timestamp = new Date().toISOString();
     const logMessage = `${timestamp} - ${level} - ${message}\n`;
 

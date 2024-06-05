@@ -1,34 +1,10 @@
 [
   {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "05 Jun 2024",
-    "time": "18:06",
-    "duration": 15,
-    "avgElevation": "16.34",
-    "maxElevation": "22.10",
-    "avgDistance": "1722844.44",
-    "minDistance": "1399203.00",
-    "recorded": false
-  },
-  {
-    "frequency": "137.62M",
-    "satellite": "NOAA 15",
-    "date": "05 Jun 2024",
-    "time": "19:44",
-    "duration": 17,
-    "avgElevation": "35.01",
-    "maxElevation": "77.87",
-    "avgDistance": "1391294.45",
-    "minDistance": "153225.00",
-    "recorded": false
-  },
-  {
     "frequency": "137.1M",
     "satellite": "NOAA 19",
     "date": "05 Jun 2024",
-    "time": "20:22",
-    "duration": 16,
+    "time": "21:18",
+    "duration": 2,
     "avgElevation": "22.80",
     "maxElevation": "33.55",
     "avgDistance": "1484779.80",

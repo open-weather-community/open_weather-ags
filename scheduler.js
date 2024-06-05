@@ -32,6 +32,7 @@ cron.schedule('* * * * *', () => {
             } catch (error) {
                 Logger.error(`Error reading file at ${passesFilePath}: ` + error);
             }
+            //Logger.info(data);
 
             // check if the file content is empty
             if (!data || data.trim() === '') {
@@ -73,13 +74,15 @@ cron.schedule('* * * * *', () => {
 
                 if (now >= recordTime && now <= endRecordTime && !item.recorded) {
 
+                    //Logger.info("found one");
+
                     let newDuration = item.duration;
                     if (now > recordTime + 60000) {
                         newDuration = Math.floor((endRecordTime - now) / 60000);
                     }
 
-                    Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`);
-                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
+                    Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
+                    startRecording(item.frequency, recordTime, item.satellite, newDuration);
                     // mark item as recorded
                     item.recorded = true;
                 }
