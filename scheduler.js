@@ -2,27 +2,43 @@ const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
-const { fetchApiData } = require('./api');
+// const { fetchApiData } = require('./api');
 const { startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
 
 // log boot
-Logger.info('Project booting up');
+Logger.info('project booting up =================================================');
+Logger.info("as user: " + process.getuid());
+Logger.info("as group: " + process.getgid());
+Logger.info("current working directory: " + process.cwd());
 
-// Schedule to download the API data at 5pm daily
+// schedule to download the API data at 5pm daily
 cron.schedule('0 17 * * *', () => {
     // fetchApiData();
 });
 
-// Schedule the task to run every minute
+// schedule the task to run every minute
 cron.schedule('* * * * *', () => {
     async function processData() {
-        try {
-            // Read the JSON file
-            const data = await fs.promises.readFile(path.resolve(__dirname, config.passesFile), 'utf8');
 
-            // Check if the file content is empty
+        try {
+            const passesFilePath = path.resolve(__dirname, config.passesFile);
+            const backupFilePath = `${passesFilePath}.bak`;
+            const tempFilePath = `${passesFilePath}.tmp`;
+
+            Logger.info(`attempting to read file at ${passesFilePath}...`);
+
+            let data;
+            try {
+                data = fs.readFileSync(passesFilePath, 'utf8');
+            } catch (error) {
+                Logger.error(`Error reading file at ${passesFilePath}: ` + error);
+            }
+
+            Logger.info(`got data: ${data}`);
+
+            // check if the file content is empty
             if (!data || data.trim() === '') {
                 Logger.error('No passes found. Retrieving TLE data...');
                 await processPasses();
@@ -30,9 +46,15 @@ cron.schedule('* * * * *', () => {
             }
 
             // Parse the JSON data
-            const jsonData = JSON.parse(data);
+            let jsonData;
+            try {
+                jsonData = JSON.parse(data);
+            } catch (parseError) {
+                Logger.error('Error parsing JSON data: ' + parseError.message);
+                return;
+            }
 
-            // Check if the parsed JSON data has entries
+            // check if the parsed JSON data has entries
             const hasEntries = Array.isArray(jsonData) ? jsonData.length > 0 : Object.keys(jsonData).length > 0;
 
             if (!hasEntries) {
@@ -41,32 +63,40 @@ cron.schedule('* * * * *', () => {
                 return;
             }
 
-            // Get the current time
+            // get the current time
             const now = new Date();
-            // Check if it's time to start recording
 
+            // check if it's time to start recording
             jsonData.forEach(item => {
-                const recordTime = new Date(`${item.date} ${item.time}`);
-                if (now >= recordTime && !item.recorded) {
-                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
-                    // write to log file that it is recording this pass
-                    fs.appendFile(logPath
-                        , `${new Date().toISOString()} - Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`
-                        , err => {
-                            if (err) {
-                                Logger.error('Error writing to log file: ' + err);
-                            }
-                        });
 
-                    // Mark item as recorded
+                const recordTime = new Date(`${item.date} ${item.time}`);
+
+                // take into account the duration
+                const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+
+                //Logger.info(`got entry ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes... and now is ${now} and record time is ${recordTime} and end record time is ${endRecordTime}`);
+
+                if (now >= recordTime && now <= endRecordTime && !item.recorded) {
+                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
+
+                    Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`);
+
+                    // mark item as recorded
                     item.recorded = true;
                 }
             });
 
-            // Write updated JSON data back to the file
-            await fs.promises.writeFile(path.resolve(__dirname, config.passesFile), JSON.stringify(jsonData, null, 2));
+            // backup the existing file before writing new data
+            fs.copyFileSync(passesFilePath, backupFilePath);
+
+            // write updated JSON data to a temporary file
+            fs.writeFileSync(tempFilePath, JSON.stringify(jsonData, null, 2));
+
+            // rename the temporary file to the original file
+            fs.renameSync(tempFilePath, passesFilePath);
+
         } catch (err) {
-            Logger.error('Error processing data:', err);
+            Logger.error('Error processing data: ' + err.message);
         }
     }
 
