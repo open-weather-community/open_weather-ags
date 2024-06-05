@@ -2,7 +2,6 @@ const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
-// const { fetchApiData } = require('./api');
 const { startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
@@ -27,16 +26,12 @@ cron.schedule('* * * * *', () => {
             const backupFilePath = `${passesFilePath}.bak`;
             const tempFilePath = `${passesFilePath}.tmp`;
 
-            Logger.info(`attempting to read file at ${passesFilePath}...`);
-
             let data;
             try {
                 data = fs.readFileSync(passesFilePath, 'utf8');
             } catch (error) {
                 Logger.error(`Error reading file at ${passesFilePath}: ` + error);
             }
-
-            Logger.info(`got data: ${data}`);
 
             // check if the file content is empty
             if (!data || data.trim() === '') {
@@ -77,10 +72,14 @@ cron.schedule('* * * * *', () => {
                 //Logger.info(`got entry ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes... and now is ${now} and record time is ${recordTime} and end record time is ${endRecordTime}`);
 
                 if (now >= recordTime && now <= endRecordTime && !item.recorded) {
-                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
+
+                    let newDuration = item.duration;
+                    if (now > recordTime + 60000) {
+                        newDuration = Math.floor((endRecordTime - now) / 60000);
+                    }
 
                     Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...\n`);
-
+                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
                     // mark item as recorded
                     item.recorded = true;
                 }
