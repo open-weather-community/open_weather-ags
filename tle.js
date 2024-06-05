@@ -6,7 +6,7 @@ const satellite = require('satellite.js');
 const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
-
+const Logger = require('./logger');
 const config = require('./config.json');
 const maxDistance = config.maxDistance;
 const locLat = config.locLat;
@@ -142,7 +142,7 @@ async function processPasses() {
     const tleData = await fetchTLEData();
     const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
 
-    console.log(`Found TLE data for ${tleLines.length / 3} satellites.`);
+    Logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
 
     const existingPasses = readExistingPasses();
 
@@ -157,7 +157,7 @@ async function processPasses() {
         }
 
         if (!tleLine1 || !tleLine2) {
-            console.error(`TLE data for ${satName} not found.`);
+            Logger.error(`TLE data for ${satName} not found.`);
             continue;
         }
 
@@ -206,16 +206,16 @@ async function processPasses() {
     // save updated passes
     savePasses(existingPasses);
 
-    console.log('Satellite passes have been updated and saved.');
+    Logger.info('Satellite passes have been updated and saved.');
 }
 
 
 if (require.main === module) {
-    console.log("tle script was executed directly.");
+    Logger.info("tle script was executed directly.");
     // execute the process passes
     processPasses().catch(console.error);
 } else {
-    console.log("tle script was not executed directly, not downloading data...");
+    Logger.info("tle script was not executed directly, not downloading data...");
 }
 
 

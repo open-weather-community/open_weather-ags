@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("./config.json"); // Assuming you have a config file for paths
-
 const logFilePath = path.join(config.usbPath, config.logFile);
 
 console.log(`logFilePath: ${logFilePath}`);
@@ -19,8 +18,15 @@ class Logger {
     };
     const timestamp = new Date().toLocaleString("en-US", options);
 
+    // create the logfile if it does not exist
+    if (!fs.existsSync(logFilePath))
+      fs.writeFileSync(logFilePath, "Log file created\n");
+
+
     //const timestamp = new Date().toISOString();
     const logMessage = `${timestamp} - ${level} - ${message}\n`;
+
+    console.log(logMessage);
 
     // Append log message to the log file
     fs.appendFile(logFilePath, logMessage, (err) => {

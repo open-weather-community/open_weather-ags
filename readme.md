@@ -31,7 +31,13 @@ WAV files are saved to this directory...
 + Use ```openweather``` for the username.
 + Use ```sudo raspi-config``` to enable SSH.
 
-### software
+### USB
+```
+sudo umount /dev/sda1
+sudo mkfs.vfat -F 32 -n 'openweather' /dev/sda
+sudo chown -R openweather:openweather /media/openweather/
+```
+I also had to delete the "INTENSO" folders in /media/openweather which were on the USB for some reason when purchased directly from the manufacturer
 
 #### RTL-SDR v4 driver
 

@@ -1,0 +1,14 @@
+[
+  {
+    "frequency": "137.62M",
+    "satellite": "NOAA 15",
+    "date": "05 Jun 2024",
+    "time": "14:45",
+    "duration": 14,
+    "avgElevation": "17.28",
+    "maxElevation": "21.97",
+    "avgDistance": "1661431.00",
+    "minDistance": "1404530.00",
+    "recorded": true
+  }
+]
