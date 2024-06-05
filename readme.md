@@ -120,6 +120,15 @@ sudo apt update
 sudo apt install libudev-dev
 ```
 
+#### crontab
+
+```
+crontab -e
+```
+```
+@reboot /home/openweather/open_weather-ags/start_scheduler.sh
+```
+
 #### Raspberry Pi misc setup
 
 ##### Nvim
