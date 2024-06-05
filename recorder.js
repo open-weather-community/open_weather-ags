@@ -1,17 +1,21 @@
 const { spawn } = require('child_process');
-let isRecording = false;
+let recording = false;
 const config = require('./config.json');
 const Logger = require('./logger');
 const fs = require('fs');
 
+function isRecording() {
+    return recording;
+}
+
 function startRecording(frequency, timestamp, satellite, durationMinutes) {
 
-    if (isRecording) {
-        Logger.info('Already recording...');
-        return;
-    }
+    // if (recording) {
+    //     Logger.info('Already recording...');
+    //     return;
+    // }
 
-    isRecording = true;
+    recording = true;
 
     Logger.info('Starting recording of ' + satellite);
 
@@ -51,8 +55,8 @@ function startRecording(frequency, timestamp, satellite, durationMinutes) {
         Logger.info('Stopping recording...');
         rtlFm.kill();
         sox.kill();
-        isRecording = false;
+        recording = false;
     }, durationMinutes * 60 * 1000);
 }
 
-module.exports = { startRecording };
+module.exports = { isRecording, startRecording };

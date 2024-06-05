@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
-const { startRecording } = require('./recorder');
+const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
 
@@ -20,6 +20,11 @@ cron.schedule('0 17 * * *', () => {
 // schedule the task to run every minute
 cron.schedule('* * * * *', () => {
     async function processData() {
+
+        if (isRecording()) {
+            Logger.info('Already recording, skipping this cron cycle...');
+            return;
+        }
 
         try {
             const passesFilePath = path.resolve(__dirname, config.passesFile);
@@ -76,10 +81,12 @@ cron.schedule('* * * * *', () => {
 
                     //Logger.info("found one");
 
-                    let newDuration = item.duration;
-                    if (now > recordTime + 60000) {
-                        newDuration = Math.floor((endRecordTime - now) / 60000);
+                    if (isRecording()) {
+                        Logger.info('Already recording from within the forEach, returning...');
+                        return;
                     }
+
+                    let newDuration = Math.floor((endRecordTime - now) / 60000);
 
                     Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
                     startRecording(item.frequency, recordTime, item.satellite, newDuration);
