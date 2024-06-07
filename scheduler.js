@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
-const config = require('./config.json');
+let config = require('./config.json');
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
@@ -11,6 +11,50 @@ Logger.info('project booting up ================================================
 Logger.info("as user: " + process.getuid());
 Logger.info("as group: " + process.getgid());
 Logger.info("current working directory: " + process.cwd());
+
+// find config file by searching for config.json in /media/
+const mediaPath = '/media/';
+
+function findConfigFile(dir) {
+    const files = fs.readdirSync(dir);
+
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isDirectory()) {
+            const result = findConfigFile(filePath);
+            if (result) {
+                return result;
+            }
+        } else if (file === 'config.json') {
+            return filePath;
+        }
+    }
+
+    return null;
+}
+// if there is nothing in configPath.json, find the config file in /media/
+// and save the path to configPath.json
+if (!fs.existsSync('configPath.json')) {
+
+    Logger.info('No configPath.json found, searching for config file in /media/');
+
+    const configPath = findConfigFile(mediaPath);
+
+    if (!configPath) {
+        Logger.error('No config file found in /media/');
+    } else {
+        Logger.info(`Found config file at ${configPath}`);
+        // save config path to configPath.json in this working directory
+        fs.writeFileSync('configPath.json', JSON.stringify({ configPath }));
+        // load the config file to config
+        config = require(configPath);
+    }
+} else {
+    Logger.info('Found configPath.json, skipping search for config file in /media/');
+}
+
 
 // schedule reset for 4AM daily
 cron.schedule('0 4 * * *', () => {

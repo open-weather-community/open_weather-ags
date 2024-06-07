@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("./config.json"); // Assuming you have a config file for paths
-const logFilePath = path.join(config.usbPath, config.logFile);
+const logFilePath = path.join(config.saveDir, config.logFile);
 
 console.log(`logFilePath: ${logFilePath}`);
 
