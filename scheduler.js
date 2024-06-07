@@ -12,8 +12,8 @@ Logger.info("as user: " + process.getuid());
 Logger.info("as group: " + process.getgid());
 Logger.info("current working directory: " + process.cwd());
 
-// schedule to download the API data at 5pm daily
-cron.schedule('0 17 * * *', () => {
+// schedule reset for 4AM daily
+cron.schedule('0 4 * * *', () => {
     // fetchApiData();
 });
 
