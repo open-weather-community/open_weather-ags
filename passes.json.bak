@@ -285,7 +285,7 @@
     "maxElevation": "36.29",
     "avgDistance": "1410904.51",
     "minDistance": "428124.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -297,7 +297,7 @@
     "maxElevation": "19.20",
     "avgDistance": "1500654.28",
     "minDistance": "123558.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",

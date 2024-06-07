@@ -1,8 +1,9 @@
 const { spawn } = require('child_process');
-let recording = false;
 const config = require('./config.json');
 const Logger = require('./logger');
 const fs = require('fs');
+
+let recording = false;
 
 function isRecording() {
     return recording;
@@ -20,27 +21,26 @@ function startRecording(frequency, timestamp, satellite, durationMinutes) {
     Logger.info('Starting recording of ' + satellite);
 
     // Make dir if it doesn't exist
-    const dir = `${config.usbPath}/recordings`;
+    const dir = `${config.saveDir}/recordings`;
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
 
-    const outputPath = `${config.usbPath}/recordings/${satellite}-${timestamp}`;
+    const outputPath = `${config.saveDir}/recordings/${satellite}-${timestamp}`;
     const rawFile = `${outputPath}-raw.wav`;
     const downsampledFile = `${outputPath}.wav`;
 
-    // Record at 48000 Hz
-    const rtlFm = spawn('/usr/local/bin/rtl_fm', [
+    const rtlFm = spawn(config.rtl_fm_path, [
         '-f', frequency,
         '-M', 'fm',
-        '-s', '48k',
+        '-s', '48k',    // recording sample rate, be sure to match below at -r
         '-A', 'fast',
         '-l', '0',
         '-E', 'deemp',
-        '-g', '38'
+        '-g', config.gain
     ]);
 
-    const sox = spawn('/usr/bin/sox', [
+    const sox = spawn(config.sox_path, [
         '-t', 'raw',
         '-e', 'signed',
         '-c', '1',
