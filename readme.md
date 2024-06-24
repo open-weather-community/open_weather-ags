@@ -60,7 +60,42 @@ chmod +x install.sh
 ```
 
 
-### software
+### USB Drive
+
+Format to Fat32
+```
+lsblk # identify disk
+sudo mkdir /mnt/o-w
+sudo nano /etc/fstab
+```
+Add to fstab:
+```
+/dev/sda1  /mnt/o-w  vfat  defaults  0  2
+```
+
+Reload and mount the drive
+```
+systemctl daemon-reload
+sudo mount -a
+```
+
+### software (quick way)
+
+```bash
+git clone git@github.com:prismspecs/open_weather-ags.git
+cd open_weather-ags
+chmod +x install.sh
+./install.sh
+```
+
+
+### USB
+```
+sudo umount /dev/sda1
+sudo mkfs.vfat -F 32 -n 'openweather' /dev/sda
+sudo chown -R openweather:openweather /media/openweather/
+```
+I also had to delete the "INTENSO" folders in /media/openweather which were on the USB for some reason when purchased directly from the manufacturer
 
 #### RTL-SDR v4 driver
 
@@ -114,6 +149,7 @@ sudo make install
 ```
 
 Once SoapySDR is installed, test FM recording
+Once SoapySDR is installed, test it out on an FM station or NOAA satellite
 ```bash
 sudo apt install sox
 rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - fm104-6.wav # FM radio station in Berlin
@@ -139,6 +175,69 @@ sudo apt update
 sudo apt install libudev-dev
 ```
 
+#### crontab
+
+```
+crontab -e
+```
+```
+@reboot /home/openweather/open_weather-ags/start_scheduler.sh
+```
+
+#### Raspberry Pi misc setup
+
+##### Nvim
+```
+sudo apt update
+sudo apt install neovim curl
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+mkdir -p ~/.config/nvim
+nano ~/.config/nvim/init.vim
+```
+
+init.vm:
+```
+" Specify a directory for plugins
+call plug#begin('~/.local/share/nvim/plugged')
+
+" Add plugins here
+Plug 'morhetz/gruvbox' " Gruvbox theme
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " Fuzzy finder
+Plug 'junegunn/fzf.vim' " FZF Vim integration
+Plug 'tpope/vim-sensible' " Basic sensible settings
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'preservim/nerdtree'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'sheerun/vim-polyglot'
+Plug 'sbdchd/neoformat'
+
+" Initialize plugin system
+call plug#end()
+
+let g:neoformat_enabled_javascript = ['prettier']
+
+" Enable Gruvbox theme
+syntax enable
+set background=dark
+colorscheme gruvbox
+
+" Basic settings
+set number " Show line numbers
+set relativenumber " Show relative line numbers
+set tabstop=4 " Number of spaces that a <Tab> in the file counts for
+set shiftwidth=4 " Number of spaces to use for each step of (auto)indent
+set expandtab " Use spaces instead of tabs
+set smartindent " Smart auto-indenting
+set clipboard=unnamedplus " Use the system clipboard
+set mouse=a " Enable mouse support
+
+" Key binding to toggle NERDTree
+map <C-n> :Ntree<CR>
+```
+
 ## helpful links etc
 + [10-day predictions for NOAA-19](https://www.n2yo.com/passes/?s=33591#)
 + [10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)
@@ -146,3 +245,13 @@ sudo apt install libudev-dev
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
 
+
+## other SDR software options...
++ [rfsoapyfile](https://github.com/roseengineering/rfsoapyfile)
++ https://github.com/ha7ilm/csdr
++ [rtl_fm](https://osmocom-sdr.osmocom.narkive.com/lDN2mcET/rtl-fm-problem-with-capture-audio)
++ [rx_tools](https://github.com/rxseger/rx_tools)
++ [AltiWx](https://github.com/altillimity/AltiWx)
++ GNURadio
++ GQRX
++ [more info here...](https://inst.eecs.berkeley.edu/~ee123/fa12/rtl_sdr.html)
