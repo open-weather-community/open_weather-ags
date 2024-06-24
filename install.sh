@@ -62,10 +62,13 @@ echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
 
-# Step 10: Install npm packages
+# Step 10: Install npm and npm packages
+npm install npm@latest -g
+
+# Step 11: Install npm packages
 npm install chokidar usb-detection
 
-# Step 11: Install Neovim and set up configuration
+# Step 12: Install Neovim and set up configuration
 sudo apt install -y neovim curl
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
