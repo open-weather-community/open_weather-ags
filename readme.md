@@ -33,69 +33,41 @@ WAV files are saved to this directory...
 
 ### USB Drive
 
-Format to Fat32
-```
-lsblk # identify disk
-sudo mkdir /mnt/o-w
-sudo nano /etc/fstab
-```
-Add to fstab:
-```
-/dev/sda1  /mnt/o-w  vfat  defaults  0  2
-```
-
-Reload and mount the drive
-```
-systemctl daemon-reload
-sudo mount -a
-```
-
-### software (quick way)
-
+Format to Fat32 (not sure about these instructions)
 ```bash
-git clone git@github.com:prismspecs/open_weather-ags.git
-cd open_weather-ags
-chmod +x install.sh
-./install.sh
-```
-
-
-### USB Drive
-
-Format to Fat32
-```
-lsblk # identify disk
-sudo mkdir /mnt/o-w
-sudo nano /etc/fstab
-```
-Add to fstab:
-```
-/dev/sda1  /mnt/o-w  vfat  defaults  0  2
-```
-
-Reload and mount the drive
-```
-systemctl daemon-reload
-sudo mount -a
-```
-
-### software (quick way)
-
-```bash
-git clone git@github.com:prismspecs/open_weather-ags.git
-cd open_weather-ags
-chmod +x install.sh
-./install.sh
-```
-
-
-### USB
-```
 sudo umount /dev/sda1
-sudo mkfs.vfat -F 32 -n 'openweather' /dev/sda
-sudo chown -R openweather:openweather /media/openweather/
+sudo mkfs.vfat -F 32 -n 'o-w' /dev/sda
+sudo chown -R openweather:openweather /media/o-w/
 ```
-I also had to delete the "INTENSO" folders in /media/openweather which were on the USB for some reason when purchased directly from the manufacturer
+
+```bash
+lsblk # identify disk
+sudo mkdir /mnt/o-w
+sudo nano /etc/fstab
+```
+Add to fstab:
+```
+/dev/sda1  /mnt/o-w  vfat  defaults  0  2
+```
+
+Reload and mount the drive
+```
+systemctl daemon-reload
+sudo mount -a
+```
+
+### create an ssh key for the raspberry pi and add it to github
+
+### software (quick way)
+
+```bash
+git clone https://github.com/prismspecs/open_weather-ags.git
+cd open_weather-ags
+chmod +x install.sh
+./install.sh
+```
+
+### software (manual way)
 
 #### RTL-SDR v4 driver
 
@@ -149,12 +121,9 @@ sudo make install
 ```
 
 Once SoapySDR is installed, test FM recording
-Once SoapySDR is installed, test it out on an FM station or NOAA satellite
 ```bash
 sudo apt install sox
 rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - fm104-6.wav # FM radio station in Berlin
-rtl_fm -f 137.1M -M fm -s 15k -r 15k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 15000 - noaa19.wav # NOAA19
-
 ```
 
 #### Node, nvm and NPM
@@ -244,14 +213,3 @@ map <C-n> :Ntree<CR>
 + [10-day predictions for NOAA-15](https://www.n2yo.com/passes/?s=25338)
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
-
-
-## other SDR software options...
-+ [rfsoapyfile](https://github.com/roseengineering/rfsoapyfile)
-+ https://github.com/ha7ilm/csdr
-+ [rtl_fm](https://osmocom-sdr.osmocom.narkive.com/lDN2mcET/rtl-fm-problem-with-capture-audio)
-+ [rx_tools](https://github.com/rxseger/rx_tools)
-+ [AltiWx](https://github.com/altillimity/AltiWx)
-+ GNURadio
-+ GQRX
-+ [more info here...](https://inst.eecs.berkeley.edu/~ee123/fa12/rtl_sdr.html)
