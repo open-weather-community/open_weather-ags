@@ -29,7 +29,10 @@ echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-
 # Step 5: Install Python and SWIG
 sudo apt-get install -y python-dev-is-python3 swig
 
-# Step 6: Clone and build SoapyRTLSDR
+# Step 6: Install SoapySDR
+sudo apt-get install -y libsoapysdr-dev soapysdr-tools
+
+# Step 7: Clone and build SoapyRTLSDR
 git clone https://github.com/pothosware/SoapyRTLSDR.git
 cd SoapyRTLSDR
 mkdir build
@@ -39,17 +42,17 @@ make
 sudo make install
 cd ../..
 
-# Step 7: Install build-essential and libssl-dev
+# Step 8: Install build-essential and libssl-dev
 sudo apt install -y build-essential libssl-dev
 
-# Step 8: Install NVM and Node.js
+# Step 9: Install NVM and Node.js
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 nvm install node
 
-# Step 9: Install npm packages and libudev-dev
+# Step 10: Install npm packages and libudev-dev
 npm install chokidar usb-detection
 sudo apt update
 sudo apt install -y libudev-dev
