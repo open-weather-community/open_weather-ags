@@ -14,8 +14,10 @@
     "fs": "^0.0.1-security",
     "geolib": "^3.3.4",
     "https": "^1.0.0",
+    "install": "^0.13.0",
     "luxon": "^3.4.4",
     "node-cron": "^3.0.3",
+    "npm": "^10.8.0",
     "satellite.js": "^5.0.0"
   },
   "author": "",

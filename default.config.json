@@ -1,0 +1,18 @@
+{
+    "locLat": 52.495480,
+    "locLon": 13.468430,
+    "gain": 38.0,
+    "maxDistance": 2200000,
+    "daysToPropagate": 10,
+    "bufferMinutes": 3,
+    "noaaFrequencies": {
+        "NOAA 19": "137.1M",
+        "NOAA 18": "137.9125M",
+        "NOAA 15": "137.62M"
+    },
+    "passesFile": "passes.json",
+    "saveDir": "/media/openweather",
+    "logFile": "log.txt",
+    "rtl_fm_path": "/usr/local/bin/rtl_fm",
+    "sox_path": "/usr/bin/sox"
+}

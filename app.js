@@ -28,33 +28,20 @@ const axios = require('axios');
 const FormData = require('form-data');
 require('dotenv').config(); // Load environment variables from .env file
 
-const BYPASS_RECORDING = true;
-
-const apiOptions = {
-    hostname: 'api.example.com',
-    port: 443,
-    path: '/endpoint',
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_API_KEY'
-    }
-};
-
 // schedule
 cron.schedule('11 12 * * *', () => {
 
     // do a git pull
     // this should also happen at a more system-foundational level like on restart though...
-    const { exec } = require('child_process');
-    exec('git pull', (err, stdout, stderr) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        console.log(stdout);
-    }
-    );
+    // const { exec } = require('child_process');
+    // exec('git pull', (err, stdout, stderr) => {
+    //     if (err) {
+    //         console.error(err);
+    //         return;
+    //     }
+    //     console.log(stdout);
+    // }
+    // );
 
 
     // api request json data
@@ -117,12 +104,12 @@ function startRecording(f, timestamp, satellite, durationMinutes) {
     const rtlFm = spawn('rtl_fm', [
         '-f', f,
         '-M', 'fm',
-        '-s', '11025',
+        '-s', '44k',
         '-r', '11025',
         '-A', 'fast',
         '-l', '0',
         '-E', 'deemp',
-        '-g', '10'
+        '-g', '20'
     ]);
 
     const sox = spawn('sox', [
