@@ -9,5 +9,6 @@
     },
     "passesFile": "passes.json",
     "daysToPropagate": 10,
-    "bufferMinutes": 3
+    "bufferMinutes": 3,
+    "apiUpURL": "https://open-weather.community/wp-json/ow/v1/ground-stations"
 }

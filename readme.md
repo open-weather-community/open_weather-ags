@@ -31,6 +31,35 @@ WAV files are saved to this directory...
 + Use ```openweather``` for the username.
 + Use ```sudo raspi-config``` to enable SSH.
 
+### USB Drive
+
+Format to Fat32
+```
+lsblk # identify disk
+sudo mkdir /mnt/o-w
+sudo nano /etc/fstab
+```
+Add to fstab:
+```
+/dev/sda1  /mnt/o-w  vfat  defaults  0  2
+```
+
+Reload and mount the drive
+```
+systemctl daemon-reload
+sudo mount -a
+```
+
+### software (quick way)
+
+```bash
+git clone git@github.com:prismspecs/open_weather-ags.git
+cd open_weather-ags
+chmod +x install.sh
+./install.sh
+```
+
+
 ### software
 
 #### RTL-SDR v4 driver
@@ -73,23 +102,18 @@ First install SWIG so that the Python bindings are created when you build SoapyS
 ```bash
 sudo apt-get install python-dev-is-python3 swig
 ```
-[First install SoapySDR from GitHub](https://github.com/pothosware/SoapyRTLSDR)
-[Then follow instructions for the RTLSDR device](https://github.com/pothosware/SoapyRTLSDR/wiki)
-
-To do.. get it working with Python
-https://github.com/pothosware/SoapySDR/wiki/PythonSupport
-https://gist.github.com/songritk/b0ac5cde818d42d61a9848f3f2a5a797
-https://stackoverflow.com/questions/49371699/no-modules-found-when-installing-soapysdr-on-raspberry-pi-3
-
-
-```bash
-python3 -m venv myenv
-source myenv/bin/activate
-pip install soapysdr
-
+[First install SoapySDR from GitHub](https://github.com/pothosware/SoapyRTLSDR) [using the wiki instructions](https://github.com/pothosware/SoapyRTLSDR/wiki)
+```
+git clone https://github.com/pothosware/SoapyRTLSDR.git
+cd SoapyRTLSDR
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
 ```
 
-Once SoapySDR is installed
+Once SoapySDR is installed, test FM recording
 ```bash
 sudo apt install sox
 rtl_fm -f 104.6M -M fm -s 170k -r 32k -A fast -l 0 -E deemp -g 10 | sox -t raw -e signed -c 1 -b 16 -r 32000 - fm104-6.wav # FM radio station in Berlin
@@ -115,31 +139,6 @@ sudo apt update
 sudo apt install libudev-dev
 ```
 
-#### rtl-sdr (not working...)
-```bash
-git clone https://gitea.osmocom.org/sdr/rtl-sdr.git
-cd rtl-sdr/
-mkdir build
-cd build
-cmake ../
-make
-sudo make install
-sudo ldconfig
-cmake ../ -DINSTALL_UDEV_RULES=ON
-```
-
-#### SDR++ (no longer used)
-
-+ Helpful tip, download the [SDR++ manual here](https://www.sdrpp.org/manual.pdf)
-
-+ As of the time of writing (23 April 2024) there is no binary for 64-bit Raspberry Pi OS, so we have to build it from source.
-
-+ In order to do this quickly and easily, run the install-sdrpp.sh script from this directory
-
-```bash
-chmod +x install-sdrpp.sh
-./install-sdrpp.sh
-```
 ## helpful links etc
 + [10-day predictions for NOAA-19](https://www.n2yo.com/passes/?s=33591#)
 + [10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)
@@ -147,12 +146,3 @@ chmod +x install-sdrpp.sh
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
 
-## other SDR software options...
-+ [rfsoapyfile](https://github.com/roseengineering/rfsoapyfile)
-+ https://github.com/ha7ilm/csdr
-+ [rtl_fm](https://osmocom-sdr.osmocom.narkive.com/lDN2mcET/rtl-fm-problem-with-capture-audio)
-+ [rx_tools](https://github.com/rxseger/rx_tools)
-+ [AltiWx](https://github.com/altillimity/AltiWx)
-+ GNURadio
-+ GQRX
-+ [more info here...](https://inst.eecs.berkeley.edu/~ee123/fa12/rtl_sdr.html)

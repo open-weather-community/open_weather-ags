@@ -1,5 +1,4 @@
 /*
-
     + get shared doc of bill's adjustments
     + how long should the wave form be recorded for?
         + is it possible to start recording when there is a good signal to noise ratio?
@@ -18,8 +17,6 @@ Estimate Noise Floor:
     Analyze the power spectrum obtained from the FFT to estimate the noise floor.
     You can estimate the noise floor as the average power in a frequency band where there is no significant signal present.
 
-    Lizzie and Dan: will API be responsive to lat/long of the device? what exactly will it return?
-
 */
 
 const { spawn } = require('child_process');
@@ -28,7 +25,10 @@ const https = require('https');
 const fs = require('fs');
 const config = require('./config.json');
 const axios = require('axios');
+const FormData = require('form-data');
 require('dotenv').config(); // Load environment variables from .env file
+
+const BYPASS_RECORDING = true;
 
 const apiOptions = {
     hostname: 'api.example.com',
@@ -80,29 +80,31 @@ cron.schedule('11 12 * * *', () => {
 
 // Schedule the task to run every minute
 cron.schedule('* * * * *', () => {
-    // read the JSON file
-    fs.readFile(`${config.passesFile}`, 'utf8', (err, data) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        // parse the JSON data
-        const jsonData = JSON.parse(data);
-
-        // get the current time
-        const now = new Date();
-
-        // check if it's time to start recording
-        jsonData.forEach(item => {
-            const recordTime = new Date(item.date + ' ' + item.time);
-            if (now >= recordTime && !item.recorded) {
-                startRecording(item.frequency, recordTime, item.satellite, item.duration);
-                // make item as recorded
-                item.recorded = true;
+    if (!BYPASS_RECORDING) {
+        // read the JSON file
+        fs.readFile(`${config.passesFile}`, 'utf8', (err, data) => {
+            if (err) {
+                console.error(err);
+                return;
             }
+
+            // parse the JSON data
+            const jsonData = JSON.parse(data);
+
+            // get the current time
+            const now = new Date();
+
+            // check if it's time to start recording
+            jsonData.forEach(item => {
+                const recordTime = new Date(item.date + ' ' + item.time);
+                if (now >= recordTime && !item.recorded) {
+                    startRecording(item.frequency, recordTime, item.satellite, item.duration);
+                    // make item as recorded
+                    item.recorded = true;
+                }
+            });
         });
-    });
+    }
 });
 
 
@@ -145,39 +147,42 @@ function startRecording(f, timestamp, satellite, durationMinutes) {
         // ...
 
         // upload the file to the server
-        uploadFile(fileName, 'https://api.example.com/upload', satellite, config.locLat, config.locLon);
+        uploadFile(fileName, satellite, config.locLat, config.locLon);
 
 
     }, durationMinutes * 60 * 1000);
 }
 
-async function uploadFile(filePath, url, satelliteName, lat, lon) {
+async function uploadFile(filePath, satelliteName, lat, lon) {
     // read the file as a buffer
-    const fileData = fs.readFileSync(filePath);
+    const fileStream = fs.createReadStream(filePath);
 
     // create a FormData object to include the file data and additional fields
     const formData = new FormData();
-    formData.append('file', fileData, {
-        filename: 'file.txt',
-        contentType: 'application/octet-stream'
-    });
-    formData.append('satelliteName', satelliteName);
-    formData.append('latitude', lat);
-    formData.append('longitude', lon);
+    formData.append('wavfile', fileStream, 'audio.wav');
+    formData.append('ID', '3158');
+    // formData.append('satelliteName', satelliteName);
+    // formData.append('latitude', lat);
+    // formData.append('longitude', lon);
 
     try {
         // make a POST request to the server with the FormData and authentication headers
-        const response = await axios.post(url, formData, {
+        const response = await axios.post(config.apiUpURL, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data', // set the content type to multipart/form-data
+                ...formData.getHeaders(),
                 'Authorization': `Bearer ${process.env.AUTH_TOKEN}` // use the authentication token from environment variables
             },
+            onUploadProgress: progressEvent => {
+                console.log(`Uploaded ${Math.round(progressEvent.loaded / progressEvent.total * 100)}%`);
+            }
         });
 
         // log the response from the server
-        console.log(response.data);
+        console.log('File uploaded successfully:', response.data);
     } catch (error) {
         // log any errors
         console.error('Error uploading file:', error);
     }
 }
+
+// uploadFile("recordings/audio.wav", "x", "123", "456");
