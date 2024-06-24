@@ -12,6 +12,9 @@ sudo apt-get update
 sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev
 
 # Step 3: Clone and build rtl-sdr-blog
+if [ -d "rtl-sdr-blog" ]; then
+    rm -rf rtl-sdr-blog
+fi
 git clone https://github.com/rtlsdrblog/rtl-sdr-blog
 cd rtl-sdr-blog
 mkdir build
@@ -33,6 +36,9 @@ sudo apt-get install -y python-dev-is-python3 swig
 sudo apt-get install -y libsoapysdr-dev soapysdr-tools
 
 # Step 7: Clone and build SoapyRTLSDR
+if [ -d "SoapyRTLSDR" ]; then
+    rm -rf SoapyRTLSDR
+fi
 git clone https://github.com/pothosware/SoapyRTLSDR.git
 cd SoapyRTLSDR
 mkdir build
