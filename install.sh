@@ -9,7 +9,7 @@ sudo rm -rvf /usr/lib/librtlsdr* /usr/include/rtl-sdr* /usr/local/lib/librtlsdr*
 
 # Step 2: Install dependencies
 sudo apt-get update
-sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config
+sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev
 
 # Step 3: Clone and build rtl-sdr-blog
 git clone https://github.com/rtlsdrblog/rtl-sdr-blog
@@ -52,10 +52,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 nvm install node
 
-# Step 10: Install npm packages and libudev-dev
+# Step 10: Install npm packages
 npm install chokidar usb-detection
-sudo apt update
-sudo apt install -y libudev-dev
 
 echo "Installation completed successfully."
 
