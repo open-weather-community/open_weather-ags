@@ -73,7 +73,7 @@ echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.
 npm install npm@latest -g
 
 # Step 11: Install npm packages
-npm install chokidar usb-detection
+npm install chokidar usb-detection node-cron
 
 # Step 12: Install Neovim and set up configuration
 sudo apt install -y neovim curl
@@ -125,6 +125,10 @@ EOL
 
 # Install Neovim plugins
 nvim +PlugInstall +qall
+
+# Step 13: Set up cron job to start scheduler on reboot
+(crontab -l 2>/dev/null; echo "@reboot /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
+
 
 echo "Installation completed successfully."
 
