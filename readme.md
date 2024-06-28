@@ -58,13 +58,27 @@ sudo mount -a
 
 ### create an ssh key for the raspberry pi and add it to github
 
-### software (quick way)
+### software (quick way -- manual instructions below)
 
 ```bash
 git clone https://github.com/prismspecs/open_weather-ags.git
 cd open_weather-ags
 chmod +x install.sh
 ./install.sh
+```
+### crontab
+This ensures that the node project starts upon reboot.
+
+```
+crontab -e
+```
+```
+@reboot /home/openweather/open_weather-ags/start_scheduler.sh
+```
+
+### check that it is working
+```bash
+nvim /home/openweather/cronlog.txt
 ```
 
 ### software (manual way)
@@ -134,7 +148,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-nvm install node
+nvm install node v16.13.2
 ```
 
 Then install ...
@@ -142,15 +156,6 @@ Then install ...
 npm install chokidar usb-detection
 sudo apt update
 sudo apt install libudev-dev
-```
-
-#### crontab
-
-```
-crontab -e
-```
-```
-@reboot /home/openweather/open_weather-ags/start_scheduler.sh
 ```
 
 #### Raspberry Pi misc setup
