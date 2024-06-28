@@ -5,8 +5,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export PATH="$HOME/.nvm/versions/node/v22.3.0/bin:$PATH"
-
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
@@ -62,7 +60,8 @@ sudo apt install -y build-essential libssl-dev
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 source $NVM_DIR/nvm.sh
-nvm install node
+nvm install 16.13.2
+nvm use 16.13.2
 
 # Ensure NVM and Node.js are available in non-interactive shells
 echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
@@ -127,8 +126,6 @@ EOL
 nvim +PlugInstall +qall
 
 # Step 13: Set up cron job to start scheduler on reboot
-(crontab -l 2>/dev/null; echo "@reboot /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
-
+(crontab -l 2>/dev/null || true; echo "@reboot /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
 
 echo "Installation completed successfully."
-
