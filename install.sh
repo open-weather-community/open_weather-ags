@@ -60,7 +60,6 @@ sudo apt install -y build-essential libssl-dev
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 source $NVM_DIR/nvm.sh
-nvm install 16.13.2
 
 # Ensure NVM and Node.js are available in non-interactive shells
 echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
@@ -126,5 +125,7 @@ nvim +PlugInstall +qall
 
 # Step 13: Set up cron job to start scheduler on reboot
 (crontab -l 2>/dev/null || true; echo "@reboot /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
+
+nvm install 16.13.2
 
 echo "Installation completed successfully."
