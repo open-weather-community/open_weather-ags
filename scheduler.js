@@ -5,6 +5,7 @@ let config = null;
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
+const { load } = require('npm');
 
 // log boot
 Logger.info('project booting up =================================================');
@@ -55,8 +56,10 @@ if (!fs.existsSync('configPath.json')) {
         Logger.info(`Found config file at ${configPath}`);
         // save config path to configPath.json in this working directory
         fs.writeFileSync('configPath.json', JSON.stringify({ configPath }));
-        // load the config file to config
-        config = require(configPath);
+        // load the config file to config without using require
+        config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        Logger.info('Config loaded from ' + configPath);
+
     }
 } else {
     Logger.info('Found configPath.json, skipping search for config file');
