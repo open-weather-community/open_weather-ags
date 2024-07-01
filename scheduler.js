@@ -7,18 +7,14 @@ const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
 const { load } = require('npm');
 
-// log boot
-Logger.info('project booting up =================================================');
-Logger.info("as user: " + process.getuid());
-Logger.info("as group: " + process.getgid());
-Logger.info("current working directory: " + process.cwd());
+
 
 // find config file by searching for config.json in /mnt/
 const mediaPath = '/mnt/o-w/';
 
 function findConfigFile(dir) {
     if (!fs.existsSync(dir)) {
-        Logger.error(`Directory not found white finding config: ${dir}`);
+        logger.error(`Directory not found white finding config: ${dir}`);
         return null;
     }
 
@@ -45,25 +41,30 @@ function findConfigFile(dir) {
 // and save the path to configPath.json
 if (!fs.existsSync('configPath.json')) {
 
-    Logger.info(`No configPath.json found, searching for config file in ${mediaPath}...`);
+    // logger.info(`No configPath.json found, searching for config file in ${mediaPath}...`);
 
     const configPath = findConfigFile(mediaPath);
 
     if (!configPath) {
-        Logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
+        // logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
         fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
     } else {
-        Logger.info(`Found config file at ${configPath}`);
+        // logger.info(`Found config file at ${configPath}`);
         // save config path to configPath.json in this working directory
         fs.writeFileSync('configPath.json', JSON.stringify({ configPath }));
         // load the config file to config without using require
         config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        Logger.info('Config loaded from ' + configPath);
-        Logger.setConfig(config);
+        // logger.info('Config loaded from ' + configPath);
+        logger = new Logger(config);
+        // log boot
+        logger.info('logger loaded =================================================');
+        logger.info("as user: " + process.getuid());
+        logger.info("as group: " + process.getgid());
+        logger.info("current working directory: " + process.cwd());
 
     }
 } else {
-    Logger.info('Found configPath.json, skipping search for config file');
+    logger.info('Found configPath.json, skipping search for config file');
 }
 
 
@@ -77,7 +78,7 @@ cron.schedule('* * * * *', () => {
     async function processData() {
 
         if (isRecording()) {
-            Logger.info('Already recording, skipping this cron cycle...');
+            logger.info('Already recording, skipping this cron cycle...');
             return;
         }
 
@@ -90,13 +91,13 @@ cron.schedule('* * * * *', () => {
             try {
                 data = fs.readFileSync(passesFilePath, 'utf8');
             } catch (error) {
-                Logger.error(`Error reading file at ${passesFilePath}: ` + error);
+                logger.error(`Error reading file at ${passesFilePath}: ` + error);
             }
-            //Logger.info(data);
+            //logger.info(data);
 
             // check if the file content is empty
             if (!data || data.trim() === '') {
-                Logger.error('No passes found. Retrieving TLE data...');
+                logger.error('No passes found. Retrieving TLE data...');
                 await processPasses(config);
                 return;
             }
@@ -106,7 +107,7 @@ cron.schedule('* * * * *', () => {
             try {
                 jsonData = JSON.parse(data);
             } catch (parseError) {
-                Logger.error('Error parsing JSON data: ' + parseError.message);
+                logger.error('Error parsing JSON data: ' + parseError.message);
                 return;
             }
 
@@ -114,7 +115,7 @@ cron.schedule('* * * * *', () => {
             const hasEntries = Array.isArray(jsonData) ? jsonData.length > 0 : Object.keys(jsonData).length > 0;
 
             if (!hasEntries) {
-                Logger.info('No passes found. Running TLE data...');
+                logger.info('No passes found. Running TLE data...');
                 await processPasses();
                 return;
             }
@@ -130,20 +131,20 @@ cron.schedule('* * * * *', () => {
                 // take into account the duration
                 const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
 
-                //Logger.info(`got entry ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes... and now is ${now} and record time is ${recordTime} and end record time is ${endRecordTime}`);
+                //logger.info(`got entry ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes... and now is ${now} and record time is ${recordTime} and end record time is ${endRecordTime}`);
 
                 if (now >= recordTime && now <= endRecordTime && !item.recorded) {
 
-                    //Logger.info("found one");
+                    //logger.info("found one");
 
                     if (isRecording()) {
-                        Logger.info('Already recording from within the forEach, returning...');
+                        logger.info('Already recording from within the forEach, returning...');
                         return;
                     }
 
                     let newDuration = Math.floor((endRecordTime - now) / 60000);
 
-                    Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
+                    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
                     startRecording(item.frequency, recordTime, item.satellite, newDuration, config);
                     // mark item as recorded
                     item.recorded = true;
@@ -160,7 +161,7 @@ cron.schedule('* * * * *', () => {
             fs.renameSync(tempFilePath, passesFilePath);
 
         } catch (err) {
-            Logger.error('Error processing data: ' + err.message);
+            logger.error('Error processing data: ' + err.message);
         }
     }
 
