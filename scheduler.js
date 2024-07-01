@@ -44,11 +44,13 @@ if (!fs.existsSync('configPath.json')) {
     // logger.info(`No configPath.json found, searching for config file in ${mediaPath}...`);
 
     const configPath = findConfigFile(mediaPath);
+    console.log(`configPath: ${configPath}`);
 
     if (!configPath) {
         // logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
         fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
         config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        console.log(`no config file found, duplicating default config.json to ${mediaPath}`);
     } else {
         // logger.info(`Found config file at ${configPath}`);
         // save config path to configPath.json in this working directory
@@ -56,11 +58,14 @@ if (!fs.existsSync('configPath.json')) {
         // load the config file to config without using require
         config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         // logger.info('Config loaded from ' + configPath);
+        console.log(`config loaded from ${configPath}`);
 
     }
 } else {
     // logger.info('Found configPath.json, skipping search for config file');
 }
+
+console.log(`config: ${config}`);
 
 logger = new Logger(config);
 
