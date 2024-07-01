@@ -59,7 +59,7 @@ if (!fs.existsSync('configPath.json')) {
 
     }
 } else {
-    logger.info('Found configPath.json, skipping search for config file');
+    // logger.info('Found configPath.json, skipping search for config file');
 }
 
 logger = new Logger(config);
