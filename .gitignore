@@ -4,3 +4,4 @@ venv/
 node_modules/
 *.wav
 passes.json
+configPath.json
