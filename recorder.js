@@ -1,5 +1,4 @@
 const { spawn } = require('child_process');
-const config = require('./config.json');
 const Logger = require('./logger');
 const fs = require('fs');
 
@@ -9,7 +8,7 @@ function isRecording() {
     return recording;
 }
 
-function startRecording(frequency, timestamp, satellite, durationMinutes) {
+function startRecording(frequency, timestamp, satellite, durationMinutes, config) {
 
     if (recording) {
         Logger.info('Already recording...');
