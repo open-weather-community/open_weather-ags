@@ -3,7 +3,7 @@ const path = require("path");
 
 class Logger {
   constructor(config) {
-    console.log("config:" + config);
+    // console.log("config: " + config);
     this.config = config;
     this.logFilePath = path.join(config.saveDir, config.logFile);
 
@@ -11,6 +11,9 @@ class Logger {
     if (!fs.existsSync(this.logFilePath)) {
       fs.writeFileSync(this.logFilePath, "Log file created\n");
     }
+
+    this.info("\n========================================\n");
+    this.info(`Logger initialized to file: ${this.logFilePath}`);
   }
 
   log(message, level = "INFO") {
