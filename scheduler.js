@@ -5,7 +5,7 @@ let config = null;
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
-const { load } = require('npm');
+// const { load } = require('npm');
 
 
 
