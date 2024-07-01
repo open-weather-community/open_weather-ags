@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
-let config = require('./config.json');
+let config = null;
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle.js');
 const Logger = require('./logger');
@@ -12,10 +12,15 @@ Logger.info("as user: " + process.getuid());
 Logger.info("as group: " + process.getgid());
 Logger.info("current working directory: " + process.cwd());
 
-// find config file by searching for config.json in /media/
-const mediaPath = '/media/';
+// find config file by searching for config.json in /mnt/
+const mediaPath = '/mnt/o-w/';
 
 function findConfigFile(dir) {
+    if (!fs.existsSync(dir)) {
+        Logger.error(`Directory not found white finding config: ${dir}`);
+        return null;
+    }
+
     const files = fs.readdirSync(dir);
 
     for (const file of files) {
@@ -34,16 +39,18 @@ function findConfigFile(dir) {
 
     return null;
 }
-// if there is nothing in configPath.json, find the config file in /media/
+
+// if there is nothing in configPath.json, find the config file in the mount path
 // and save the path to configPath.json
 if (!fs.existsSync('configPath.json')) {
 
-    Logger.info('No configPath.json found, searching for config file in /media/');
+    Logger.info(`No configPath.json found, searching for config file in ${mediaPath}...`);
 
     const configPath = findConfigFile(mediaPath);
 
     if (!configPath) {
-        Logger.error('No config file found in /media/');
+        Logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
+        fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
     } else {
         Logger.info(`Found config file at ${configPath}`);
         // save config path to configPath.json in this working directory
@@ -52,7 +59,7 @@ if (!fs.existsSync('configPath.json')) {
         config = require(configPath);
     }
 } else {
-    Logger.info('Found configPath.json, skipping search for config file in /media/');
+    Logger.info('Found configPath.json, skipping search for config file');
 }
 
 

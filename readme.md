@@ -66,7 +66,15 @@ cd open_weather-ags
 chmod +x install.sh
 ./install.sh
 ```
-### crontab
+
+### check that it is working
+```bash
+nvim /home/openweather/cronlog.txt
+```
+
+### software (manual way)
+
+#### crontab
 This ensures that the node project starts upon reboot.
 
 ```
@@ -76,12 +84,6 @@ crontab -e
 @reboot /home/openweather/open_weather-ags/start_scheduler.sh
 ```
 
-### check that it is working
-```bash
-nvim /home/openweather/cronlog.txt
-```
-
-### software (manual way)
 
 #### RTL-SDR v4 driver
 
@@ -148,7 +150,8 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-nvm install node v16.13.2
+nvm install 16.13.2
+nvm use 16.13.2
 ```
 
 Then install ...

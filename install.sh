@@ -66,6 +66,10 @@ echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
 
+# clear the pacage cache
+npm cache clean --force
+npm install chokidar usb-detection node-cron
+
 # Step 10: Install npm and npm packages
 npm install npm@latest -g
 
