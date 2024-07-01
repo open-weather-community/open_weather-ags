@@ -6,7 +6,7 @@ const satellite = require('satellite.js');
 const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
-const Logger = require('./logger');
+// const Logger = require('./logger');
 let config = null;
 
 // check if the satellite passes over the given location within a certain distance
@@ -145,7 +145,7 @@ async function processPasses(config) {
     const tleData = await fetchTLEData();
     const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
 
-    Logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
+    // Logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
 
     const existingPasses = readExistingPasses();
 
@@ -160,7 +160,7 @@ async function processPasses(config) {
         }
 
         if (!tleLine1 || !tleLine2) {
-            Logger.error(`TLE data for ${satName} not found.`);
+            // Logger.error(`TLE data for ${satName} not found.`);
             continue;
         }
 
@@ -209,7 +209,7 @@ async function processPasses(config) {
     // save updated passes
     savePasses(existingPasses);
 
-    Logger.info('Satellite passes have been updated and saved.');
+    // Logger.info('Satellite passes have been updated and saved.');
 }
 
 
@@ -217,14 +217,14 @@ async function processPasses(config) {
 
 
 if (require.main === module) {
-    Logger.info("tle script was executed directly.");
+    // Logger.info("tle script was executed directly.");
     // load config.json from default.config.json without using require
     config = JSON.parse(fs.readFileSync('default.config.json', 'utf8'));
     // execute the process passes
     processPasses(config).catch(console.error);
 
 } else {
-    Logger.info("tle script was not executed directly, not downloading data...");
+    // Logger.info("tle script was not executed directly, not downloading data...");
 }
 
 
