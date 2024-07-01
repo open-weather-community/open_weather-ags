@@ -3,6 +3,7 @@ const path = require("path");
 
 class Logger {
   constructor(config) {
+    console.log("config:" + config);
     this.config = config;
     this.logFilePath = path.join(config.saveDir, config.logFile);
 
