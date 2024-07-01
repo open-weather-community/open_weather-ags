@@ -97,7 +97,7 @@ cron.schedule('* * * * *', () => {
             // check if the file content is empty
             if (!data || data.trim() === '') {
                 Logger.error('No passes found. Retrieving TLE data...');
-                await processPasses();
+                await processPasses(config);
                 return;
             }
 
