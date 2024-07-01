@@ -5,81 +5,125 @@ const { DateTime } = require('luxon');
 const fs = require('fs');
 const Logger = require('./logger');
 
-// Parse command-line arguments to get configPath
-const args = process.argv.slice(2);
-if (args.length === 0) {
-    console.error('Usage: node tle.js <configPath>');
-    process.exit(1);
-}
-const configPath = args[0];
-
+// Function to load configuration from file
 function loadConfig(configPath) {
     if (!fs.existsSync(configPath)) {
-        console.error('Config file not found.');
-        process.exit(1);
+        throw new Error('Config file not found.');
     }
-
     return JSON.parse(fs.readFileSync(configPath, 'utf8'));
 }
 
-// Load the configuration
-const config = loadConfig(configPath);
-const maxDistance = config.maxDistance;
-const locLat = config.locLat;
-const locLon = config.locLon;
-const noaaFrequencies = config.noaaFrequencies;
-const passesFile = config.passesFile;
-const daysToPropagate = config.daysToPropagate;
-const bufferMinutes = config.bufferMinutes;
+// Function to find satellite passes over a specific location
+async function findSatellitePasses(configPath) {
+    try {
+        // Load configuration
+        const config = loadConfig(configPath);
+        const maxDistance = config.maxDistance;
+        const locLat = config.locLat;
+        const locLon = config.locLon;
+        const noaaFrequencies = config.noaaFrequencies;
+        const passesFile = config.passesFile;
+        const daysToPropagate = config.daysToPropagate;
+        const bufferMinutes = config.bufferMinutes;
 
-// Initialize Logger with the configuration
-Logger.setConfig(config);
+        // Initialize Logger with the configuration
+        Logger.setConfig(config);
 
-function isOverLocation(distance) {
-    return distance <= maxDistance;
+        // Fetch TLE data
+        const tleData = await fetchTLEData();
+        const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
+
+        Logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
+
+        // Read existing passes from file
+        const existingPasses = readExistingPasses(passesFile);
+
+        // Process passes for each satellite
+        for (const satName in noaaFrequencies) {
+            let tleLine1, tleLine2;
+            for (let i = 0; i < tleLines.length; i++) {
+                if (tleLines[i].startsWith(satName)) {
+                    tleLine1 = tleLines[i + 1];
+                    tleLine2 = tleLines[i + 2];
+                    break;
+                }
+            }
+
+            if (!tleLine1 || !tleLine2) {
+                Logger.error(`TLE data for ${satName} not found.`);
+                continue;
+            }
+
+            const passes = await calculateSatellitePasses(
+                satName,
+                tleLine1,
+                tleLine2,
+                maxDistance,
+                locLat,
+                locLon,
+                daysToPropagate,
+                bufferMinutes
+            );
+
+            // Process each pass and update existing passes
+            processPasses(passes, existingPasses, noaaFrequencies[satName]);
+        }
+
+        // Save updated passes to file
+        savePasses(existingPasses, passesFile);
+        Logger.info('Satellite passes have been updated and saved.');
+    } catch (error) {
+        console.error('Error processing passes:', error.message);
+        process.exit(1);
+    }
 }
 
-function calculateDistance(satLat, satLon, locLat, locLon) {
-    return geolib.getDistance(
-        { latitude: satLat, longitude: satLon },
-        { latitude: locLat, longitude: locLon }
-    );
-}
-
+// Fetch TLE data from Celestrak
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
     const response = await axios.get(url);
     return response.data;
 }
 
-function readExistingPasses() {
-    if (fs.existsSync(passesFile)) {
-        const data = fs.readFileSync(passesFile, 'utf8');
-        if (data.trim() === '') {
-            return [];
-        }
-        try {
+// Read existing passes from file
+function readExistingPasses(passesFile) {
+    try {
+        if (fs.existsSync(passesFile)) {
+            const data = fs.readFileSync(passesFile, 'utf8');
+            if (data.trim() === '') {
+                return [];
+            }
             return JSON.parse(data);
-        } catch (error) {
-            console.error('Error parsing existing passes JSON:', error.message);
-            return [];
         }
+        return [];
+    } catch (error) {
+        Logger.error('Error reading existing passes:', error.message);
+        return [];
     }
-    return [];
 }
 
-function savePasses(passes) {
-    passes.sort((a, b) => {
-        const dateTimeA = DateTime.fromFormat(`${a.date} ${a.time}`, 'dd LLL yyyy HH:mm');
-        const dateTimeB = DateTime.fromFormat(`${b.date} ${b.time}`, 'dd LLL yyyy HH:mm');
-        return dateTimeA - dateTimeB;
-    });
-    fs.writeFileSync(passesFile, JSON.stringify(passes, null, 2));
+// Save passes to file
+function savePasses(passes, passesFile) {
+    try {
+        passes.sort((a, b) => DateTime.fromISO(a.start) - DateTime.fromISO(b.start));
+        fs.writeFileSync(passesFile, JSON.stringify(passes, null, 2));
+    } catch (error) {
+        Logger.error('Error saving passes:', error.message);
+    }
 }
 
-async function findSatellitePasses(satName, tleLine1, tleLine2) {
+// Calculate satellite passes over specific location
+async function calculateSatellitePasses(
+    satName,
+    tleLine1,
+    tleLine2,
+    maxDistance,
+    locLat,
+    locLon,
+    daysToPropagate,
+    bufferMinutes
+) {
     const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
-
     const startTime = DateTime.utc();
     const endTime = startTime.plus({ days: daysToPropagate });
     const timeStep = { minutes: 1 };
@@ -99,9 +143,12 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
             const positionGd = satellite.eciToGeodetic(positionEci, gmst);
             const satLat = satellite.degreesLat(positionGd.latitude);
             const satLon = satellite.degreesLong(positionGd.longitude);
-            const distance = calculateDistance(satLat, satLon, locLat, locLon);
+            const distance = geolib.getDistance(
+                { latitude: satLat, longitude: satLon },
+                { latitude: locLat, longitude: locLon }
+            );
 
-            if (isOverLocation(distance)) {
+            if (distance <= maxDistance) {
                 const observerGd = {
                     longitude: satellite.degreesToRadians(locLon),
                     latitude: satellite.degreesToRadians(locLat),
@@ -126,8 +173,8 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                     const minDistance = Math.min(...distances);
 
                     passes.push({
-                        start: passStart,
-                        end: currentTime,
+                        start: passStart.toISO(),
+                        end: currentTime.toISO(),
                         maxElevation: maxElevation.toFixed(2),
                         avgElevation: avgElevation.toFixed(2),
                         avgDistance: avgDistance.toFixed(2),
@@ -145,8 +192,8 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
         const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
         const maxElevation = Math.max(...elevations);
         passes.push({
-            start: passStart,
-            end: currentTime,
+            start: passStart.toISO(),
+            end: currentTime.toISO(),
             maxElevation: maxElevation.toFixed(2),
             avgElevation: avgElevation.toFixed(2)
         });
@@ -155,86 +202,24 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     return passes;
 }
 
-async function processPasses() {
-    const tleData = await fetchTLEData();
-    const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
-
-    Logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
-
-    const existingPasses = readExistingPasses();
-
-    for (const satName in noaaFrequencies) {
-        let tleLine1, tleLine2;
-        for (let i = 0; i < tleLines.length; i++) {
-            if (tleLines[i].startsWith(satName)) {
-                tleLine1 = tleLines[i + 1];
-                tleLine2 = tleLines[i + 2];
-                break;
-            }
-        }
-
-        if (!tleLine1 || tleLine2) {
-            Logger.error(`TLE data for ${satName} not found.`);
-            continue;
-        }
-
-        const passes = await findSatellitePasses(satName, tleLine1, tleLine2);
-
-        passes.forEach(pass => {
-            const formattedStart = DateTime.fromISO(pass.start.toISO());
-            const formattedEnd = DateTime.fromISO(pass.end.toISO());
-            const maxElevation = pass.maxElevation || 'N/A';
-            const avgElevation = pass.avgElevation || 'N/A';
-            const avgDistance = pass.avgDistance || 'N/A';
-            const minDistance = pass.minDistance || 'N/A';
-
-            const bufferStart = formattedStart.minus({ minutes: bufferMinutes });
-            const bufferEnd = formattedEnd.plus({ minutes: bufferMinutes });
-            const bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
-
-            const newPass = {
-                frequency: noaaFrequencies[satName],
-                satellite: satName,
-                date: bufferStart.toFormat('dd LLL yyyy'),
-                time: bufferStart.toFormat('HH:mm'),
-                duration: bufferDuration,
-                avgElevation: avgElevation,
-                maxElevation: maxElevation,
-                avgDistance: avgDistance,
-                minDistance: minDistance,
-                recorded: false
-            };
-
-            const duplicate = existingPasses.some(
-                existingPass =>
-                    existingPass.satellite === newPass.satellite &&
-                    existingPass.date === newPass.date &&
-                    existingPass.time === newPass.time
-            );
-
-            if (!duplicate) {
-                existingPasses.push(newPass);
-            }
-        });
+// Main function to process passes
+async function main() {
+    const args = process.argv.slice(2);
+    if (args.length !== 1) {
+        console.error('Usage: node tle.js <configPath>');
+        process.exit(1);
     }
-
-    savePasses(existingPasses);
-    Logger.info('Satellite passes have been updated and saved.');
+    const configPath = args[0];
+    await findSatellitePasses(configPath);
 }
 
 if (require.main === module) {
     Logger.info("tle script was executed directly.");
-
-    Logger.info("setting up config...");
-
-    // Ensure the Logger is set up with the configuration
-    Logger.setConfig(config);
-
-    processPasses().catch(console.error);
+    main().catch(console.error);
 } else {
     Logger.info("tle script was not executed directly, not downloading data...");
 }
 
 module.exports = {
-    processPasses
+    findSatellitePasses
 };
