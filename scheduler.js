@@ -33,13 +33,13 @@ function findConfigFile(dir) {
 
 function loadConfig() {
     if (!fs.existsSync('configPath.json')) {
-        logger.info(`No configPath.json found, searching for config file in ${mediaPath}...`);
+        console.log(`No configPath.json found, searching for config file in ${mediaPath}...`);
 
         const configPath = findConfigFile(mediaPath);
-        logger.info(`configPath: ${configPath}`);
+        console.log(`found configFile on external media, setting configPath to ${configPath}`);
 
         if (!configPath) {
-            logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
+            console.log('No config file found in /mnt/... duplicating default config.json to /mnt/');
             fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
             return JSON.parse(fs.readFileSync(`${mediaPath}config.json`, 'utf8'));
         } else {
@@ -51,7 +51,7 @@ function loadConfig() {
         if (fs.existsSync(configPath)) {
             return JSON.parse(fs.readFileSync(configPath, 'utf8'));
         } else {
-            logger.error(`Config file at path ${configPath} not found!`);
+            console.log(`Config file at path ${configPath} not found!`);
             return null;
         }
     }
@@ -83,6 +83,14 @@ cron.schedule('* * * * *', () => {
 
         try {
             const passesFilePath = path.resolve(__dirname, config.passesFile);
+
+            // if file does not exist, create it
+            if (!fs.existsSync(passesFilePath)) {
+                fs.writeFileSync(passesFilePath, '[]');
+                logger.info(`Blank passes file created at ${passesFilePath}`);
+                return;
+            }
+
             const backupFilePath = `${passesFilePath}.bak`;
             const tempFilePath = `${passesFilePath}.tmp`;
 

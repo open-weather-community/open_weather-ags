@@ -5,3 +5,4 @@ node_modules/
 *.wav
 passes.json
 configPath.json
+rtl-sdr-blog/
