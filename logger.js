@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const config = require("./config.json"); // Assuming you have a config file for paths
-const logFilePath = path.join(config.saveDir, config.logFile);
+let config = null;
+let logFilePath = null;
 
 console.log(`logFilePath: ${logFilePath}`);
 
@@ -33,6 +33,11 @@ class Logger {
         console.error("Error writing to log file:", err);
       }
     });
+  }
+
+  static setConfig(config) {
+    this.config = config;
+    logFilePath = path.join(config.saveDir, config.logFile);
   }
 
   static info(message) {
