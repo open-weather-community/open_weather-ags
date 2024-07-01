@@ -140,7 +140,7 @@ cron.schedule('* * * * *', () => {
                     let newDuration = Math.floor((endRecordTime - now) / 60000);
 
                     Logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
-                    startRecording(item.frequency, recordTime, item.satellite, newDuration);
+                    startRecording(item.frequency, recordTime, item.satellite, newDuration, config);
                     // mark item as recorded
                     item.recorded = true;
                 }
