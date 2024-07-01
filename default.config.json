@@ -11,7 +11,7 @@
         "NOAA 15": "137.62M"
     },
     "passesFile": "passes.json",
-    "saveDir": "/media/openweather",
+    "saveDir": "/mnt/o-w",
     "logFile": "log.txt",
     "rtl_fm_path": "/usr/local/bin/rtl_fm",
     "sox_path": "/usr/bin/sox"
