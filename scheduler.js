@@ -59,6 +59,7 @@ if (!fs.existsSync('configPath.json')) {
         // load the config file to config without using require
         config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         Logger.info('Config loaded from ' + configPath);
+        Logger.setConfig(config);
 
     }
 } else {
