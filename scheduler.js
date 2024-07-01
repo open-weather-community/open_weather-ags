@@ -48,6 +48,7 @@ if (!fs.existsSync('configPath.json')) {
     if (!configPath) {
         // logger.error('No config file found in /mnt/... duplicating default config.json to /mnt/');
         fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
+        config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     } else {
         // logger.info(`Found config file at ${configPath}`);
         // save config path to configPath.json in this working directory
@@ -55,17 +56,19 @@ if (!fs.existsSync('configPath.json')) {
         // load the config file to config without using require
         config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         // logger.info('Config loaded from ' + configPath);
-        logger = new Logger(config);
-        // log boot
-        logger.info('logger loaded =================================================');
-        logger.info("as user: " + process.getuid());
-        logger.info("as group: " + process.getgid());
-        logger.info("current working directory: " + process.cwd());
 
     }
 } else {
     logger.info('Found configPath.json, skipping search for config file');
 }
+
+logger = new Logger(config);
+
+// log boot
+logger.info('logger loaded =================================================');
+logger.info("as user: " + process.getuid());
+logger.info("as group: " + process.getgid());
+logger.info("current working directory: " + process.cwd());
 
 
 // schedule reset for 4AM daily
