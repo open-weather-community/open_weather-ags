@@ -29,7 +29,16 @@ WAV files are saved to this directory...
 ### raspberry pi
 + Install latest [Raspberry Pi OS](https://www.raspberrypi.com/software/). At the time of writing this I am using v12 (Bookworm). It's probably best to stick to this version.
 + Use ```openweather``` for the username.
-+ Use ```sudo raspi-config``` to enable SSH.
++ Enable SSH and I2C
+```bash
+sudo raspi-config
+# then Interface, then see SSH and I2C options
+```
+You can test I2C with:
+```bash
+sudo i2cdetect -y 1
+```
+This will give you the address (likely 0x27) which should be used when initializing the device in the node project.
 
 ### USB Drive
 
@@ -47,7 +56,7 @@ sudo nano /etc/fstab
 ```
 Add to fstab:
 ```
-/dev/sda1  /mnt/o-w  vfat  defaults  0  2
+/dev/sda1  /mnt/o-w  vfat  defaults,uid=1000,gid=1000  0  2
 ```
 
 Reload and mount the drive

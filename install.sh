@@ -14,7 +14,10 @@ sudo rm -rvf /usr/lib/librtlsdr* /usr/include/rtl-sdr* /usr/local/lib/librtlsdr*
 
 # Step 2: Install dependencies
 sudo apt-get update
-sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev
+sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev sox
+# I2C for LCD
+sudo apt-get install -y python3-smbus
+sudo apt-get install -y i2c-tools
 
 # Step 3: Clone and build rtl-sdr-blog
 if [ -d "rtl-sdr-blog" ]; then

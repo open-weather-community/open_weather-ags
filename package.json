@@ -18,6 +18,7 @@
     "luxon": "^3.4.4",
     "node-cron": "^3.0.3",
     "npm": "^10.8.0",
+    "raspberrypi-liquid-crystal": "^1.20.0",
     "satellite.js": "^5.0.0"
   },
   "author": "",

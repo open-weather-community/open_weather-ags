@@ -1,8 +1,9 @@
-.DS_Store
 .env
 venv/
 node_modules/
+rtl-sdr-blog/
+.DS_Store
 *.wav
 passes.json
+passes.json.bak
 configPath.json
-rtl-sdr-blog/

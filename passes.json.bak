@@ -7,8 +7,8 @@
     "duration": 13,
     "avgElevation": "15.09",
     "maxElevation": "17.78",
-    "avgDistance": "1835458.00",
-    "minDistance": "1669140.00",
+    "avgDistance": "1835564.14",
+    "minDistance": "1669281.00",
     "recorded": false
   },
   {
@@ -18,9 +18,9 @@
     "time": "08:22",
     "duration": 17,
     "avgElevation": "25.71",
-    "maxElevation": "43.93",
-    "avgDistance": "1358948.91",
-    "minDistance": "710922.00",
+    "maxElevation": "43.92",
+    "avgDistance": "1359034.09",
+    "minDistance": "711173.00",
     "recorded": false
   },
   {
@@ -30,9 +30,9 @@
     "time": "09:59",
     "duration": 16,
     "avgElevation": "21.86",
-    "maxElevation": "31.15",
-    "avgDistance": "1524956.10",
-    "minDistance": "1101527.00",
+    "maxElevation": "31.14",
+    "avgDistance": "1524942.30",
+    "minDistance": "1101978.00",
     "recorded": false
   },
   {
@@ -42,22 +42,22 @@
     "time": "10:02",
     "duration": 16,
     "avgElevation": "23.42",
-    "maxElevation": "35.28",
-    "avgDistance": "1417444.70",
-    "minDistance": "930346.00",
+    "maxElevation": "35.26",
+    "avgDistance": "1417430.50",
+    "minDistance": "930943.00",
     "recorded": false
   },
   {
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
     "date": "02 Jul 2024",
-    "time": "11:06",
-    "duration": 15,
+    "time": "16:08",
+    "duration": 3,
     "avgElevation": "18.47",
-    "maxElevation": "24.31",
-    "avgDistance": "1672590.67",
-    "minDistance": "1362184.00",
-    "recorded": false
+    "maxElevation": "24.32",
+    "avgDistance": "1672427.67",
+    "minDistance": "1361911.00",
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -66,9 +66,9 @@
     "time": "11:40",
     "duration": 16,
     "avgElevation": "31.23",
-    "maxElevation": "50.58",
-    "avgDistance": "1197589.90",
-    "minDistance": "601932.00",
+    "maxElevation": "50.62",
+    "avgDistance": "1197636.10",
+    "minDistance": "601141.00",
     "recorded": false
   },
   {
@@ -77,10 +77,10 @@
     "date": "02 Jul 2024",
     "time": "12:46",
     "duration": 17,
-    "avgElevation": "33.66",
-    "maxElevation": "63.19",
-    "avgDistance": "1176802.64",
-    "minDistance": "376932.00",
+    "avgElevation": "33.67",
+    "maxElevation": "63.27",
+    "avgDistance": "1176572.64",
+    "minDistance": "375562.00",
     "recorded": false
   },
   {
@@ -91,8 +91,8 @@
     "duration": 11,
     "avgElevation": "11.95",
     "maxElevation": "13.03",
-    "avgDistance": "2066536.60",
-    "minDistance": "1989693.00",
+    "avgDistance": "2066576.60",
+    "minDistance": "1989737.00",
     "recorded": false
   },
   {
@@ -103,8 +103,8 @@
     "duration": 13,
     "avgElevation": "13.34",
     "maxElevation": "15.80",
-    "avgDistance": "1965283.57",
-    "minDistance": "1801972.00",
+    "avgDistance": "1965200.29",
+    "minDistance": "1801867.00",
     "recorded": false
   },
   {
@@ -114,9 +114,9 @@
     "time": "18:09",
     "duration": 15,
     "avgElevation": "17.45",
-    "maxElevation": "23.58",
-    "avgDistance": "1674615.33",
-    "minDistance": "1343508.00",
+    "maxElevation": "23.59",
+    "avgDistance": "1674440.89",
+    "minDistance": "1343220.00",
     "recorded": false
   },
   {
@@ -126,9 +126,9 @@
     "time": "19:48",
     "duration": 17,
     "avgElevation": "34.22",
-    "maxElevation": "69.48",
-    "avgDistance": "1140990.82",
-    "minDistance": "268393.00",
+    "maxElevation": "69.36",
+    "avgDistance": "1141195.09",
+    "minDistance": "270055.00",
     "recorded": false
   },
   {
@@ -137,10 +137,10 @@
     "date": "02 Jul 2024",
     "time": "19:52",
     "duration": 14,
-    "avgElevation": "17.28",
-    "maxElevation": "21.75",
-    "avgDistance": "1741543.63",
-    "minDistance": "1491303.00",
+    "avgElevation": "17.29",
+    "maxElevation": "21.74",
+    "avgDistance": "1741338.63",
+    "minDistance": "1491382.00",
     "recorded": false
   },
   {
@@ -151,8 +151,8 @@
     "duration": 13,
     "avgElevation": "14.15",
     "maxElevation": "16.81",
-    "avgDistance": "1899145.71",
-    "minDistance": "1728874.00",
+    "avgDistance": "1899103.86",
+    "minDistance": "1728822.00",
     "recorded": false
   },
   {
@@ -161,10 +161,10 @@
     "date": "02 Jul 2024",
     "time": "21:31",
     "duration": 17,
-    "avgElevation": "37.99",
-    "maxElevation": "85.95",
-    "avgDistance": "1087429.64",
-    "minDistance": "53975.00",
+    "avgElevation": "37.98",
+    "maxElevation": "85.82",
+    "avgDistance": "1087579.27",
+    "minDistance": "55678.00",
     "recorded": false
   },
   {
@@ -175,8 +175,8 @@
     "duration": 12,
     "avgElevation": "11.40",
     "maxElevation": "12.88",
-    "avgDistance": "2030753.67",
-    "minDistance": "1924725.00",
+    "avgDistance": "2030840.00",
+    "minDistance": "1924541.00",
     "recorded": false
   },
   {
@@ -186,9 +186,9 @@
     "time": "22:38",
     "duration": 17,
     "avgElevation": "34.90",
-    "maxElevation": "71.68",
-    "avgDistance": "1140485.09",
-    "minDistance": "245934.00",
+    "maxElevation": "71.64",
+    "avgDistance": "1140551.36",
+    "minDistance": "246517.00",
     "recorded": false
   },
   {
@@ -198,9 +198,9 @@
     "time": "23:14",
     "duration": 13,
     "avgElevation": "14.29",
-    "maxElevation": "16.72",
-    "avgDistance": "1912705.29",
-    "minDistance": "1755682.00",
+    "maxElevation": "16.73",
+    "avgDistance": "1912530.86",
+    "minDistance": "1755467.00",
     "recorded": false
   },
   {
@@ -211,8 +211,8 @@
     "duration": 15,
     "avgElevation": "16.74",
     "maxElevation": "22.01",
-    "avgDistance": "1750160.22",
-    "minDistance": "1451838.00",
+    "avgDistance": "1750120.11",
+    "minDistance": "1451785.00",
     "recorded": false
   },
   {
@@ -223,8 +223,8 @@
     "duration": 15,
     "avgElevation": "20.76",
     "maxElevation": "28.49",
-    "avgDistance": "1507096.44",
-    "minDistance": "1147915.00",
+    "avgDistance": "1507158.78",
+    "minDistance": "1148018.00",
     "recorded": false
   },
   {
@@ -234,9 +234,9 @@
     "time": "09:36",
     "duration": 17,
     "avgElevation": "29.13",
-    "maxElevation": "53.89",
-    "avgDistance": "1260499.00",
-    "minDistance": "513274.00",
+    "maxElevation": "53.88",
+    "avgDistance": "1260535.82",
+    "minDistance": "513414.00",
     "recorded": false
   },
   {
@@ -247,8 +247,8 @@
     "duration": 15,
     "avgElevation": "19.46",
     "maxElevation": "25.84",
-    "avgDistance": "1623477.11",
-    "minDistance": "1300491.00",
+    "avgDistance": "1623443.78",
+    "minDistance": "1300425.00",
     "recorded": false
   },
   {
@@ -258,9 +258,9 @@
     "time": "10:54",
     "duration": 14,
     "avgElevation": "16.10",
-    "maxElevation": "19.80",
-    "avgDistance": "1796177.25",
-    "minDistance": "1577281.00",
+    "maxElevation": "19.79",
+    "avgDistance": "1796112.88",
+    "minDistance": "1577531.00",
     "recorded": false
   },
   {
@@ -271,8 +271,8 @@
     "duration": 11,
     "avgElevation": "11.53",
     "maxElevation": "12.64",
-    "avgDistance": "2026562.40",
-    "minDistance": "1947124.00",
+    "avgDistance": "2026765.80",
+    "minDistance": "1947352.00",
     "recorded": false
   },
   {
@@ -282,9 +282,9 @@
     "time": "11:27",
     "duration": 17,
     "avgElevation": "32.97",
-    "maxElevation": "62.73",
-    "avgDistance": "1190378.27",
-    "minDistance": "385343.00",
+    "maxElevation": "62.75",
+    "avgDistance": "1190313.64",
+    "minDistance": "384943.00",
     "recorded": false
   },
   {
@@ -294,9 +294,9 @@
     "time": "12:34",
     "duration": 17,
     "avgElevation": "36.89",
-    "maxElevation": "80.18",
-    "avgDistance": "1105235.91",
-    "minDistance": "130605.00",
+    "maxElevation": "80.14",
+    "avgDistance": "1105297.45",
+    "minDistance": "131193.00",
     "recorded": false
   },
   {
@@ -305,10 +305,10 @@
     "date": "03 Jul 2024",
     "time": "13:09",
     "duration": 12,
-    "avgElevation": "13.53",
+    "avgElevation": "13.54",
     "maxElevation": "15.34",
-    "avgDistance": "1958689.83",
-    "minDistance": "1837799.00",
+    "avgDistance": "1958535.00",
+    "minDistance": "1837919.00",
     "recorded": false
   },
   {
@@ -319,8 +319,8 @@
     "duration": 13,
     "avgElevation": "15.71",
     "maxElevation": "18.66",
-    "avgDistance": "1815451.43",
-    "minDistance": "1638041.00",
+    "avgDistance": "1815549.00",
+    "minDistance": "1638168.00",
     "recorded": false
   },
   {
@@ -331,8 +331,8 @@
     "duration": 13,
     "avgElevation": "13.93",
     "maxElevation": "16.69",
-    "avgDistance": "1866783.57",
-    "minDistance": "1691593.00",
+    "avgDistance": "1866825.29",
+    "minDistance": "1691648.00",
     "recorded": false
   },
   {
@@ -341,10 +341,10 @@
     "date": "03 Jul 2024",
     "time": "19:22",
     "duration": 17,
-    "avgElevation": "34.55",
-    "maxElevation": "73.90",
-    "avgDistance": "1133715.91",
-    "minDistance": "207690.00",
+    "avgElevation": "34.54",
+    "maxElevation": "73.85",
+    "avgDistance": "1133794.45",
+    "minDistance": "208445.00",
     "recorded": false
   },
   {
@@ -353,10 +353,10 @@
     "date": "03 Jul 2024",
     "time": "19:41",
     "duration": 13,
-    "avgElevation": "15.59",
-    "maxElevation": "18.46",
-    "avgDistance": "1835517.71",
-    "minDistance": "1661204.00",
+    "avgElevation": "15.58",
+    "maxElevation": "18.45",
+    "avgDistance": "1835653.86",
+    "minDistance": "1661382.00",
     "recorded": false
   },
   {
@@ -367,8 +367,8 @@
     "duration": 12,
     "avgElevation": "12.49",
     "maxElevation": "14.19",
-    "avgDistance": "2008015.33",
-    "minDistance": "1891832.00",
+    "avgDistance": "2007890.67",
+    "minDistance": "1891991.00",
     "recorded": false
   },
   {
@@ -378,9 +378,9 @@
     "time": "21:04",
     "duration": 14,
     "avgElevation": "16.33",
-    "maxElevation": "20.53",
-    "avgDistance": "1723534.50",
-    "minDistance": "1482370.00",
+    "maxElevation": "20.54",
+    "avgDistance": "1723693.38",
+    "minDistance": "1482228.00",
     "recorded": false
   },
   {
@@ -390,9 +390,9 @@
     "time": "21:19",
     "duration": 17,
     "avgElevation": "36.55",
-    "maxElevation": "73.31",
-    "avgDistance": "1117693.73",
-    "minDistance": "227709.00",
+    "maxElevation": "73.16",
+    "avgDistance": "1117913.27",
+    "minDistance": "229727.00",
     "recorded": false
   },
   {
@@ -401,10 +401,10 @@
     "date": "03 Jul 2024",
     "time": "22:25",
     "duration": 17,
-    "avgElevation": "31.33",
-    "maxElevation": "57.44",
-    "avgDistance": "1226104.18",
-    "minDistance": "466498.00",
+    "avgElevation": "31.34",
+    "maxElevation": "57.50",
+    "avgDistance": "1225908.73",
+    "minDistance": "465586.00",
     "recorded": false
   },
   {
@@ -413,10 +413,10 @@
     "date": "03 Jul 2024",
     "time": "23:01",
     "duration": 14,
-    "avgElevation": "16.72",
+    "avgElevation": "16.73",
     "maxElevation": "20.74",
-    "avgDistance": "1769408.88",
-    "minDistance": "1538095.00",
+    "avgDistance": "1769236.38",
+    "minDistance": "1538204.00",
     "recorded": false
   },
   {
@@ -426,9 +426,9 @@
     "time": "00:07",
     "duration": 16,
     "avgElevation": "19.05",
-    "maxElevation": "26.81",
-    "avgDistance": "1640176.60",
-    "minDistance": "1245212.00",
+    "maxElevation": "26.82",
+    "avgDistance": "1640226.20",
+    "minDistance": "1244871.00",
     "recorded": false
   },
   {
@@ -439,8 +439,8 @@
     "duration": 14,
     "avgElevation": "14.76",
     "maxElevation": "18.48",
-    "avgDistance": "1817784.25",
-    "minDistance": "1589276.00",
+    "avgDistance": "1817615.13",
+    "minDistance": "1589386.00",
     "recorded": false
   },
   {
@@ -450,9 +450,9 @@
     "time": "09:10",
     "duration": 17,
     "avgElevation": "35.80",
-    "maxElevation": "78.77",
-    "avgDistance": "1111472.00",
-    "minDistance": "143504.00",
+    "maxElevation": "78.94",
+    "avgDistance": "1111275.27",
+    "minDistance": "141382.00",
     "recorded": false
   },
   {
@@ -462,9 +462,9 @@
     "time": "09:35",
     "duration": 14,
     "avgElevation": "17.01",
-    "maxElevation": "20.92",
-    "avgDistance": "1745424.88",
-    "minDistance": "1521529.00",
+    "maxElevation": "20.91",
+    "avgDistance": "1745384.38",
+    "minDistance": "1521815.00",
     "recorded": false
   },
   {
@@ -475,8 +475,8 @@
     "duration": 13,
     "avgElevation": "13.69",
     "maxElevation": "16.06",
-    "avgDistance": "1942072.57",
-    "minDistance": "1786781.00",
+    "avgDistance": "1942117.43",
+    "minDistance": "1786833.00",
     "recorded": false
   },
   {
@@ -487,8 +487,8 @@
     "duration": 14,
     "avgElevation": "14.40",
     "maxElevation": "18.15",
-    "avgDistance": "1843203.38",
-    "minDistance": "1611331.00",
+    "avgDistance": "1843316.25",
+    "minDistance": "1611120.00",
     "recorded": false
   },
   {
@@ -497,10 +497,10 @@
     "date": "04 Jul 2024",
     "time": "11:15",
     "duration": 17,
-    "avgElevation": "36.21",
-    "maxElevation": "75.63",
-    "avgDistance": "1119590.18",
-    "minDistance": "193295.00",
+    "avgElevation": "36.20",
+    "maxElevation": "75.56",
+    "avgDistance": "1119703.27",
+    "minDistance": "194278.00",
     "recorded": false
   },
   {
@@ -510,9 +510,9 @@
     "time": "12:21",
     "duration": 17,
     "avgElevation": "37.19",
-    "maxElevation": "76.88",
-    "avgDistance": "1102092.55",
-    "minDistance": "175991.00",
+    "maxElevation": "77.06",
+    "avgDistance": "1101851.82",
+    "minDistance": "173420.00",
     "recorded": false
   },
   {
@@ -522,9 +522,9 @@
     "time": "12:57",
     "duration": 13,
     "avgElevation": "15.18",
-    "maxElevation": "17.98",
-    "avgDistance": "1853948.86",
-    "minDistance": "1681248.00",
+    "maxElevation": "17.97",
+    "avgDistance": "1854122.86",
+    "minDistance": "1681471.00",
     "recorded": false
   },
   {
@@ -534,9 +534,9 @@
     "time": "14:03",
     "duration": 14,
     "avgElevation": "17.55",
-    "maxElevation": "21.84",
-    "avgDistance": "1715031.13",
-    "minDistance": "1477089.00",
+    "maxElevation": "21.85",
+    "avgDistance": "1715057.75",
+    "minDistance": "1476738.00",
     "recorded": false
   },
   {
@@ -546,9 +546,9 @@
     "time": "17:21",
     "duration": 10,
     "avgElevation": "10.94",
-    "maxElevation": "11.54",
-    "avgDistance": "2067901.50",
-    "minDistance": "2024864.00",
+    "maxElevation": "11.53",
+    "avgDistance": "2067845.25",
+    "minDistance": "2025096.00",
     "recorded": false
   },
   {
@@ -557,10 +557,10 @@
     "date": "04 Jul 2024",
     "time": "18:56",
     "duration": 17,
-    "avgElevation": "27.24",
-    "maxElevation": "48.34",
-    "avgDistance": "1314889.73",
-    "minDistance": "617423.00",
+    "avgElevation": "27.25",
+    "maxElevation": "48.36",
+    "avgDistance": "1314778.64",
+    "minDistance": "617029.00",
     "recorded": false
   },
   {
@@ -570,9 +570,9 @@
     "time": "19:29",
     "duration": 12,
     "avgElevation": "13.90",
-    "maxElevation": "15.64",
-    "avgDistance": "1939101.67",
-    "minDistance": "1825779.00",
+    "maxElevation": "15.63",
+    "avgDistance": "1939051.83",
+    "minDistance": "1826027.00",
     "recorded": false
   },
   {
@@ -583,8 +583,8 @@
     "duration": 10,
     "avgElevation": "11.32",
     "maxElevation": "11.87",
-    "avgDistance": "2090373.50",
-    "minDistance": "2049535.00",
+    "avgDistance": "2090413.75",
+    "minDistance": "2049298.00",
     "recorded": false
   },
   {
@@ -594,9 +594,9 @@
     "time": "20:37",
     "duration": 16,
     "avgElevation": "21.30",
-    "maxElevation": "31.56",
-    "avgDistance": "1500292.00",
-    "minDistance": "1041744.00",
+    "maxElevation": "31.57",
+    "avgDistance": "1500459.70",
+    "minDistance": "1041567.00",
     "recorded": false
   },
   {
@@ -606,9 +606,9 @@
     "time": "21:06",
     "duration": 17,
     "avgElevation": "33.47",
-    "maxElevation": "63.38",
-    "avgDistance": "1182247.18",
-    "minDistance": "376399.00",
+    "maxElevation": "63.43",
+    "avgDistance": "1182100.00",
+    "minDistance": "375570.00",
     "recorded": false
   },
   {
@@ -617,10 +617,10 @@
     "date": "04 Jul 2024",
     "time": "22:13",
     "duration": 17,
-    "avgElevation": "27.74",
-    "maxElevation": "48.19",
-    "avgDistance": "1324297.36",
-    "minDistance": "641494.00",
+    "avgElevation": "27.73",
+    "maxElevation": "48.18",
+    "avgDistance": "1324352.82",
+    "minDistance": "641710.00",
     "recorded": false
   },
   {
@@ -631,8 +631,8 @@
     "duration": 15,
     "avgElevation": "19.15",
     "maxElevation": "25.24",
-    "avgDistance": "1646373.67",
-    "minDistance": "1330905.00",
+    "avgDistance": "1646194.67",
+    "minDistance": "1330620.00",
     "recorded": false
   },
   {
@@ -642,9 +642,9 @@
     "time": "23:54",
     "duration": 16,
     "avgElevation": "22.56",
-    "maxElevation": "33.03",
-    "avgDistance": "1481129.30",
-    "minDistance": "1026859.00",
+    "maxElevation": "33.02",
+    "avgDistance": "1481013.00",
+    "minDistance": "1027169.00",
     "recorded": false
   },
   {
@@ -655,8 +655,8 @@
     "duration": 10,
     "avgElevation": "10.80",
     "maxElevation": "11.37",
-    "avgDistance": "2074199.00",
-    "minDistance": "2031224.00",
+    "avgDistance": "2074105.50",
+    "minDistance": "2031394.00",
     "recorded": false
   },
   {
@@ -666,9 +666,9 @@
     "time": "08:45",
     "duration": 16,
     "avgElevation": "34.87",
-    "maxElevation": "61.93",
-    "avgDistance": "1075837.20",
-    "minDistance": "379877.00",
+    "maxElevation": "62.02",
+    "avgDistance": "1075854.40",
+    "minDistance": "378391.00",
     "recorded": false
   },
   {
@@ -679,8 +679,8 @@
     "duration": 13,
     "avgElevation": "14.55",
     "maxElevation": "17.09",
-    "avgDistance": "1887356.71",
-    "minDistance": "1727000.00",
+    "avgDistance": "1887322.86",
+    "minDistance": "1726952.00",
     "recorded": false
   },
   {
@@ -690,9 +690,9 @@
     "time": "10:25",
     "duration": 15,
     "avgElevation": "18.94",
-    "maxElevation": "25.91",
-    "avgDistance": "1597931.56",
-    "minDistance": "1247980.00",
+    "maxElevation": "25.90",
+    "avgDistance": "1598010.44",
+    "minDistance": "1248114.00",
     "recorded": false
   },
   {
@@ -703,8 +703,8 @@
     "duration": 11,
     "avgElevation": "11.74",
     "maxElevation": "12.73",
-    "avgDistance": "2073510.80",
-    "minDistance": "2002162.00",
+    "avgDistance": "2073435.00",
+    "minDistance": "2002076.00",
     "recorded": false
   },
   {
@@ -714,9 +714,9 @@
     "time": "11:02",
     "duration": 18,
     "avgElevation": "35.12",
-    "maxElevation": "75.30",
-    "avgDistance": "1192109.33",
-    "minDistance": "198151.00",
+    "maxElevation": "75.29",
+    "avgDistance": "1192116.75",
+    "minDistance": "198517.00",
     "recorded": false
   },
   {
@@ -725,10 +725,10 @@
     "date": "05 Jul 2024",
     "time": "12:09",
     "duration": 17,
-    "avgElevation": "34.69",
-    "maxElevation": "68.66",
-    "avgDistance": "1148216.00",
-    "minDistance": "293315.00",
+    "avgElevation": "34.68",
+    "maxElevation": "68.61",
+    "avgDistance": "1148311.73",
+    "minDistance": "293960.00",
     "recorded": false
   },
   {
@@ -738,9 +738,9 @@
     "time": "12:44",
     "duration": 14,
     "avgElevation": "16.96",
-    "maxElevation": "20.99",
-    "avgDistance": "1752533.25",
-    "minDistance": "1522162.00",
+    "maxElevation": "21.00",
+    "avgDistance": "1752532.25",
+    "minDistance": "1522527.00",
     "recorded": false
   },
   {
@@ -751,8 +751,8 @@
     "duration": 15,
     "avgElevation": "19.41",
     "maxElevation": "26.09",
-    "avgDistance": "1627142.89",
-    "minDistance": "1289667.00",
+    "avgDistance": "1627112.00",
+    "minDistance": "1289612.00",
     "recorded": false
   },
   {
@@ -762,9 +762,9 @@
     "time": "18:31",
     "duration": 16,
     "avgElevation": "21.73",
-    "maxElevation": "32.42",
-    "avgDistance": "1485487.80",
-    "minDistance": "1016895.00",
+    "maxElevation": "32.41",
+    "avgDistance": "1485415.00",
+    "minDistance": "1017326.00",
     "recorded": false
   },
   {
@@ -775,8 +775,8 @@
     "duration": 10,
     "avgElevation": "12.64",
     "maxElevation": "13.21",
-    "avgDistance": "2021841.25",
-    "minDistance": "1982008.00",
+    "avgDistance": "2021854.25",
+    "minDistance": "1981741.00",
     "recorded": false
   },
   {
@@ -786,9 +786,9 @@
     "time": "20:10",
     "duration": 17,
     "avgElevation": "27.60",
-    "maxElevation": "48.74",
-    "avgDistance": "1300535.82",
-    "minDistance": "609151.00",
+    "maxElevation": "48.76",
+    "avgDistance": "1300409.09",
+    "minDistance": "608708.00",
     "recorded": false
   },
   {
@@ -799,8 +799,8 @@
     "duration": 7,
     "avgElevation": "10.01",
     "maxElevation": "10.01",
-    "avgDistance": "2188888.00",
-    "minDistance": "2188888.00",
+    "avgDistance": "2188823.00",
+    "minDistance": "2188823.00",
     "recorded": false
   },
   {
@@ -811,8 +811,8 @@
     "duration": 17,
     "avgElevation": "29.88",
     "maxElevation": "53.04",
-    "avgDistance": "1273115.73",
-    "minDistance": "555959.00",
+    "avgDistance": "1273116.18",
+    "minDistance": "555979.00",
     "recorded": false
   },
   {
@@ -822,9 +822,9 @@
     "time": "22:01",
     "duration": 16,
     "avgElevation": "25.78",
-    "maxElevation": "39.21",
-    "avgDistance": "1360133.20",
-    "minDistance": "850018.00",
+    "maxElevation": "39.23",
+    "avgDistance": "1360175.10",
+    "minDistance": "849454.00",
     "recorded": false
   },
   {
@@ -834,9 +834,9 @@
     "time": "22:36",
     "duration": 15,
     "avgElevation": "22.82",
-    "maxElevation": "31.02",
-    "avgDistance": "1472597.89",
-    "minDistance": "1111381.00",
+    "maxElevation": "31.01",
+    "avgDistance": "1472650.56",
+    "minDistance": "1111490.00",
     "recorded": false
   },
   {
@@ -846,9 +846,9 @@
     "time": "23:41",
     "duration": 17,
     "avgElevation": "24.92",
-    "maxElevation": "40.85",
-    "avgDistance": "1413083.45",
-    "minDistance": "807194.00",
+    "maxElevation": "40.86",
+    "avgDistance": "1413039.36",
+    "minDistance": "807091.00",
     "recorded": false
   },
   {
@@ -857,10 +857,10 @@
     "date": "06 Jul 2024",
     "time": "08:19",
     "duration": 16,
-    "avgElevation": "26.34",
-    "maxElevation": "41.09",
-    "avgDistance": "1306946.00",
-    "minDistance": "776291.00",
+    "avgElevation": "26.35",
+    "maxElevation": "41.06",
+    "avgDistance": "1306892.00",
+    "minDistance": "776871.00",
     "recorded": false
   },
   {
@@ -871,8 +871,8 @@
     "duration": 12,
     "avgElevation": "12.14",
     "maxElevation": "13.52",
-    "avgDistance": "2045859.83",
-    "minDistance": "1947474.00",
+    "avgDistance": "2045844.50",
+    "minDistance": "1947722.00",
     "recorded": false
   },
   {
@@ -882,9 +882,9 @@
     "time": "09:59",
     "duration": 16,
     "avgElevation": "24.23",
-    "maxElevation": "37.27",
-    "avgDistance": "1386035.70",
-    "minDistance": "875390.00",
+    "maxElevation": "37.28",
+    "avgDistance": "1386126.10",
+    "minDistance": "874926.00",
     "recorded": false
   },
   {
@@ -894,9 +894,9 @@
     "time": "10:50",
     "duration": 17,
     "avgElevation": "35.62",
-    "maxElevation": "72.71",
-    "avgDistance": "1128760.82",
-    "minDistance": "234368.00",
+    "maxElevation": "72.76",
+    "avgDistance": "1128683.00",
+    "minDistance": "233659.00",
     "recorded": false
   },
   {
@@ -905,10 +905,10 @@
     "date": "06 Jul 2024",
     "time": "11:56",
     "duration": 17,
-    "avgElevation": "30.95",
-    "maxElevation": "55.52",
-    "avgDistance": "1237805.82",
-    "minDistance": "506624.00",
+    "avgElevation": "30.96",
+    "maxElevation": "55.55",
+    "avgDistance": "1237684.64",
+    "minDistance": "506068.00",
     "recorded": false
   },
   {
@@ -918,9 +918,9 @@
     "time": "12:31",
     "duration": 15,
     "avgElevation": "18.66",
-    "maxElevation": "24.87",
-    "avgDistance": "1669448.56",
-    "minDistance": "1343339.00",
+    "maxElevation": "24.88",
+    "avgDistance": "1669288.00",
+    "minDistance": "1343067.00",
     "recorded": false
   },
   {
@@ -930,9 +930,9 @@
     "time": "13:37",
     "duration": 16,
     "avgElevation": "21.26",
-    "maxElevation": "30.73",
-    "avgDistance": "1553963.40",
-    "minDistance": "1115991.00",
+    "maxElevation": "30.72",
+    "avgDistance": "1553889.20",
+    "minDistance": "1116352.00",
     "recorded": false
   },
   {
@@ -943,8 +943,8 @@
     "duration": 15,
     "avgElevation": "16.84",
     "maxElevation": "22.74",
-    "avgDistance": "1707621.22",
-    "minDistance": "1382343.00",
+    "avgDistance": "1707543.00",
+    "minDistance": "1382218.00",
     "recorded": false
   },
   {
@@ -953,10 +953,10 @@
     "date": "06 Jul 2024",
     "time": "19:06",
     "duration": 9,
-    "avgElevation": "10.86",
+    "avgElevation": "10.87",
     "maxElevation": "11.19",
-    "avgDistance": "2149311.00",
-    "minDistance": "2124953.00",
+    "avgDistance": "2149120.67",
+    "minDistance": "2124756.00",
     "recorded": false
   },
   {
@@ -966,9 +966,9 @@
     "time": "19:44",
     "duration": 17,
     "avgElevation": "34.93",
-    "maxElevation": "71.99",
-    "avgDistance": "1128615.82",
-    "minDistance": "233867.00",
+    "maxElevation": "72.14",
+    "avgDistance": "1128382.09",
+    "minDistance": "231862.00",
     "recorded": false
   },
   {
@@ -978,9 +978,9 @@
     "time": "20:42",
     "duration": 16,
     "avgElevation": "27.93",
-    "maxElevation": "43.55",
-    "avgDistance": "1302543.70",
-    "minDistance": "756753.00",
+    "maxElevation": "43.53",
+    "avgDistance": "1302423.00",
+    "minDistance": "757165.00",
     "recorded": false
   },
   {
@@ -991,8 +991,8 @@
     "duration": 12,
     "avgElevation": "12.06",
     "maxElevation": "13.76",
-    "avgDistance": "1986521.17",
-    "minDistance": "1867775.00",
+    "avgDistance": "1986746.00",
+    "minDistance": "1867747.00",
     "recorded": false
   },
   {
@@ -1003,8 +1003,8 @@
     "duration": 15,
     "avgElevation": "23.73",
     "maxElevation": "33.23",
-    "avgDistance": "1418696.78",
-    "minDistance": "1022677.00",
+    "avgDistance": "1418711.00",
+    "minDistance": "1022712.00",
     "recorded": false
   },
   {
@@ -1014,9 +1014,9 @@
     "time": "22:23",
     "duration": 16,
     "avgElevation": "25.32",
-    "maxElevation": "37.34",
-    "avgDistance": "1389333.50",
-    "minDistance": "915242.00",
+    "maxElevation": "37.36",
+    "avgDistance": "1389355.30",
+    "minDistance": "914712.00",
     "recorded": false
   },
   {
@@ -1026,9 +1026,9 @@
     "time": "23:29",
     "duration": 16,
     "avgElevation": "30.64",
-    "maxElevation": "49.18",
-    "avgDistance": "1201302.70",
-    "minDistance": "620570.00",
+    "maxElevation": "49.22",
+    "avgDistance": "1201321.20",
+    "minDistance": "619739.00",
     "recorded": false
   },
   {
@@ -1038,9 +1038,9 @@
     "time": "07:53",
     "duration": 16,
     "avgElevation": "18.75",
-    "maxElevation": "26.85",
-    "avgDistance": "1616714.90",
-    "minDistance": "1208342.00",
+    "maxElevation": "26.84",
+    "avgDistance": "1616649.30",
+    "minDistance": "1208676.00",
     "recorded": false
   },
   {
@@ -1051,8 +1051,8 @@
     "duration": 9,
     "avgElevation": "10.35",
     "maxElevation": "10.64",
-    "avgDistance": "2173969.00",
-    "minDistance": "2151480.00",
+    "avgDistance": "2173982.67",
+    "minDistance": "2151493.00",
     "recorded": false
   },
   {
@@ -1062,9 +1062,9 @@
     "time": "09:33",
     "duration": 17,
     "avgElevation": "29.99",
-    "maxElevation": "56.03",
-    "avgDistance": "1238892.36",
-    "minDistance": "475380.00",
+    "maxElevation": "55.99",
+    "avgDistance": "1239038.00",
+    "minDistance": "476044.00",
     "recorded": false
   },
   {
@@ -1074,9 +1074,9 @@
     "time": "10:38",
     "duration": 17,
     "avgElevation": "32.06",
-    "maxElevation": "59.16",
-    "avgDistance": "1208929.91",
-    "minDistance": "442800.00",
+    "maxElevation": "59.13",
+    "avgDistance": "1209050.64",
+    "minDistance": "443363.00",
     "recorded": false
   },
   {
@@ -1086,9 +1086,9 @@
     "time": "11:14",
     "duration": 12,
     "avgElevation": "11.63",
-    "maxElevation": "13.17",
-    "avgDistance": "2019793.50",
-    "minDistance": "1911685.00",
+    "maxElevation": "13.18",
+    "avgDistance": "2019814.67",
+    "minDistance": "1911399.00",
     "recorded": false
   },
   {
@@ -1098,9 +1098,9 @@
     "time": "11:44",
     "duration": 16,
     "avgElevation": "28.76",
-    "maxElevation": "44.83",
-    "avgDistance": "1267336.60",
-    "minDistance": "722604.00",
+    "maxElevation": "44.81",
+    "avgDistance": "1267265.50",
+    "minDistance": "723160.00",
     "recorded": false
   },
   {
@@ -1110,9 +1110,9 @@
     "time": "12:19",
     "duration": 15,
     "avgElevation": "21.62",
-    "maxElevation": "29.51",
-    "avgDistance": "1522842.44",
-    "minDistance": "1159993.00",
+    "maxElevation": "29.52",
+    "avgDistance": "1522781.78",
+    "minDistance": "1159876.00",
     "recorded": false
   },
   {
@@ -1122,9 +1122,9 @@
     "time": "13:25",
     "duration": 16,
     "avgElevation": "24.51",
-    "maxElevation": "36.87",
-    "avgDistance": "1420064.40",
-    "minDistance": "924611.00",
+    "maxElevation": "36.88",
+    "avgDistance": "1420214.90",
+    "minDistance": "924341.00",
     "recorded": false
   },
   {
@@ -1134,9 +1134,9 @@
     "time": "17:42",
     "duration": 13,
     "avgElevation": "13.35",
-    "maxElevation": "15.97",
-    "avgDistance": "1906162.43",
-    "minDistance": "1735251.00",
+    "maxElevation": "15.96",
+    "avgDistance": "1906295.57",
+    "minDistance": "1735423.00",
     "recorded": false
   },
   {
@@ -1146,9 +1146,9 @@
     "time": "19:19",
     "duration": 17,
     "avgElevation": "33.73",
-    "maxElevation": "68.22",
-    "avgDistance": "1153047.64",
-    "minDistance": "286836.00",
+    "maxElevation": "68.12",
+    "avgDistance": "1153234.18",
+    "minDistance": "288266.00",
     "recorded": false
   },
   {
@@ -1158,9 +1158,9 @@
     "time": "20:30",
     "duration": 16,
     "avgElevation": "24.41",
-    "maxElevation": "35.92",
-    "avgDistance": "1428155.30",
-    "minDistance": "956589.00",
+    "maxElevation": "35.94",
+    "avgDistance": "1428165.70",
+    "minDistance": "956032.00",
     "recorded": false
   },
   {
@@ -1171,8 +1171,8 @@
     "duration": 15,
     "avgElevation": "16.32",
     "maxElevation": "21.71",
-    "avgDistance": "1732348.56",
-    "minDistance": "1427429.00",
+    "avgDistance": "1732378.78",
+    "minDistance": "1427487.00",
     "recorded": false
   },
   {
@@ -1182,9 +1182,9 @@
     "time": "21:36",
     "duration": 16,
     "avgElevation": "19.37",
-    "maxElevation": "27.58",
-    "avgDistance": "1631032.50",
-    "minDistance": "1220514.00",
+    "maxElevation": "27.57",
+    "avgDistance": "1631007.40",
+    "minDistance": "1220946.00",
     "recorded": false
   },
   {
@@ -1195,8 +1195,8 @@
     "duration": 17,
     "avgElevation": "27.64",
     "maxElevation": "46.58",
-    "avgDistance": "1336376.18",
-    "minDistance": "686972.00",
+    "avgDistance": "1336358.18",
+    "minDistance": "686935.00",
     "recorded": false
   },
   {
@@ -1206,9 +1206,9 @@
     "time": "23:16",
     "duration": 17,
     "avgElevation": "32.67",
-    "maxElevation": "62.34",
-    "avgDistance": "1187695.64",
-    "minDistance": "386077.00",
+    "maxElevation": "62.32",
+    "avgDistance": "1187763.27",
+    "minDistance": "386502.00",
     "recorded": false
   },
   {
@@ -1219,8 +1219,8 @@
     "duration": 10,
     "avgElevation": "10.54",
     "maxElevation": "11.07",
-    "avgDistance": "2142609.00",
-    "minDistance": "2103886.00",
+    "avgDistance": "2142550.75",
+    "minDistance": "2104079.00",
     "recorded": false
   },
   {
@@ -1231,8 +1231,8 @@
     "duration": 14,
     "avgElevation": "14.03",
     "maxElevation": "17.35",
-    "avgDistance": "1860924.88",
-    "minDistance": "1649537.00",
+    "avgDistance": "1860890.63",
+    "minDistance": "1649824.00",
     "recorded": false
   },
   {
@@ -1241,10 +1241,10 @@
     "date": "08 Jul 2024",
     "time": "09:07",
     "duration": 17,
-    "avgElevation": "36.46",
-    "maxElevation": "86.01",
-    "avgDistance": "1099014.36",
-    "minDistance": "50378.00",
+    "avgElevation": "36.47",
+    "maxElevation": "86.08",
+    "avgDistance": "1098944.55",
+    "minDistance": "49543.00",
     "recorded": false
   },
   {
@@ -1254,9 +1254,9 @@
     "time": "10:26",
     "duration": 16,
     "avgElevation": "29.97",
-    "maxElevation": "47.57",
-    "avgDistance": "1228523.70",
-    "minDistance": "661044.00",
+    "maxElevation": "47.60",
+    "avgDistance": "1228595.40",
+    "minDistance": "660412.00",
     "recorded": false
   },
   {
@@ -1267,8 +1267,8 @@
     "duration": 13,
     "avgElevation": "15.79",
     "maxElevation": "18.98",
-    "avgDistance": "1752624.29",
-    "minDistance": "1565478.00",
+    "avgDistance": "1752564.43",
+    "minDistance": "1565396.00",
     "recorded": false
   },
   {
@@ -1279,8 +1279,8 @@
     "duration": 17,
     "avgElevation": "23.34",
     "maxElevation": "36.93",
-    "avgDistance": "1484410.18",
-    "minDistance": "922819.00",
+    "avgDistance": "1484410.55",
+    "minDistance": "922804.00",
     "recorded": false
   },
   {
@@ -1290,9 +1290,9 @@
     "time": "12:06",
     "duration": 16,
     "avgElevation": "23.47",
-    "maxElevation": "35.06",
-    "avgDistance": "1462196.80",
-    "minDistance": "976623.00",
+    "maxElevation": "35.05",
+    "avgDistance": "1461999.80",
+    "minDistance": "976744.00",
     "recorded": false
   },
   {
@@ -1302,9 +1302,9 @@
     "time": "13:12",
     "duration": 16,
     "avgElevation": "28.15",
-    "maxElevation": "44.31",
-    "avgDistance": "1291280.60",
-    "minDistance": "734748.00",
+    "maxElevation": "44.30",
+    "avgDistance": "1291141.10",
+    "minDistance": "735120.00",
     "recorded": false
   },
   {
@@ -1315,8 +1315,8 @@
     "duration": 9,
     "avgElevation": "10.92",
     "maxElevation": "11.25",
-    "avgDistance": "2135381.33",
-    "minDistance": "2110686.00",
+    "avgDistance": "2135311.33",
+    "minDistance": "2110613.00",
     "recorded": false
   },
   {
@@ -1326,9 +1326,9 @@
     "time": "17:18",
     "duration": 10,
     "avgElevation": "10.46",
-    "maxElevation": "10.99",
-    "avgDistance": "2104276.00",
-    "minDistance": "2063866.00",
+    "maxElevation": "11.00",
+    "avgDistance": "2104309.00",
+    "minDistance": "2063615.00",
     "recorded": false
   },
   {
@@ -1339,8 +1339,8 @@
     "duration": 17,
     "avgElevation": "26.40",
     "maxElevation": "46.29",
-    "avgDistance": "1340591.64",
-    "minDistance": "660355.00",
+    "avgDistance": "1340588.00",
+    "minDistance": "660359.00",
     "recorded": false
   },
   {
@@ -1348,11 +1348,11 @@
     "satellite": "NOAA 19",
     "date": "08 Jul 2024",
     "time": "20:18",
-    "duration": 16,
-    "avgElevation": "21.19",
+    "duration": 15,
+    "avgElevation": "22.41",
     "maxElevation": "30.63",
-    "avgDistance": "1564863.50",
-    "minDistance": "1126022.00",
+    "avgDistance": "1494360.56",
+    "minDistance": "1125777.00",
     "recorded": false
   },
   {
@@ -1363,8 +1363,8 @@
     "duration": 16,
     "avgElevation": "22.19",
     "maxElevation": "33.33",
-    "avgDistance": "1464850.40",
-    "minDistance": "987131.00",
+    "avgDistance": "1464629.80",
+    "minDistance": "987236.00",
     "recorded": false
   },
   {
@@ -1375,8 +1375,8 @@
     "duration": 15,
     "avgElevation": "17.63",
     "maxElevation": "23.54",
-    "avgDistance": "1708641.56",
-    "minDistance": "1387319.00",
+    "avgDistance": "1708568.00",
+    "minDistance": "1387203.00",
     "recorded": false
   },
   {
@@ -1385,10 +1385,10 @@
     "date": "08 Jul 2024",
     "time": "21:58",
     "duration": 17,
-    "avgElevation": "31.47",
-    "maxElevation": "56.10",
-    "avgDistance": "1229580.18",
-    "minDistance": "499223.00",
+    "avgElevation": "31.46",
+    "maxElevation": "56.05",
+    "avgDistance": "1229760.82",
+    "minDistance": "500055.00",
     "recorded": false
   },
   {
@@ -1398,9 +1398,9 @@
     "time": "23:03",
     "duration": 17,
     "avgElevation": "35.97",
-    "maxElevation": "74.56",
-    "avgDistance": "1119790.73",
-    "minDistance": "205957.00",
+    "maxElevation": "74.67",
+    "avgDistance": "1119613.55",
+    "minDistance": "204399.00",
     "recorded": false
   },
   {
@@ -1411,8 +1411,8 @@
     "duration": 12,
     "avgElevation": "12.58",
     "maxElevation": "14.23",
-    "avgDistance": "1998903.67",
-    "minDistance": "1885445.00",
+    "avgDistance": "1998730.50",
+    "minDistance": "1885532.00",
     "recorded": false
   },
   {
@@ -1423,8 +1423,8 @@
     "duration": 10,
     "avgElevation": "10.09",
     "maxElevation": "10.61",
-    "avgDistance": "2125001.00",
-    "minDistance": "2086511.00",
+    "avgDistance": "2125050.50",
+    "minDistance": "2086300.00",
     "recorded": false
   },
   {
@@ -1434,9 +1434,9 @@
     "time": "08:41",
     "duration": 17,
     "avgElevation": "31.67",
-    "maxElevation": "61.12",
-    "avgDistance": "1193714.09",
-    "minDistance": "391945.00",
+    "maxElevation": "61.17",
+    "avgDistance": "1193591.18",
+    "minDistance": "391211.00",
     "recorded": false
   },
   {
@@ -1447,8 +1447,8 @@
     "duration": 17,
     "avgElevation": "24.40",
     "maxElevation": "39.33",
-    "avgDistance": "1440979.82",
-    "minDistance": "854812.00",
+    "avgDistance": "1441007.27",
+    "minDistance": "854864.00",
     "recorded": false
   },
   {
@@ -1457,10 +1457,10 @@
     "date": "09 Jul 2024",
     "time": "10:22",
     "duration": 15,
-    "avgElevation": "19.61",
-    "maxElevation": "26.87",
-    "avgDistance": "1565352.22",
-    "minDistance": "1208883.00",
+    "avgElevation": "19.60",
+    "maxElevation": "26.86",
+    "avgDistance": "1565537.78",
+    "minDistance": "1209211.00",
     "recorded": false
   },
   {
@@ -1470,9 +1470,9 @@
     "time": "11:19",
     "duration": 16,
     "avgElevation": "21.03",
-    "maxElevation": "29.89",
-    "avgDistance": "1562946.30",
-    "minDistance": "1146352.00",
+    "maxElevation": "29.90",
+    "avgDistance": "1563021.50",
+    "minDistance": "1146006.00",
     "recorded": false
   },
   {
@@ -1482,9 +1482,9 @@
     "time": "11:54",
     "duration": 16,
     "avgElevation": "26.97",
-    "maxElevation": "41.51",
-    "avgDistance": "1328320.60",
-    "minDistance": "800081.00",
+    "maxElevation": "41.49",
+    "avgDistance": "1328246.90",
+    "minDistance": "800576.00",
     "recorded": false
   },
   {
@@ -1494,9 +1494,9 @@
     "time": "12:59",
     "duration": 17,
     "avgElevation": "30.13",
-    "maxElevation": "53.48",
-    "avgDistance": "1264864.45",
-    "minDistance": "545283.00",
+    "maxElevation": "53.51",
+    "avgDistance": "1264722.18",
+    "minDistance": "544682.00",
     "recorded": false
   },
   {
@@ -1507,8 +1507,8 @@
     "duration": 9,
     "avgElevation": "10.44",
     "maxElevation": "10.76",
-    "avgDistance": "2173248.67",
-    "minDistance": "2148989.00",
+    "avgDistance": "2173265.67",
+    "minDistance": "2149006.00",
     "recorded": false
   },
   {
@@ -1517,10 +1517,10 @@
     "date": "09 Jul 2024",
     "time": "14:42",
     "duration": 11,
-    "avgElevation": "12.28",
+    "avgElevation": "12.27",
     "maxElevation": "13.39",
-    "avgDistance": "2039081.60",
-    "minDistance": "1961140.00",
+    "avgDistance": "2039172.20",
+    "minDistance": "1961241.00",
     "recorded": false
   },
   {
@@ -1530,9 +1530,9 @@
     "time": "18:28",
     "duration": 16,
     "avgElevation": "20.97",
-    "maxElevation": "30.86",
-    "avgDistance": "1518655.00",
-    "minDistance": "1067184.00",
+    "maxElevation": "30.87",
+    "avgDistance": "1518687.60",
+    "minDistance": "1066703.00",
     "recorded": false
   },
   {
@@ -1543,8 +1543,8 @@
     "duration": 15,
     "avgElevation": "19.41",
     "maxElevation": "26.01",
-    "avgDistance": "1635379.56",
-    "minDistance": "1300864.00",
+    "avgDistance": "1635357.78",
+    "minDistance": "1300830.00",
     "recorded": false
   },
   {
@@ -1555,8 +1555,8 @@
     "duration": 17,
     "avgElevation": "28.62",
     "maxElevation": "51.89",
-    "avgDistance": "1270480.09",
-    "minDistance": "549249.00",
+    "avgDistance": "1270478.09",
+    "minDistance": "549272.00",
     "recorded": false
   },
   {
@@ -1565,10 +1565,10 @@
     "date": "09 Jul 2024",
     "time": "21:12",
     "duration": 14,
-    "avgElevation": "15.89",
+    "avgElevation": "15.90",
     "maxElevation": "19.92",
-    "avgDistance": "1799917.13",
-    "minDistance": "1562536.00",
+    "avgDistance": "1799782.63",
+    "minDistance": "1562716.00",
     "recorded": false
   },
   {
@@ -1578,9 +1578,9 @@
     "time": "21:45",
     "duration": 17,
     "avgElevation": "35.13",
-    "maxElevation": "69.25",
-    "avgDistance": "1142318.45",
-    "minDistance": "286411.00",
+    "maxElevation": "69.31",
+    "avgDistance": "1142182.00",
+    "minDistance": "285460.00",
     "recorded": false
   },
   {
@@ -1589,10 +1589,10 @@
     "date": "09 Jul 2024",
     "time": "22:51",
     "duration": 17,
-    "avgElevation": "37.22",
-    "maxElevation": "81.35",
-    "avgDistance": "1097627.00",
-    "minDistance": "113974.00",
+    "avgElevation": "37.21",
+    "maxElevation": "81.15",
+    "avgDistance": "1097871.55",
+    "minDistance": "116723.00",
     "recorded": false
   },
   {
@@ -1603,8 +1603,8 @@
     "duration": 11,
     "avgElevation": "12.12",
     "maxElevation": "13.13",
-    "avgDistance": "2055516.60",
-    "minDistance": "1983611.00",
+    "avgDistance": "2055565.60",
+    "minDistance": "1983667.00",
     "recorded": false
   },
   {
@@ -1615,8 +1615,8 @@
     "duration": 13,
     "avgElevation": "15.12",
     "maxElevation": "17.82",
-    "avgDistance": "1836334.57",
-    "minDistance": "1669910.00",
+    "avgDistance": "1836277.71",
+    "minDistance": "1669842.00",
     "recorded": false
   },
   {
@@ -1626,9 +1626,9 @@
     "time": "08:16",
     "duration": 16,
     "avgElevation": "25.31",
-    "maxElevation": "39.03",
-    "avgDistance": "1341774.00",
-    "minDistance": "827002.00",
+    "maxElevation": "39.05",
+    "avgDistance": "1341855.90",
+    "minDistance": "826495.00",
     "recorded": false
   },
   {
@@ -1637,10 +1637,10 @@
     "date": "10 Jul 2024",
     "time": "09:56",
     "duration": 16,
-    "avgElevation": "25.03",
-    "maxElevation": "39.40",
-    "avgDistance": "1358268.20",
-    "minDistance": "818525.00",
+    "avgElevation": "25.02",
+    "maxElevation": "39.41",
+    "avgDistance": "1358473.10",
+    "minDistance": "818331.00",
     "recorded": false
   },
   {
@@ -1650,9 +1650,9 @@
     "time": "10:01",
     "duration": 16,
     "avgElevation": "22.10",
-    "maxElevation": "31.58",
-    "avgDistance": "1510766.90",
-    "minDistance": "1083446.00",
+    "maxElevation": "31.57",
+    "avgDistance": "1510766.20",
+    "minDistance": "1083933.00",
     "recorded": false
   },
   {
@@ -1662,9 +1662,9 @@
     "time": "11:07",
     "duration": 15,
     "avgElevation": "18.61",
-    "maxElevation": "24.50",
-    "avgDistance": "1669758.56",
-    "minDistance": "1358626.00",
+    "maxElevation": "24.49",
+    "avgDistance": "1669923.00",
+    "minDistance": "1358886.00",
     "recorded": false
   },
   {
@@ -1675,8 +1675,8 @@
     "duration": 8,
     "avgElevation": "9.39",
     "maxElevation": "9.41",
-    "avgDistance": "2184454.50",
-    "minDistance": "2182107.00",
+    "avgDistance": "2184422.00",
+    "minDistance": "2182344.00",
     "recorded": false
   },
   {
@@ -1686,9 +1686,9 @@
     "time": "11:42",
     "duration": 16,
     "avgElevation": "30.74",
-    "maxElevation": "49.82",
-    "avgDistance": "1209287.30",
-    "minDistance": "615220.00",
+    "maxElevation": "49.85",
+    "avgDistance": "1209356.90",
+    "minDistance": "614523.00",
     "recorded": false
   },
   {
@@ -1698,9 +1698,9 @@
     "time": "12:47",
     "duration": 17,
     "avgElevation": "33.82",
-    "maxElevation": "65.37",
-    "avgDistance": "1171218.55",
-    "minDistance": "343777.00",
+    "maxElevation": "65.32",
+    "avgDistance": "1171335.73",
+    "minDistance": "344488.00",
     "recorded": false
   },
   {
@@ -1711,8 +1711,8 @@
     "duration": 11,
     "avgElevation": "11.68",
     "maxElevation": "12.75",
-    "avgDistance": "2080745.60",
-    "minDistance": "2004346.00",
+    "avgDistance": "2080813.60",
+    "minDistance": "2004421.00",
     "recorded": false
   },
   {
@@ -1723,8 +1723,8 @@
     "duration": 12,
     "avgElevation": "14.01",
     "maxElevation": "15.71",
-    "avgDistance": "1923829.17",
-    "minDistance": "1813557.00",
+    "avgDistance": "1923831.17",
+    "minDistance": "1813310.00",
     "recorded": false
   },
   {
@@ -1735,8 +1735,8 @@
     "duration": 15,
     "avgElevation": "16.22",
     "maxElevation": "21.83",
-    "avgDistance": "1743229.00",
-    "minDistance": "1425058.00",
+    "avgDistance": "1743251.00",
+    "minDistance": "1425097.00",
     "recorded": false
   },
   {
@@ -1745,10 +1745,10 @@
     "date": "10 Jul 2024",
     "time": "19:41",
     "duration": 17,
-    "avgElevation": "35.71",
-    "maxElevation": "79.34",
-    "avgDistance": "1111281.45",
-    "minDistance": "135994.00",
+    "avgElevation": "35.72",
+    "maxElevation": "79.45",
+    "avgDistance": "1111138.00",
+    "minDistance": "134582.00",
     "recorded": false
   },
   {
@@ -1758,9 +1758,9 @@
     "time": "19:54",
     "duration": 14,
     "avgElevation": "17.55",
-    "maxElevation": "22.07",
-    "avgDistance": "1726231.63",
-    "minDistance": "1475605.00",
+    "maxElevation": "22.06",
+    "avgDistance": "1726048.63",
+    "minDistance": "1475719.00",
     "recorded": false
   },
   {
@@ -1771,8 +1771,8 @@
     "duration": 13,
     "avgElevation": "14.17",
     "maxElevation": "16.79",
-    "avgDistance": "1902764.86",
-    "minDistance": "1734067.00",
+    "avgDistance": "1902559.43",
+    "minDistance": "1733806.00",
     "recorded": false
   },
   {
@@ -1783,8 +1783,8 @@
     "duration": 12,
     "avgElevation": "12.85",
     "maxElevation": "14.58",
-    "avgDistance": "1932483.83",
-    "minDistance": "1816579.00",
+    "avgDistance": "1932342.67",
+    "minDistance": "1816721.00",
     "recorded": false
   },
   {
@@ -1793,10 +1793,10 @@
     "date": "10 Jul 2024",
     "time": "21:33",
     "duration": 17,
-    "avgElevation": "37.81",
-    "maxElevation": "84.27",
-    "avgDistance": "1090339.00",
-    "minDistance": "76432.00",
+    "avgElevation": "37.80",
+    "maxElevation": "84.15",
+    "avgDistance": "1090482.18",
+    "minDistance": "78051.00",
     "recorded": false
   },
   {
@@ -1806,9 +1806,9 @@
     "time": "22:38",
     "duration": 17,
     "avgElevation": "35.00",
-    "maxElevation": "71.35",
-    "avgDistance": "1140187.00",
-    "minDistance": "251179.00",
+    "maxElevation": "71.41",
+    "avgDistance": "1140071.91",
+    "minDistance": "250308.00",
     "recorded": false
   },
   {
@@ -1818,9 +1818,9 @@
     "time": "23:16",
     "duration": 13,
     "avgElevation": "14.01",
-    "maxElevation": "16.39",
-    "avgDistance": "1930985.14",
-    "minDistance": "1775621.00",
+    "maxElevation": "16.40",
+    "avgDistance": "1930817.71",
+    "minDistance": "1775416.00",
     "recorded": false
   },
   {
@@ -1830,9 +1830,9 @@
     "time": "00:21",
     "duration": 14,
     "avgElevation": "17.65",
-    "maxElevation": "21.86",
-    "avgDistance": "1695146.13",
-    "minDistance": "1461658.00",
+    "maxElevation": "21.87",
+    "avgDistance": "1695200.25",
+    "minDistance": "1461368.00",
     "recorded": false
   },
   {
@@ -1841,10 +1841,10 @@
     "date": "11 Jul 2024",
     "time": "07:50",
     "duration": 15,
-    "avgElevation": "18.89",
+    "avgElevation": "18.90",
     "maxElevation": "25.45",
-    "avgDistance": "1596142.33",
-    "minDistance": "1263064.00",
+    "avgDistance": "1595948.56",
+    "minDistance": "1262720.00",
     "recorded": false
   },
   {
@@ -1854,9 +1854,9 @@
     "time": "09:30",
     "duration": 16,
     "avgElevation": "33.03",
-    "maxElevation": "57.06",
-    "avgDistance": "1119733.80",
-    "minDistance": "457344.00",
+    "maxElevation": "56.99",
+    "avgDistance": "1119732.40",
+    "minDistance": "458610.00",
     "recorded": false
   },
   {
@@ -1867,8 +1867,8 @@
     "duration": 15,
     "avgElevation": "19.69",
     "maxElevation": "26.24",
-    "avgDistance": "1607628.00",
-    "minDistance": "1280136.00",
+    "avgDistance": "1607609.89",
+    "minDistance": "1280095.00",
     "recorded": false
   },
   {
@@ -1877,10 +1877,10 @@
     "date": "11 Jul 2024",
     "time": "10:54",
     "duration": 14,
-    "avgElevation": "16.13",
+    "avgElevation": "16.14",
     "maxElevation": "20.05",
-    "avgDistance": "1800446.75",
-    "minDistance": "1568639.00",
+    "avgDistance": "1800216.88",
+    "minDistance": "1568656.00",
     "recorded": false
   },
   {
@@ -1890,9 +1890,9 @@
     "time": "11:11",
     "duration": 12,
     "avgElevation": "12.12",
-    "maxElevation": "13.83",
-    "avgDistance": "1984319.00",
-    "minDistance": "1866597.00",
+    "maxElevation": "13.84",
+    "avgDistance": "1984436.83",
+    "minDistance": "1866419.00",
     "recorded": false
   },
   {
@@ -1902,9 +1902,9 @@
     "time": "11:29",
     "duration": 17,
     "avgElevation": "32.52",
-    "maxElevation": "61.63",
-    "avgDistance": "1199144.91",
-    "minDistance": "401643.00",
+    "maxElevation": "61.64",
+    "avgDistance": "1199104.36",
+    "minDistance": "401390.00",
     "recorded": false
   },
   {
@@ -1913,10 +1913,10 @@
     "date": "11 Jul 2024",
     "time": "12:34",
     "duration": 17,
-    "avgElevation": "36.86",
-    "maxElevation": "77.46",
-    "avgDistance": "1108040.73",
-    "minDistance": "168633.00",
+    "avgElevation": "36.87",
+    "maxElevation": "77.59",
+    "avgDistance": "1107864.00",
+    "minDistance": "166829.00",
     "recorded": false
   },
   {
@@ -1927,8 +1927,8 @@
     "duration": 12,
     "avgElevation": "13.27",
     "maxElevation": "15.01",
-    "avgDistance": "1971560.00",
-    "minDistance": "1853743.00",
+    "avgDistance": "1971436.83",
+    "minDistance": "1853899.00",
     "recorded": false
   },
   {
@@ -1938,9 +1938,9 @@
     "time": "14:16",
     "duration": 13,
     "avgElevation": "15.78",
-    "maxElevation": "18.73",
-    "avgDistance": "1816506.57",
-    "minDistance": "1639536.00",
+    "maxElevation": "18.74",
+    "avgDistance": "1816429.00",
+    "minDistance": "1639434.00",
     "recorded": false
   },
   {
@@ -1951,8 +1951,8 @@
     "duration": 12,
     "avgElevation": "13.42",
     "maxElevation": "15.21",
-    "avgDistance": "1898383.17",
-    "minDistance": "1781699.00",
+    "avgDistance": "1898347.17",
+    "minDistance": "1781989.00",
     "recorded": false
   },
   {
@@ -1962,9 +1962,9 @@
     "time": "19:16",
     "duration": 16,
     "avgElevation": "35.25",
-    "maxElevation": "64.04",
-    "avgDistance": "1070591.20",
-    "minDistance": "347674.00",
+    "maxElevation": "64.14",
+    "avgDistance": "1070627.10",
+    "minDistance": "346219.00",
     "recorded": false
   },
   {
@@ -1975,8 +1975,8 @@
     "duration": 13,
     "avgElevation": "15.79",
     "maxElevation": "18.70",
-    "avgDistance": "1822486.14",
-    "minDistance": "1647037.00",
+    "avgDistance": "1822650.29",
+    "minDistance": "1647252.00",
     "recorded": false
   },
   {
@@ -1987,8 +1987,8 @@
     "duration": 11,
     "avgElevation": "13.11",
     "maxElevation": "14.32",
-    "avgDistance": "1968876.00",
-    "minDistance": "1887601.00",
+    "avgDistance": "1968848.20",
+    "minDistance": "1887570.00",
     "recorded": false
   },
   {
@@ -1997,10 +1997,10 @@
     "date": "11 Jul 2024",
     "time": "20:57",
     "duration": 15,
-    "avgElevation": "17.10",
-    "maxElevation": "22.76",
-    "avgDistance": "1691668.78",
-    "minDistance": "1380142.00",
+    "avgElevation": "17.09",
+    "maxElevation": "22.75",
+    "avgDistance": "1691837.22",
+    "minDistance": "1380425.00",
     "recorded": false
   },
   {
@@ -2009,10 +2009,10 @@
     "date": "11 Jul 2024",
     "time": "21:21",
     "duration": 17,
-    "avgElevation": "36.75",
-    "maxElevation": "73.44",
-    "avgDistance": "1114491.18",
-    "minDistance": "225743.00",
+    "avgElevation": "36.74",
+    "maxElevation": "73.29",
+    "avgDistance": "1114726.09",
+    "minDistance": "227954.00",
     "recorded": false
   },
   {
@@ -2022,9 +2022,9 @@
     "time": "22:26",
     "duration": 17,
     "avgElevation": "31.50",
-    "maxElevation": "58.03",
-    "avgDistance": "1222561.27",
-    "minDistance": "458454.00",
+    "maxElevation": "57.99",
+    "avgDistance": "1222722.55",
+    "minDistance": "459267.00",
     "recorded": false
   },
   {
@@ -2035,8 +2035,20 @@
     "duration": 14,
     "avgElevation": "16.43",
     "maxElevation": "20.33",
-    "avgDistance": "1786602.63",
-    "minDistance": "1558652.00",
+    "avgDistance": "1786440.88",
+    "minDistance": "1558772.00",
+    "recorded": false
+  },
+  {
+    "frequency": "137.9125M",
+    "satellite": "NOAA 18",
+    "date": "12 Jul 2024",
+    "time": "00:08",
+    "duration": 12,
+    "avgElevation": "22.25",
+    "maxElevation": "26.93",
+    "avgDistance": "N/A",
+    "minDistance": "N/A",
     "recorded": false
   }
 ]
