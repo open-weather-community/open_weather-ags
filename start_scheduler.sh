@@ -21,6 +21,9 @@ cd /home/openweather/open_weather-ags 2>> /home/openweather/cronlog.txt
 # Log the current working directory for debugging
 #echo "Current working directory after cd: $(pwd)" >> /home/openweather/cronlog.txt
 
+# Pull latest changes from Git repository (assuming origin/main is the branch)
+git pull origin main >> /home/openweather/cronlog.txt 2>&1
+
 # Launch the Node.js process using the node executable in the current working directory
 /home/openweather/.nvm/versions/node/v16.13.2/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
 

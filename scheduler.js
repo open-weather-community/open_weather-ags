@@ -139,13 +139,28 @@ function checkDisk() {
 
 }
 
+// cron job to check disk space every 6 hours
+cron.schedule('0 */6 * * *', () => {
+    checkDisk();
+});
+
+// cron job to check satellite passes every 3 days (delete old, get new)
+cron.schedule('0 0 */3 * *', () => {
+
+    // totally clear passes.json
+    const passesFilePath = path.resolve(__dirname, config.passesFile);
+    fs.writeFileSync(passesFilePath, '[]');
+    logger.info(`Blank passes file created at ${passesFilePath}`);
+
+    // get TLE data
+    processPasses(config, logger);
+
+});
 
 // Schedule a cron job to run every minute
 cron.schedule('* * * * *', () => {
 
     printLCD('waiting for', `satellites...`);
-
-    checkDisk();
 
     // Define an asynchronous function to process data
     async function processData() {

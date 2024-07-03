@@ -40,6 +40,14 @@ sudo i2cdetect -y 1
 ```
 This will give you the address (likely 0x27) which should be used when initializing the device in the node project.
 
+### crontab rebooting
+
+Using sudo, schedule a reboot every morning for 3am
+```bash
+sudo crontab -e
+0 3 * * * /sbin/shutdown -r now
+```
+
 ### USB Drive
 
 Format to Fat32 (not sure about these instructions)
