@@ -5,11 +5,13 @@ const path = require('path');
 const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle');
+const checkDiskSpace = require('check-disk-space').default;
 
 const mediaPath = '/mnt/o-w/';
 let config = null;
 
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
+printLCD('booting up', 'groundstation');
 
 // Function to recursively find the config file in a directory and its subdirectories
 function findConfigFile(dir) {
@@ -49,6 +51,7 @@ function loadConfig() {
         // Search for 'config.json' in the media path
         const configPath = findConfigFile(mediaPath);
         console.log(`found configFile on external media, setting configPath to ${configPath}`);
+        // printLCD('Config found @', `${configPath}`);
 
         if (!configPath) {
             // If no config file is found, copy the default configuration to the media path
@@ -81,6 +84,8 @@ function loadConfig() {
 config = loadConfig();
 if (!config) {
     throw new Error("Config could not be loaded. Exiting...");
+} else {
+    printLCD('ground station', 'ready!');
 }
 
 // Initialize the logger with the configuration
@@ -96,8 +101,52 @@ cron.schedule('0 4 * * *', () => {
     // fetchApiData();
 });
 
+// check disk space of mediaPath
+function checkDisk() {
+
+    // logger.info(`Checking disk space on ${mediaPath}...`);
+
+    checkDiskSpace(mediaPath).then((diskSpace) => {
+        let percentFree = (diskSpace.free / diskSpace.size) * 100;
+        // logger.info(`Disk space on ${mediaPath}: ${diskSpace.free} bytes free, or ${percentFree.toFixed(2)}%`);
+
+        // if less than 10% free space, delete oldest 2 recordings
+        if (percentFree < 10) {
+            logger.info(`Less than 10% free space on ${mediaPath}. Deleting oldest 2 recordings...`);
+
+            // Get the list of files in the media path
+            const files = fs.readdirSync(mediaPath);
+
+            // Filter the files to only include .wav files
+            const wavFiles = files.filter(file => file.endsWith('.wav'));
+
+            // Sort the .wav files by creation time in ascending order
+            wavFiles.sort((a, b) => {
+                return fs.statSync(path.join(mediaPath, a)).birthtime - fs.statSync(path.join(mediaPath, b)).birthtime;
+            });
+
+            // Delete the oldest 2 .wav files
+            for (let i = 0; i < 2 && i < wavFiles.length; i++) {
+                const fileToDelete = path.join(mediaPath, wavFiles[i]);
+                fs.unlinkSync(fileToDelete);
+                logger.info(`Deleted file: ${fileToDelete}`);
+            }
+        }
+
+    }).catch((error) => {
+        logger.error(`Error checking disk space: ${error.message}`);
+    });
+
+}
+
+
 // Schedule a cron job to run every minute
 cron.schedule('* * * * *', () => {
+
+    printLCD('waiting for', `satellites...`);
+
+    checkDisk();
+
     // Define an asynchronous function to process data
     async function processData() {
         // Check if recording is already in progress
@@ -186,7 +235,7 @@ cron.schedule('* * * * *', () => {
                     setTimeout(() => {
                         clearInterval(marqueeInterval);
                         clearLCD();
-                        printLCD('Done recording');
+                        printLCD('done recording');
                     }, newDuration * 60000);
 
                     item.recorded = true;  // Mark the item as recorded
@@ -208,4 +257,3 @@ cron.schedule('* * * * *', () => {
     processData();
 });
 
-printLCD('Booting up', 'groundstation');

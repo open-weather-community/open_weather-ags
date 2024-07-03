@@ -39,13 +39,13 @@
     "frequency": "137.62M",
     "satellite": "NOAA 15",
     "date": "02 Jul 2024",
-    "time": "10:02",
-    "duration": 16,
+    "time": "20:22",
+    "duration": 3,
     "avgElevation": "23.42",
     "maxElevation": "35.26",
     "avgDistance": "1417430.50",
     "minDistance": "930943.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -63,13 +63,13 @@
     "frequency": "137.1M",
     "satellite": "NOAA 19",
     "date": "02 Jul 2024",
-    "time": "11:40",
-    "duration": 16,
+    "time": "16:11",
+    "duration": 4,
     "avgElevation": "31.23",
     "maxElevation": "50.62",
     "avgDistance": "1197636.10",
     "minDistance": "601141.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -129,7 +129,7 @@
     "maxElevation": "69.36",
     "avgDistance": "1141195.09",
     "minDistance": "270055.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -141,7 +141,7 @@
     "maxElevation": "21.74",
     "avgDistance": "1741338.63",
     "minDistance": "1491382.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",

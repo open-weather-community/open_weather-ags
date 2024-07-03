@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "check-disk-space": "^3.4.0",
     "child_process": "^1.0.2",
     "cron": "^1.8.2",
     "dotenv": "^16.4.5",
