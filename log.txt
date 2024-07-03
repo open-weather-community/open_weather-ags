@@ -1,1 +1,1 @@
-/media/openweather/log.txt
+/mnt/o-w/log.txt

@@ -14,12 +14,16 @@ sudo rm -rvf /usr/lib/librtlsdr* /usr/include/rtl-sdr* /usr/local/lib/librtlsdr*
 
 # Step 2: Install dependencies
 sudo apt-get update
-sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev
+sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev sox
+# I2C for LCD
+sudo apt-get install -y python3-smbus
+sudo apt-get install -y i2c-tools
 
 # Step 3: Clone and build rtl-sdr-blog
 if [ -d "rtl-sdr-blog" ]; then
     rm -rf rtl-sdr-blog
 fi
+cd ~
 git clone https://github.com/rtlsdrblog/rtl-sdr-blog
 cd rtl-sdr-blog
 mkdir build
@@ -44,6 +48,7 @@ sudo apt-get install -y libsoapysdr-dev soapysdr-tools
 if [ -d "SoapyRTLSDR" ]; then
     rm -rf SoapyRTLSDR
 fi
+cd ~
 git clone https://github.com/pothosware/SoapyRTLSDR.git
 cd SoapyRTLSDR
 mkdir build
@@ -60,6 +65,8 @@ sudo apt install -y build-essential libssl-dev
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 source $NVM_DIR/nvm.sh
+
+cd ~/open_weather-ags
 
 # Ensure NVM and Node.js are available in non-interactive shells
 echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc

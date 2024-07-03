@@ -1,3 +1,4 @@
+// tle.js
 const axios = require('axios');
 const satellite = require('satellite.js');
 const geolib = require('geolib');
@@ -7,7 +8,7 @@ const fs = require('fs');
 let config = null;
 let logger = null;
 
-// Fetch TLE data from Celestrak
+// Fetch TLE (Two-Line Element) data from Celestrak
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
     try {
@@ -19,7 +20,7 @@ async function fetchTLEData() {
     }
 }
 
-// Read existing passes from the file
+// Read existing passes from the specified file
 function readExistingPasses() {
     if (fs.existsSync(config.passesFile)) {
         const data = fs.readFileSync(config.passesFile, 'utf8');
@@ -36,9 +37,8 @@ function readExistingPasses() {
     return [];
 }
 
-// Save passes to the file
+// Save passes to the specified file, sorted by date and time
 function savePasses(passes) {
-    // Sort passes by date and time
     passes.sort((a, b) => {
         const dateTimeA = DateTime.fromFormat(`${a.date} ${a.time}`, 'dd LLL yyyy HH:mm');
         const dateTimeB = DateTime.fromFormat(`${b.date} ${b.time}`, 'dd LLL yyyy HH:mm');
@@ -49,16 +49,17 @@ function savePasses(passes) {
 
 // Find satellite passes over a specific location
 async function findSatellitePasses(satName, tleLine1, tleLine2) {
-    const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
+    const satrec = satellite.twoline2satrec(tleLine1, tleLine2); // Convert TLE lines to satellite record
     const startTime = DateTime.utc();
     const endTime = startTime.plus({ days: config.daysToPropagate });
-    const timeStep = { minutes: 1 };
+    const timeStep = { minutes: 1 }; // Propagate in 1-minute steps
     let currentTime = startTime;
     let passStart = null;
     const passes = [];
     let elevations = [];
     let distances = [];
 
+    // Loop through each minute in the propagation period
     while (currentTime < endTime) {
         const positionAndVelocity = satellite.propagate(satrec, currentTime.toJSDate());
         const positionEci = positionAndVelocity.position;
@@ -73,6 +74,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                 { latitude: config.locLat, longitude: config.locLon }
             );
 
+            // Check if the satellite is within the maximum distance
             if (distance <= config.maxDistance) {
                 const observerGd = {
                     longitude: satellite.degreesToRadians(config.locLon),
@@ -84,7 +86,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                 const elevation = satellite.radiansToDegrees(lookAngles.elevation);
 
                 if (!passStart) {
-                    passStart = currentTime;
+                    passStart = currentTime; // Mark the start of the pass
                     elevations = [];
                     distances = [];
                 }
@@ -92,6 +94,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                 elevations.push(elevation);
                 distances.push(distance);
             } else if (passStart) {
+                // Calculate average and maximum elevations and distances when the pass ends
                 const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
                 const maxElevation = Math.max(...elevations);
                 const avgDistance = distances.reduce((sum, el) => sum + el, 0) / distances.length;
@@ -105,13 +108,14 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
                     avgDistance: avgDistance.toFixed(2),
                     minDistance: minDistance.toFixed(2)
                 });
-                passStart = null;
+                passStart = null; // Reset pass start
             }
         }
 
-        currentTime = currentTime.plus(timeStep);
+        currentTime = currentTime.plus(timeStep); // Move to the next minute
     }
 
+    // Handle case where the pass doesn't end before endTime
     if (passStart) {
         const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
         const maxElevation = Math.max(...elevations);
@@ -126,7 +130,7 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
     return passes;
 }
 
-// Process passes and save to file
+// Process passes and save them to a file
 async function processPasses(configParam, loggerParam) {
     config = configParam;
     logger = loggerParam;
@@ -141,6 +145,7 @@ async function processPasses(configParam, loggerParam) {
 
         const existingPasses = readExistingPasses();
 
+        // Process each satellite specified in the config
         for (const satName in config.noaaFrequencies) {
             let tleLine1, tleLine2;
             for (let i = 0; i < tleLines.length; i++) {
@@ -159,6 +164,7 @@ async function processPasses(configParam, loggerParam) {
             logger.info(`Processing satellite: ${satName}`);
             const passes = await findSatellitePasses(satName, tleLine1, tleLine2);
 
+            // Format and add new passes
             passes.forEach(pass => {
                 const formattedStart = DateTime.fromISO(pass.start.toISO());
                 const formattedEnd = DateTime.fromISO(pass.end.toISO());
@@ -184,6 +190,7 @@ async function processPasses(configParam, loggerParam) {
                     recorded: false
                 };
 
+                // Avoid adding duplicate passes
                 const duplicate = existingPasses.some(
                     existingPass =>
                         existingPass.satellite === newPass.satellite &&
@@ -206,12 +213,14 @@ async function processPasses(configParam, loggerParam) {
     }
 }
 
+// Entry point for running the script directly
 if (require.main === module) {
     config = JSON.parse(fs.readFileSync('default.config.json', 'utf8'));
     const Logger = require('./logger');
     const logger = new Logger(config);
     processPasses(config, logger).catch(console.error);
 } else {
+    // Export processPasses function for external use
     module.exports = {
         processPasses
     };
