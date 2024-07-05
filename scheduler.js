@@ -144,7 +144,7 @@ cron.schedule('0 */6 * * *', () => {
     checkDisk();
 });
 
-// cron job to check satellite passes every 3 days (delete old, get new)
+// every 3 days... maintenance on log and passes files
 cron.schedule('0 0 */3 * *', () => {
 
     // totally clear passes.json
@@ -154,6 +154,14 @@ cron.schedule('0 0 */3 * *', () => {
 
     // get TLE data
     processPasses(config, logger);
+
+    // clear all but the most recent 100 lines of log.txt
+    const logFilePath = path.resolve(__dirname, config.logFile);
+    const logFile = fs.readFileSync(logFilePath, 'utf8').split('\n');
+    const logFileLength = logFile.length;
+    if (logFileLength > 100) {
+        fs.writeFileSync(logFilePath, logFile.slice(logFileLength - 100).join('\n'));
+    }
 
 });
 
@@ -233,6 +241,17 @@ cron.schedule('* * * * *', () => {
                 if (now >= recordTime && now <= endRecordTime && !item.recorded) {
                     if (isRecording()) {
                         logger.info('Already recording from within the forEach, returning...');
+                        return;
+                    }
+
+                    // if the elevation is lower than minElevation, skip recording
+                    if (item.avgElevation < config.minElevation) {
+                        logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.avgElevation}°)`);
+
+                        // delete entry
+                        jsonData = jsonData.filter(pass => pass !== item);
+                        fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
+
                         return;
                     }
 

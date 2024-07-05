@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { printLCD, clearLCD } = require('./lcd'); // Import LCD module
+const { uploadFile } = require('./upload');
 
 let recording = false;
 

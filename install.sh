@@ -137,6 +137,6 @@ nvim +PlugInstall +qall
 # Step 13: Set up cron job to start scheduler on reboot
 (crontab -l 2>/dev/null || true; echo "@reboot /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
 
-nvm install 16.13.2
+nvm install 22.3.0
 
 echo "Installation completed successfully."

@@ -315,13 +315,13 @@
     "frequency": "137.9125M",
     "satellite": "NOAA 18",
     "date": "03 Jul 2024",
-    "time": "14:16",
+    "time": "16:16",
     "duration": 13,
     "avgElevation": "15.71",
     "maxElevation": "18.66",
     "avgDistance": "1815549.00",
     "minDistance": "1638168.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -333,7 +333,7 @@
     "maxElevation": "16.69",
     "avgDistance": "1866825.29",
     "minDistance": "1691648.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -345,7 +345,7 @@
     "maxElevation": "73.85",
     "avgDistance": "1133794.45",
     "minDistance": "208445.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -357,7 +357,7 @@
     "maxElevation": "18.45",
     "avgDistance": "1835653.86",
     "minDistance": "1661382.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -369,7 +369,7 @@
     "maxElevation": "14.19",
     "avgDistance": "2007890.67",
     "minDistance": "1891991.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -381,7 +381,7 @@
     "maxElevation": "20.54",
     "avgDistance": "1723693.38",
     "minDistance": "1482228.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -393,7 +393,7 @@
     "maxElevation": "73.16",
     "avgDistance": "1117913.27",
     "minDistance": "229727.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -405,7 +405,7 @@
     "maxElevation": "57.50",
     "avgDistance": "1225908.73",
     "minDistance": "465586.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -417,7 +417,7 @@
     "maxElevation": "20.74",
     "avgDistance": "1769236.38",
     "minDistance": "1538204.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -429,7 +429,7 @@
     "maxElevation": "26.82",
     "avgDistance": "1640226.20",
     "minDistance": "1244871.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -441,7 +441,7 @@
     "maxElevation": "18.48",
     "avgDistance": "1817615.13",
     "minDistance": "1589386.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -453,7 +453,7 @@
     "maxElevation": "78.94",
     "avgDistance": "1111275.27",
     "minDistance": "141382.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -465,7 +465,7 @@
     "maxElevation": "20.91",
     "avgDistance": "1745384.38",
     "minDistance": "1521815.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -477,7 +477,7 @@
     "maxElevation": "16.06",
     "avgDistance": "1942117.43",
     "minDistance": "1786833.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -489,7 +489,7 @@
     "maxElevation": "18.15",
     "avgDistance": "1843316.25",
     "minDistance": "1611120.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -501,7 +501,7 @@
     "maxElevation": "75.56",
     "avgDistance": "1119703.27",
     "minDistance": "194278.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -513,7 +513,7 @@
     "maxElevation": "77.06",
     "avgDistance": "1101851.82",
     "minDistance": "173420.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -525,7 +525,7 @@
     "maxElevation": "17.97",
     "avgDistance": "1854122.86",
     "minDistance": "1681471.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -537,7 +537,7 @@
     "maxElevation": "21.85",
     "avgDistance": "1715057.75",
     "minDistance": "1476738.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -549,7 +549,7 @@
     "maxElevation": "11.53",
     "avgDistance": "2067845.25",
     "minDistance": "2025096.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -561,7 +561,7 @@
     "maxElevation": "48.36",
     "avgDistance": "1314778.64",
     "minDistance": "617029.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -573,7 +573,7 @@
     "maxElevation": "15.63",
     "avgDistance": "1939051.83",
     "minDistance": "1826027.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -585,7 +585,7 @@
     "maxElevation": "11.87",
     "avgDistance": "2090413.75",
     "minDistance": "2049298.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -597,7 +597,7 @@
     "maxElevation": "31.57",
     "avgDistance": "1500459.70",
     "minDistance": "1041567.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -609,7 +609,7 @@
     "maxElevation": "63.43",
     "avgDistance": "1182100.00",
     "minDistance": "375570.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -621,7 +621,7 @@
     "maxElevation": "48.18",
     "avgDistance": "1324352.82",
     "minDistance": "641710.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -633,7 +633,7 @@
     "maxElevation": "25.24",
     "avgDistance": "1646194.67",
     "minDistance": "1330620.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -645,7 +645,7 @@
     "maxElevation": "33.02",
     "avgDistance": "1481013.00",
     "minDistance": "1027169.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -657,7 +657,7 @@
     "maxElevation": "11.37",
     "avgDistance": "2074105.50",
     "minDistance": "2031394.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -669,7 +669,7 @@
     "maxElevation": "62.02",
     "avgDistance": "1075854.40",
     "minDistance": "378391.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -681,7 +681,7 @@
     "maxElevation": "17.09",
     "avgDistance": "1887322.86",
     "minDistance": "1726952.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -693,7 +693,7 @@
     "maxElevation": "25.90",
     "avgDistance": "1598010.44",
     "minDistance": "1248114.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -705,7 +705,7 @@
     "maxElevation": "12.73",
     "avgDistance": "2073435.00",
     "minDistance": "2002076.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -717,7 +717,7 @@
     "maxElevation": "75.29",
     "avgDistance": "1192116.75",
     "minDistance": "198517.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -729,7 +729,7 @@
     "maxElevation": "68.61",
     "avgDistance": "1148311.73",
     "minDistance": "293960.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -741,7 +741,7 @@
     "maxElevation": "21.00",
     "avgDistance": "1752532.25",
     "minDistance": "1522527.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -765,7 +765,7 @@
     "maxElevation": "32.41",
     "avgDistance": "1485415.00",
     "minDistance": "1017326.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",
@@ -777,7 +777,7 @@
     "maxElevation": "13.21",
     "avgDistance": "2021854.25",
     "minDistance": "1981741.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.62M",
@@ -789,7 +789,7 @@
     "maxElevation": "48.76",
     "avgDistance": "1300409.09",
     "minDistance": "608708.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.9125M",
@@ -801,7 +801,7 @@
     "maxElevation": "10.01",
     "avgDistance": "2188823.00",
     "minDistance": "2188823.00",
-    "recorded": false
+    "recorded": true
   },
   {
     "frequency": "137.1M",

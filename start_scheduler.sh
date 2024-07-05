@@ -25,7 +25,7 @@ cd /home/openweather/open_weather-ags 2>> /home/openweather/cronlog.txt
 git pull origin main >> /home/openweather/cronlog.txt 2>&1
 
 # Launch the Node.js process using the node executable in the current working directory
-/home/openweather/.nvm/versions/node/v16.13.2/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
+/home/openweather/.nvm/versions/node/v22.3.0/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
 
 # Log the completion of the script
 echo "Script completed at $(date)" >> /home/openweather/cronlog.txt
