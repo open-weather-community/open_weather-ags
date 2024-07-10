@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { printLCD, clearLCD } = require('./lcd'); // Import LCD module
+require('dotenv').config(); // Load environment variables from .env file
 const { uploadFile } = require('./upload');
 
 let recording = false;
@@ -115,7 +116,24 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
             if (code === 0) {
                 logger.info(`Successfully downsampled to ${downsampledFile}`);
                 // Optionally, remove the raw file after downsampling
-                // fs.unlinkSync(rawFile);
+                fs.unlinkSync(rawFile);
+
+                // upload the downsampled file
+                const jsonData = {
+                    ID: '9999'
+                    // Add other data fields as needed
+                };
+
+                uploadFile(downsampledFile, jsonData)
+                    .then(response => {
+                        // Handle success if needed
+                        console.log('Response:', response);
+                    })
+                    .catch(error => {
+                        // Handle error if needed
+                        console.error('Error:', error);
+                    });
+
             } else {
                 logger.error(`Downsampling failed with code ${code}`);
             }
