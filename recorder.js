@@ -124,10 +124,14 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                     // Add other data fields as needed
                 };
 
+                printLCD('uploading...');
+
                 uploadFile(downsampledFile, jsonData)
                     .then(response => {
                         // Handle success if needed
                         console.log('Response:', response);
+
+                        printLCD('upload completed!');
                     })
                     .catch(error => {
                         // Handle error if needed

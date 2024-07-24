@@ -97,8 +97,31 @@ logger.info(`current working directory: ${process.cwd()}`);  // Log the current 
 
 // Schedule a cron job to run every day at 4 AM
 cron.schedule('0 4 * * *', () => {
-    // Placeholder for future functionality to fetch API data
-    // fetchApiData();
+    // request update from server, get json file back'
+    if (false) {    // don't do this for now
+        fetch('https://example.com/data')
+            .then(response => {
+                // Check if the response is ok (status in the range 200-299)
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse JSON from the response body
+            })
+            .then(data => {
+                console.log(data); // Handle the data from the response
+                // if we receive any of the keys from config.json, update the config.json file
+                for (const key in data) {
+                    if (data.hasOwnProperty(key) && config.hasOwnProperty(key)) {
+                        config[key] = data[key];
+                    }
+                }
+                // save the updated config.json file
+                fs.writeFileSync('config.json', JSON.stringify(config, null, 2));
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    }
 });
 
 // check disk space of mediaPath
