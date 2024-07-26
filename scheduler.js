@@ -1,3 +1,10 @@
+/*
+
+to do:
++ add wifi connection info to USB config
+
+*/
+
 // scheduler.js
 const cron = require('node-cron');
 const fs = require('fs');
@@ -6,77 +13,85 @@ const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle');
 const checkDiskSpace = require('check-disk-space').default;
+const { exec } = require('child_process');  // for wifi-checking
+const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
 
-const mediaPath = '/mnt/o-w/';
+printLCD('booting up', 'groundstation');
+
+const configName = 'ow-config.json';
+const configPathFile = 'configPath.json';
 let config = null;
 
-const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
-printLCD('booting up', 'groundstation');
 
 // Function to recursively find the config file in a directory and its subdirectories
 function findConfigFile(dir) {
-    // Check if the directory exists
     if (!fs.existsSync(dir)) {
-        logger.error(`Directory not found while finding config: ${dir}`);
+        console.log(`Directory not found while finding config: ${dir}`);
         return null;
     }
 
-    // Read all files and directories in the current directory
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-        // Construct the full path for each file
-        const filePath = path.join(dir, file);
-        // Get the file or directory stats
-        const stat = fs.statSync(filePath);
+    let files;
+    try {
+        files = fs.readdirSync(dir);
+    } catch (err) {
+        console.log(`Permission denied accessing directory: ${dir}`);
+        return null;
+    }
 
-        // If it is a directory, recursively search within this directory
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        let stat;
+        try {
+            stat = fs.statSync(filePath);
+        } catch (err) {
+            console.log(`Permission denied accessing: ${filePath}`);
+            continue; // Skip this file or directory
+        }
+
         if (stat.isDirectory()) {
             const result = findConfigFile(filePath);
-            if (result) {
-                return result;  // Return the path of the found config file
-            }
-        } else if (file === 'config.json') {
-            return filePath;  // Return the path if the config.json file is found
+            if (result) return result;
+        } else if (file === configName) {
+            console.log(`Config file found at: ${filePath}`);
+            return filePath;
         }
     }
-    return null;  // Return null if no config file is found in this directory and its subdirectories
+    return null;
 }
 
 // Function to load the configuration from the config file
 function loadConfig() {
-    // Check if the 'configPath.json' file exists to store the path of the found config file
-    if (!fs.existsSync('configPath.json')) {
-        console.log(`No configPath.json found, searching for config file in ${mediaPath}...`);
+    let configPath = null;
 
-        // Search for 'config.json' in the media path
-        const configPath = findConfigFile(mediaPath);
-        console.log(`found configFile on external media, setting configPath to ${configPath}`);
-        // printLCD('Config found @', `${configPath}`);
+    // Check if the configPath.json file exists
+    if (fs.existsSync(configPathFile)) {
 
-        if (!configPath) {
-            // If no config file is found, copy the default configuration to the media path
-            console.log('No config file found in /mnt/... duplicating default config.json to /mnt/');
-            fs.copyFileSync('default.config.json', `${mediaPath}config.json`);
-            // Read and return the newly copied config file
-            return JSON.parse(fs.readFileSync(`${mediaPath}config.json`, 'utf8'));
+        const { configPath: savedConfigPath } = JSON.parse(fs.readFileSync(configPathFile, 'utf8'));
+
+        console.log(`Config file path found in ${configPathFile}: ${savedConfigPath}`);
+
+        if (fs.existsSync(savedConfigPath)) {
+            return JSON.parse(fs.readFileSync(savedConfigPath, 'utf8'));
         } else {
-            // Save the path of the found config file in 'configPath.json'
-            fs.writeFileSync('configPath.json', JSON.stringify({ configPath }));
-            // Read and return the config file
-            return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            console.log(`Config file at path ${savedConfigPath} not found!`);
         }
+    }
+
+    // Search for the config file in /mnt/ and /media/openweather/
+    const searchPaths = ['/mnt', '/media/openweather'];
+    for (const basePath of searchPaths) {
+        console.log(`Searching for config file in ${basePath}...`);
+        configPath = findConfigFile(basePath);
+        if (configPath) break;
+    }
+
+    if (configPath) {
+        fs.writeFileSync(configPathFile, JSON.stringify({ configPath }));
+        return JSON.parse(fs.readFileSync(configPath, 'utf8'));
     } else {
-        // If 'configPath.json' exists, read the path of the config file from it
-        const { configPath } = JSON.parse(fs.readFileSync('configPath.json', 'utf8'));
-        // Check if the config file exists at the specified path
-        if (fs.existsSync(configPath)) {
-            // Read and return the config file
-            return JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        } else {
-            // Log an error if the config file path is invalid
-            console.log(`Config file at path ${configPath} not found!`);
-            return null;
-        }
+        console.log('Config file not found in any search paths.');
+        printLCD('no config on', 'usb drive');
+        return null;
     }
 }
 
@@ -86,7 +101,52 @@ if (!config) {
     throw new Error("Config could not be loaded. Exiting...");
 } else {
     printLCD('ground station', 'ready!');
+
+    // set config.saveDir to the configPath in configPath.json without the config file name
+    const saveDir = path.dirname(JSON.parse(fs.readFileSync(configPathFile, 'utf8')).configPath);
+    console.log(`setting saveDir: ${saveDir}`);
+    // save saveDir to the config
+    config.saveDir = saveDir;
+    // save the updated config.json file
+    fs.writeFileSync(configName, JSON.stringify(config, null, 2));
+
+
 }
+// check if Pi is connected to wifi
+function checkWifiConnection() {
+    exec('iwgetid', (error, stdout, stderr) => {
+
+        if (stdout) {
+            console.log(`Connected to wifi: ${stdout}`);
+        } else {
+            // Not connected to wifi, connect to the wifi in the config file
+            const wifiName = config.wifiName;
+            const wifiPassword = config.wifiPassword;
+            if (wifiName && wifiPassword) {
+                console.log(`Connecting to wifi: ${wifiName} with password: ${wifiPassword}`);
+                const command = `nmcli device wifi connect "${wifiName}" password "${wifiPassword}"`;
+                exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error connecting to wifi: ${error.message}`);
+                    } else {
+                        console.log(`Connected to wifi: ${wifiName}`);
+                    }
+                });
+            } else {
+                console.error('Wifi name or password not found in the config file');
+            }
+        }
+        if (stderr) {
+            console.error(`stderr: ${stderr}`);
+        }
+        // if (error) {
+        //     console.error(`Error checking wifi connection: ${error.message}`);
+        //     return;
+        // }
+    });
+}
+
+checkWifiConnection();
 
 // Initialize the logger with the configuration
 const logger = new Logger(config);
