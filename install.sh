@@ -18,6 +18,8 @@ sudo apt-get install -y libusb-1.0-0-dev git cmake pkg-config libudev-dev sox
 # I2C for LCD
 sudo apt-get install -y python3-smbus
 sudo apt-get install -y i2c-tools
+# for wifi detection
+sudo apt-get install -y wireless-tools
 
 # Step 3: Clone and build rtl-sdr-blog
 if [ -d "rtl-sdr-blog" ]; then

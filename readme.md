@@ -48,6 +48,44 @@ sudo crontab -e
 0 3 * * * /sbin/shutdown -r now
 ```
 
+### Policy for user to do networking
+
+Since the app needs to connect to wifi networks based on the config file, we need to give the user the necessary permissions to do so.
+
+```sh
+sudo nano /etc/polkit-1/localauthority/50-local.d/x.pkla
+```
+
+```
+/etc/polkit-1/localauthority/50-local.d/x.pkla               
+[Allow specific user to modify network settings]
+Identity=unix-user:openweather
+Action=org.freedesktop.NetworkManager.settings.modify.system
+ResultAny=yes
+```
+
+```sh
+sudo systemctl restart polkit
+```
+
+NOTE: I'm not sure if this one is important...
+```sh
+sudo nano /etc/polkit-1/rules.d/80-network-manager.rules
+```
+
+```
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0 &&
+        subject.user == "openweather") {
+        return polkit.Result.YES;
+    }
+});
+```
+
+```sh
+sudo systemctl restart NetworkManager
+```
+
 ### USB Drive
 
 Format to Fat32 (not sure about these instructions)
