@@ -1,8 +1,47 @@
 # open-weather automated ground station
 
-## usage
+## Usage
 
+If you have a fully assembled AGS, just plug it in after editing the ow-config.json file on the USB using a laptop or desktop you have handy.
+
+Assuming you have installed the project, the start_scheduler.sh script will be added as a cron job, which will automatically launch the app at startup.
+
+To start the node project manually:
+```sh
 npm start
+```
+
+## Adjusting the config
+
+Create a file (or edit an existing one) named ow-config.json. Here is a template:
+
+```json
+{
+	"wifiName": "your wifi network name",
+	"wifiPassword": "password",
+    "myID": 1,
+    "locLat": 52.495480,
+    "locLon": 13.468430,
+    "gain": 38.0,
+    "maxDistance": 2200000,
+    "daysToPropagate": 7,
+    "minElevation": 30,
+    "bufferMinutes": 3,
+    "noaaFrequencies": {
+        "NOAA 19": "137.1M",
+        "NOAA 18": "137.9125M",
+        "NOAA 15": "137.62M"
+    },
+    "passesFile": "passes.json",
+    "saveDir": "/mnt/o-w",
+    "logFile": "log.txt",
+    "rtl_fm_path": "/usr/local/bin/rtl_fm",
+    "sox_path": "/usr/bin/sox"
+}
+
+```
+
+The only settings you should really need to adjust are above noaaFrequencies in the config file. The rest is for advanced use. You should change the ID based on what open-weather provides you, and find your lat/long and enter those as well. The gain can be adjusted depending on the quality of the recordings. maxDistance is the maximum distance in meters (to the satelite from your location) to be considered a viable pass. daysToPropagate is how many dates in advance your device should predict NOAA passes. bufferMinutes gives a little buffer before and after the pass of X minutes.
 
 ## Explanation
 
@@ -12,21 +51,23 @@ npm start
 
 Hidden file with AUTH_TOKEN property which is assigned to each device by open-weather.
 
-#### config.json
+#### ow-config.json
 
 This holds the basic configuration for each ground station. Properties include latitude and longitude, maximum distance from satellite to consider a "good pass", etc.
+
+#### recordings
+
+WAV files are stored to the recordings/ directory wherever the ow-config.json file is found.
 
 #### passes.json
 
 This file contains information for upcoming and past NOAA satellite passes. It is updated using tle.js, and a cron job checks every minute in app.js to see if it should be recording based on this info. When it finishes, the recorded flag should be set to true.
 
-#### recordings
+## Setup
 
-WAV files are saved to this directory...
+Regardless of whether or not you use the automatic install vs. a manual install, some things must be prepped on the Raspberry Pi first.
 
-## setup
-
-### raspberry pi
+### Raspberry Pi interfaces
 + Install latest [Raspberry Pi OS](https://www.raspberrypi.com/software/). At the time of writing this I am using v12 (Bookworm). It's probably best to stick to this version.
 + Use ```openweather``` for the username.
 + Enable SSH and I2C
@@ -67,7 +108,7 @@ ResultAny=yes
 sudo systemctl restart polkit
 ```
 
-NOTE: I'm not sure if this one is important...
+NOTE: I don't think this one is actually important, try to skip it
 ```sh
 sudo nano /etc/polkit-1/rules.d/80-network-manager.rules
 ```
@@ -86,6 +127,8 @@ sudo systemctl restart NetworkManager
 ```
 
 ### USB Drive
+
+Make sure to format whatever USB drive you use as a FAT (or FAT32) drive. The application should automatically detect whatever drive you plug in, so adjusting the mount point, etc. below is optional. These instructions may also be out of date, and I have bricked my install by running fstab improperly before, so be careful.
 
 Format to Fat32 (not sure about these instructions)
 ```bash
@@ -110,9 +153,13 @@ systemctl daemon-reload
 sudo mount -a
 ```
 
-### create an ssh key for the raspberry pi and add it to github
+### Create an ssh key for the raspberry pi and add it to github as a deploy key
 
-### software (quick way -- manual instructions below)
+```sh
+ssh-keygen
+```
+
+### Software (quick way -- manual instructions below)
 
 ```bash
 git clone https://github.com/prismspecs/open_weather-ags.git
@@ -121,10 +168,10 @@ chmod +x install.sh
 ./install.sh
 ```
 
-Sometimes the installer hangs so I run it twice.
+Sometimes the installer hangs after NVM instructions so I run it twice.
 
 
-### check that it is working
+### Check that it is working
 ```bash
 nvim /home/openweather/cronlog.txt
 ```
