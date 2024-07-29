@@ -17,8 +17,8 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
 
 ```json
 {
-	"wifiName": "your wifi network name",
-	"wifiPassword": "password",
+    "wifiName": "your wifi network name",
+    "wifiPassword": "password",
     "myID": 1,
     "locLat": 52.495480,
     "locLon": 13.468430,
