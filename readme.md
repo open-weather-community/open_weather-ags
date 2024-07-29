@@ -57,7 +57,6 @@ sudo nano /etc/polkit-1/localauthority/50-local.d/x.pkla
 ```
 
 ```
-/etc/polkit-1/localauthority/50-local.d/x.pkla               
 [Allow specific user to modify network settings]
 Identity=unix-user:openweather
 Action=org.freedesktop.NetworkManager.settings.modify.system
