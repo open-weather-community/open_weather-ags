@@ -21,11 +21,13 @@ sudo apt-get install -y i2c-tools
 # for wifi detection
 sudo apt-get install -y wireless-tools
 
+cd ~
+
 # Step 3: Clone and build rtl-sdr-blog
 if [ -d "rtl-sdr-blog" ]; then
     rm -rf rtl-sdr-blog
 fi
-cd ~
+
 git clone https://github.com/rtlsdrblog/rtl-sdr-blog
 cd rtl-sdr-blog
 mkdir build
@@ -74,6 +76,8 @@ cd ~/open_weather-ags
 echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
 echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
+
+nvm install 22.3.0
 
 # clear the pacage cache
 npm cache clean --force

@@ -122,6 +122,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
+Sometimes the installer hangs so I run it twice.
+
+
 ### check that it is working
 ```bash
 nvim /home/openweather/cronlog.txt
