@@ -1,7 +1,7 @@
 /*
 
 to do:
-+ add wifi connection info to USB config
++ add passes.json to usb
 
 */
 
@@ -107,8 +107,8 @@ if (!config) {
     console.log(`setting saveDir: ${saveDir}`);
     // save saveDir to the config
     config.saveDir = saveDir;
-    // save the updated config.json file
-    fs.writeFileSync(configName, JSON.stringify(config, null, 2));
+    // save the updated config.json file to the configPath
+    fs.writeFileSync(JSON.parse(fs.readFileSync(configPathFile, 'utf8')).configPath, JSON.stringify(config, null, 2));
 
 
 }
