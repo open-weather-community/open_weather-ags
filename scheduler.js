@@ -342,8 +342,8 @@ cron.schedule('* * * * *', () => {
                     }
 
                     // if the elevation is lower than minElevation, skip recording
-                    if (item.avgElevation < config.minElevation) {
-                        logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.avgElevation}°)`);
+                    if (item.maxElevation < config.minElevation) {
+                        logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.maxElevation}°)`);
 
                         // delete entry
                         jsonData = jsonData.filter(pass => pass !== item);
