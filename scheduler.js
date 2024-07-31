@@ -1,7 +1,12 @@
 /*
 
+The scheduler is the main app for the project. It is responsible for scheduling the recording of satellite passes based on the TLE data and configuration settings. It also handles other tasks such as checking disk space, updating the configuration, and connecting to Wi-Fi.
+
 to do:
 + add passes.json to usb
++ separate finding config file stuff into a separate module
++ separate wifi checking and connecting into a separate module
++ add more LCD feedback
 
 */
 
@@ -260,7 +265,7 @@ cron.schedule('0 0 */3 * *', () => {
 // Schedule a cron job to run every minute
 cron.schedule('* * * * *', () => {
 
-    printLCD('waiting for', `satellites...`);
+    printLCD('chillin 4', `satellites...`);
 
     // Define an asynchronous function to process data
     async function processData() {
