@@ -1,4 +1,8 @@
 // tle.js
+// This module processes TLE data to find satellite passes over a specific location
+// It uses the satellite.js library to propagate satellite orbits and calculate passes
+// The passes are saved to a JSON file for use by the scheduler
+
 const axios = require('axios');
 const satellite = require('satellite.js');
 const geolib = require('geolib');

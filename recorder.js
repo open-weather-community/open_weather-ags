@@ -1,3 +1,8 @@
+// recorder.js
+// This script contains the logic to start and stop recording audio from the RTL-SDR dongle
+// It uses the rtl_fm and SoX command-line tools to capture and process the radio signal
+// The recorded audio is saved to a file, downsampled, and uploaded to the server using the upload.js module
+
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -119,9 +124,13 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                 fs.unlinkSync(rawFile);
 
                 // upload the downsampled file
+                // get json data from the config
                 const jsonData = {
-                    ID: '9999'
-                    // Add other data fields as needed
+                    myID: config.myID,
+                    locLat: config.locLat,
+                    locLon: config.locLon,
+                    gain: config.gain,
+                    timestamp: formattedTimestamp,
                 };
 
                 printLCD('uploading...');

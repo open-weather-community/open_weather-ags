@@ -4,8 +4,10 @@ const { uploadFile } = require('./upload');
 
 const filePath = './recordings/test.wav';
 const jsonData = {
-    ID: '3159'
-    // Add other data fields as needed
+    "ID": '3159',
+    "locLat": 52.495480,
+    "locLon": 13.468430,
+    "gain": 38.0
 };
 
 uploadFile(filePath, jsonData)

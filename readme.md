@@ -43,7 +43,7 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
 
 The only settings you should really need to adjust are above noaaFrequencies in the config file. The rest is for advanced use. You should change the ID based on what open-weather provides you, and find your lat/long and enter those as well. The gain can be adjusted depending on the quality of the recordings. maxDistance is the maximum distance in meters (to the satelite from your location) to be considered a viable pass. daysToPropagate is how many dates in advance your device should predict NOAA passes. bufferMinutes gives a little buffer before and after the pass of X minutes.
 
-## Explanation
+## Explanation of files involved
 
 ### Files
 

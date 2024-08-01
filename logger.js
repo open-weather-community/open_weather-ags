@@ -1,4 +1,6 @@
 // logger.js
+// This module logs messages to a file and the console
+
 const fs = require("fs");
 const path = require("path");
 
