@@ -1,4 +1,8 @@
 // upload.js
+// This script uploads the recorded audio file to the server using the Axios library
+// It reads the recorded audio file, appends additional JSON data, and uploads it to the server
+// The server URL and authorization token are stored in the .env file
+
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
