@@ -39,7 +39,7 @@ function loadConfig() {
         const configPath = findConfigFile(dir);
         if (configPath) {
             try {
-                const configData = fs.readFileSync(configPath, 'utf8');
+                const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 // save configPath to configPathFile
                 fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
 
