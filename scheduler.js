@@ -87,7 +87,7 @@ function checkDisk() {
 
     checkDiskSpace(mediaPath).then((diskSpace) => {
         let percentFree = (diskSpace.free / diskSpace.size) * 100;
-        // logger.info(`Disk space on ${mediaPath}: ${diskSpace.free} bytes free, or ${percentFree.toFixed(2)}%`);
+        logger.info(`Disk space on ${mediaPath}: ${diskSpace.free} bytes free, or ${percentFree.toFixed(2)}%`);
 
         // if less than 10% free space, delete oldest 2 recordings
         if (percentFree < 10) {
@@ -160,6 +160,11 @@ if (highestMaxElevationPass) {
     const now = new Date();
     const recordTime = new Date(highestMaxElevationPass.time);
     const delay = recordTime - now;
+
+    // print now and recordTime
+    console.log(`Now: ${now}`);
+    console.log(`Record Time: ${recordTime}`);
+    console.log(`Delay: ${delay}`);
 
     if (delay > 0) {
         setTimeout(() => {
