@@ -148,6 +148,9 @@ async function processPasses(configParam, loggerParam) {
     config = configParam;
     logger = loggerParam;
 
+    // print config
+    console.log(config);
+
     try {
         logger.info('Starting TLE data processing...');
 
@@ -235,6 +238,7 @@ if (require.main === module) {
 
     const Logger = require('./logger');
     const logger = new Logger(config);
+
     processPasses(config, logger).catch(console.error);
 } else {
     // Export processPasses function for external use
