@@ -158,129 +158,95 @@ const passes = JSON.parse(fs.readFileSync(passesFilePath, 'utf8'));
 const highestMaxElevationPass = findHighestMaxElevationPass(passes);
 console.log(highestMaxElevationPass);
 
-// Schedule a cron job to run every minute
-cron.schedule('* * * * *', () => {
+// Function to create an empty passes file if it doesn't exist
+function ensurePassesFileExists(passesFilePath) {
+    if (!fs.existsSync(passesFilePath)) {
+        fs.writeFileSync(passesFilePath, '[]');
+        logger.info(`Blank passes file created at ${passesFilePath}`);
+    }
+}
 
-    printLCD('chillin 4', `satellites...`);
+// Function to read and parse the passes file
+function readPassesFile(passesFilePath) {
+    try {
+        const data = fs.readFileSync(passesFilePath, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        logger.error(`Error reading or parsing file at ${passesFilePath}: ${error.message}`);
+        return null;
+    }
+}
 
-    // Define an asynchronous function to process data
-    async function processData() {
-        // Check if recording is already in progress
+// Function to handle the recording of passes
+async function handleRecording(item, now, passesFilePath, jsonData) {
+    const recordTime = new Date(`${item.date} ${item.time}`);
+    const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+
+    if (now >= recordTime && now <= endRecordTime && !item.recorded) {
         if (isRecording()) {
-            logger.info('Already recording, skipping this cron cycle...');
-            return;  // Skip the cron job if recording is in progress
+            logger.info('Already recording from within the forEach, returning...');
+            return;
         }
 
-        try {
-            // Resolve the full path to the passes file based on the config
-            const passesFilePath = path.resolve(config.saveDir, config.passesFile);
-
-            // If the passes file does not exist, create it with an empty array
-            if (!fs.existsSync(passesFilePath)) {
-                fs.writeFileSync(passesFilePath, '[]');
-                logger.info(`Blank passes file created at ${passesFilePath}`);
-                return;
-            }
-
-            // Define paths for the backup and temporary files
-            const backupFilePath = `${passesFilePath}.bak`;
-            const tempFilePath = `${passesFilePath}.tmp`;
-
-            let data;
-            try {
-                // Read the data from the passes file
-                data = fs.readFileSync(passesFilePath, 'utf8');
-            } catch (error) {
-                // Log an error if reading the file fails
-                logger.error(`Error reading file at ${passesFilePath}: ${error}`);
-                return;
-            }
-
-            // If the file is empty, process passes data
-            if (!data || data.trim() === '') {
-                logger.error('No passes found. Retrieving TLE data...');
-                await processPasses(config, logger);
-                return;
-            }
-
-            let jsonData;
-            try {
-                // Parse the data from the passes file as JSON
-                jsonData = JSON.parse(data);
-            } catch (parseError) {
-                // Log an error if parsing the JSON data fails
-                logger.error(`Error parsing JSON data: ${parseError.message}`);
-                return;
-            }
-
-            // Check if there are any entries in the JSON data
-            const hasEntries = Array.isArray(jsonData) ? jsonData.length > 0 : Object.keys(jsonData).length > 0;
-
-            if (!hasEntries) {
-                // If no entries, retrieve TLE data
-                logger.info('No passes found. Running TLE data...');
-                await processPasses(config, logger);
-                return;
-            }
-
-            const now = new Date();
-
-            jsonData.forEach(item => {
-                // Parse the record time and calculate the end time
-                const recordTime = new Date(`${item.date} ${item.time}`);
-                const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
-
-                // Check if the current time is within the recording time range and it has not been recorded yet
-                if (now >= recordTime && now <= endRecordTime && !item.recorded) {
-                    if (isRecording()) {
-                        logger.info('Already recording from within the forEach, returning...');
-                        return;
-                    }
-
-                    // if the elevation is lower than minElevation, skip recording
-                    if (item.maxElevation < config.minElevation) {
-                        logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.maxElevation}°)`);
-
-                        // delete entry
-                        jsonData = jsonData.filter(pass => pass !== item);
-                        fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
-
-                        return;
-                    }
-
-                    let newDuration = Math.floor((endRecordTime - now) / 60000);
-
-                    // Start recording
-                    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
-                    startRecording(item.frequency, recordTime, item.satellite, newDuration, config, logger);
-
-                    // printLCD(`Recording`, `${item.satellite}`);
-
-                    const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`, 500);
-
-                    // Stop the marquee after 10 seconds for demonstration purposes
-                    setTimeout(() => {
-                        clearInterval(marqueeInterval);
-                        clearLCD();
-                        printLCD('done recording');
-                    }, newDuration * 60000);
-
-                    item.recorded = true;  // Mark the item as recorded
-                }
-            });
-
-            // Backup the current passes file and update it with the new data
-            fs.copyFileSync(passesFilePath, backupFilePath);
-            fs.writeFileSync(tempFilePath, JSON.stringify(jsonData, null, 2));
-            fs.renameSync(tempFilePath, passesFilePath);
-
-        } catch (err) {
-            // Log any errors that occur during the data processing
-            logger.error(`Error processing data: ${err.message}`);
+        if (item.maxElevation < config.minElevation) {
+            logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.maxElevation}°)`);
+            jsonData = jsonData.filter(pass => pass !== item);
+            fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
+            return;
         }
+
+        const newDuration = Math.floor((endRecordTime - now) / 60000);
+        logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
+        startRecording(item.frequency, recordTime, item.satellite, newDuration, config, logger);
+
+        const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`, 500);
+        setTimeout(() => {
+            clearInterval(marqueeInterval);
+            clearLCD();
+            printLCD('done recording');
+        }, newDuration * 60000);
+
+        item.recorded = true;  // Mark the item as recorded
+    }
+}
+
+// Function to process passes and manage file backups
+async function processData() {
+    if (isRecording()) {
+        logger.info('Already recording, skipping this cron cycle...');
+        return;
     }
 
-    // Execute the data processing function
-    processData();
-});
+    const passesFilePath = path.resolve(config.saveDir, config.passesFile);
+    ensurePassesFileExists(passesFilePath);
 
+    let jsonData = readPassesFile(passesFilePath);
+    if (jsonData === null) {
+        logger.error('Failed to read passes file. Retrieving TLE data...');
+        await processPasses(config, logger);
+        return;
+    }
+
+    if (jsonData.length === 0) {
+        logger.info('No passes found. Retrieving TLE data...');
+        await processPasses(config, logger);
+        return;
+    }
+
+    const now = new Date();
+    for (const item of jsonData) {
+        await handleRecording(item, now, passesFilePath, jsonData);
+    }
+
+    const backupFilePath = `${passesFilePath}.bak`;
+    const tempFilePath = `${passesFilePath}.tmp`;
+    fs.copyFileSync(passesFilePath, backupFilePath);
+    fs.writeFileSync(tempFilePath, JSON.stringify(jsonData, null, 2));
+    fs.renameSync(tempFilePath, passesFilePath);
+}
+
+// Schedule the cron job to run every minute
+cron.schedule('* * * * *', () => {
+    printLCD('chillin 4', 'satellites...');
+    processData().catch(err => logger.error(`Error processing data: ${err.message}`));
+});
