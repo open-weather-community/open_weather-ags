@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Beginning installer"
+
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
