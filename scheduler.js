@@ -81,7 +81,9 @@ cron.schedule('0 4 * * *', () => {
 // check disk space of mediaPath
 function checkDisk() {
 
-    // logger.info(`Checking disk space on ${mediaPath}...`);
+    const mediaPath = config.saveDir;
+
+    logger.info(`Checking disk space on ${mediaPath}...`);
 
     checkDiskSpace(mediaPath).then((diskSpace) => {
         let percentFree = (diskSpace.free / diskSpace.size) * 100;
