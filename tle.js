@@ -155,7 +155,7 @@ async function processPasses(configParam, loggerParam) {
         const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
         logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
 
-        const existingPasses = readExistingPasses();
+        const existingPasses = readExistingPasses(config);
 
         // Process each satellite specified in the config
         for (const satName in config.noaaFrequencies) {
