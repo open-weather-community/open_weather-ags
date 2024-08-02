@@ -145,6 +145,16 @@ cron.schedule('0 0 */3 * *', () => {
 
 });
 
+function findHighestMaxElevationPass(passes) {
+    return passes.reduce((maxPass, currentPass) => {
+        return currentPass.maxelevation > (maxPass.maxelevation || 0) ? currentPass : maxPass;
+    }, {});
+}
+
+// find the highest max elevation pass
+const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+console.log(highestMaxElevationPass);
+
 // Schedule a cron job to run every minute
 cron.schedule('* * * * *', () => {
 
