@@ -142,15 +142,30 @@ cron.schedule('0 0 */3 * *', () => {
 });
 
 function findHighestMaxElevationPass(passes) {
-    return passes.reduce((maxPass, currentPass) => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+
+    const validPasses = passes.filter(pass => {
+        const passDate = new Date(pass.time);
+        const passDay = passDate.toISOString().split('T')[0];
+        return passDay === today && passDate > now;
+    });
+
+    return validPasses.reduce((maxPass, currentPass) => {
         return currentPass.maxElevation > (maxPass.maxElevation || 0) ? currentPass : maxPass;
     }, {});
 }
 
 // find the highest max elevation pass
 const passesFilePath = path.resolve(config.saveDir, config.passesFile);
-// convert to json
-const passes = JSON.parse(fs.readFileSync(passesFilePath, 'utf8'));
+
+// ensure the passes file exists
+ensurePassesFileExists(passesFilePath);
+
+// read it and parse it
+const passes = readPassesFile(passesFilePath);
+
+// find the highest max elevation pass
 const highestMaxElevationPass = findHighestMaxElevationPass(passes);
 console.log("Highest max elevation pass of the day:");
 console.log(highestMaxElevationPass);
@@ -158,14 +173,10 @@ console.log(highestMaxElevationPass);
 // record the highest max elevation pass at the correct time
 if (highestMaxElevationPass) {
     const now = new Date();
+
     // combine highestMaxElevationPass.date and highestMaxElevationPass.time to get the recordTime
     const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
     const delay = recordTime - now;
-
-    // print now and recordTime
-    console.log(`Now: ${now}`);
-    console.log(`Record Time: ${recordTime}`);
-    console.log(`Delay: ${delay}`);
 
     if (delay > 0) {
         setTimeout(() => {
@@ -195,6 +206,9 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
     }, newDuration * 60000);
 
     item.recorded = true;  // Mark the item as recorded
+
+    // write the updated jsonData to the passes file
+    fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
 
@@ -217,6 +231,7 @@ function readPassesFile(passesFilePath) {
     }
 }
 
+/*
 // Function to handle the recording of passes
 async function handleRecordingOld(item, now, passesFilePath, jsonData) {
     const recordTime = new Date(`${item.date} ${item.time}`);
@@ -284,6 +299,7 @@ async function processData() {
     fs.writeFileSync(tempFilePath, JSON.stringify(jsonData, null, 2));
     fs.renameSync(tempFilePath, passesFilePath);
 }
+    */
 
 // Schedule the cron job to run every minute
 // cron.schedule('* * * * *', () => {
