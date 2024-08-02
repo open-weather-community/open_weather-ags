@@ -152,7 +152,8 @@ function findHighestMaxElevationPass(passes) {
 }
 
 // find the highest max elevation pass
-const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+const passesFilePath = path.resolve(config.saveDir, config.passesFile);
+const highestMaxElevationPass = findHighestMaxElevationPass(passesFilePath);
 console.log(highestMaxElevationPass);
 
 // Schedule a cron job to run every minute
