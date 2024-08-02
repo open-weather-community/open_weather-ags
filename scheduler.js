@@ -147,7 +147,7 @@ cron.schedule('0 0 */3 * *', () => {
 
 function findHighestMaxElevationPass(passes) {
     return passes.reduce((maxPass, currentPass) => {
-        return currentPass.maxelevation > (maxPass.maxelevation || 0) ? currentPass : maxPass;
+        return currentPass.maxElevation > (maxPass.maxElevation || 0) ? currentPass : maxPass;
     }, {});
 }
 
