@@ -158,7 +158,8 @@ console.log(highestMaxElevationPass);
 // record the highest max elevation pass at the correct time
 if (highestMaxElevationPass) {
     const now = new Date();
-    const recordTime = new Date(highestMaxElevationPass.time);
+    // combine highestMaxElevationPass.date and highestMaxElevationPass.time to get the recordTime
+    const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
     const delay = recordTime - now;
 
     // print now and recordTime
