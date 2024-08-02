@@ -79,10 +79,13 @@ blacklist_old_drivers() {
     echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-dvb_usb_rtl28xxu.conf
 }
 
-# Add cron job for daily restart at 3 AM
-add_cron_job() {
+add_cron_jobs() {
+    # Add cron job for daily restart at 3 AM
     echo "Adding cron job for daily restart at 3 AM..."
     (sudo crontab -l 2>/dev/null; echo "0 3 * * * /sbin/shutdown -r now") | sudo crontab -
+    # Add cron job to run start_scheduler.sh on boot
+    echo "Adding cron job to run start_scheduler.sh on boot..."
+    (sudo crontab -l 2>/dev/null; echo "@reboot /bin/bash /home/openweather/start_scheduler.sh") | sudo crontab -
 }
 
 # Allow specific user to modify network settings
@@ -105,7 +108,7 @@ main() {
     install_dependencies
     build_rtl_sdr_blog
     blacklist_old_drivers
-    add_cron_job
+    add_cron_jobs
     configure_polkit
 }
 
