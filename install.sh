@@ -11,7 +11,7 @@ install_nvm() {
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 }
 
-# Load NVM (Node Version Manager)
+# Load NVM (Node Version Manager) and install Node.js v22.3.0
 load_nvm() {
     echo "Loading NVM..."
     export NVM_DIR="$HOME/.nvm"
@@ -27,6 +27,12 @@ load_nvm() {
         echo "NVM bash_completion not found!"
         exit 1
     fi
+
+    # Install and use Node.js v22.3.0
+    echo "Installing Node.js v22.3.0..."
+    nvm install 22.3.0
+    nvm use 22.3.0
+    nvm alias default 22.3.0
 }
 
 # Purge existing librtlsdr
