@@ -1,25 +1,13 @@
-/*
-
-The scheduler is the main app for the project. It is responsible for scheduling the recording of satellite passes based on the TLE data and configuration settings. It also handles other tasks such as checking disk space, updating the configuration, and connecting to Wi-Fi.
-
-to do:
-
-
-*/
-
 // scheduler.js
-const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { processPasses } = require('./tle');
 const checkDiskSpace = require('check-disk-space').default;
-const { exec } = require('child_process');  // for wifi-checking
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
 const { checkWifiConnection } = require('./wifi');
-
 
 printLCD('booting up', 'groundstation');
 
@@ -49,7 +37,6 @@ logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
 logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
 logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
 
-
 // request update from server, get json file back'
 // add this later if necessary
 if (false) {    // don't do this for now
@@ -77,10 +64,8 @@ if (false) {    // don't do this for now
         });
 }
 
-
 // check disk space of mediaPath
 function checkDisk() {
-
     const mediaPath = config.saveDir;
 
     logger.info(`Checking disk space on ${mediaPath}...`);
@@ -115,20 +100,18 @@ function checkDisk() {
     }).catch((error) => {
         logger.error(`Error checking disk space: ${error.message}`);
     });
-
 }
 
 checkDisk();
 
 async function updatePasses() {
-
     // totally clear passes.json
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
     fs.writeFileSync(passesFilePath, '[]');
     logger.info(`Blank passes file created at ${passesFilePath}`);
 
     // get TLE data
-    processPasses(config, logger);
+    await processPasses(config, logger);
 
     // clear all but the most recent 100 lines of log.txt
     const logFilePath = path.resolve(config.saveDir, config.logFile);
@@ -139,64 +122,58 @@ async function updatePasses() {
     }
 }
 
-printLCD('updating', 'passes...');
+async function main() {
+    printLCD('updating', 'passes...');
+    await updatePasses();
 
-(async () => {
-    try {
-        await updatePasses();
-        console.log('updatePasses completed successfully');
-    } catch (error) {
-        console.error('Error in updatePasses:', error);
+    function findHighestMaxElevationPass(passes) {
+        const now = new Date();
+        const today = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+
+        const validPasses = passes.filter(pass => {
+            const passDate = new Date(`${pass.date} ${pass.time}`);
+            const passDay = passDate.toISOString().split('T')[0];
+            return passDay === today && passDate > now;
+        });
+
+        return validPasses.reduce((maxPass, currentPass) => {
+            return currentPass.maxElevation > (maxPass.maxElevation || 0) ? currentPass : maxPass;
+        }, {});
     }
-})();
 
-function findHighestMaxElevationPass(passes) {
-    const now = new Date();
-    const today = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+    // find the highest max elevation pass
+    const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
-    const validPasses = passes.filter(pass => {
-        const passDate = new Date(`${pass.date} ${pass.time}`);
-        const passDay = passDate.toISOString().split('T')[0];
-        return passDay === today && passDate > now;
-    });
+    // ensure the passes file exists
+    ensurePassesFileExists(passesFilePath);
 
-    return validPasses.reduce((maxPass, currentPass) => {
-        return currentPass.maxElevation > (maxPass.maxElevation || 0) ? currentPass : maxPass;
-    }, {});
-}
+    // read it and parse it
+    const passes = readPassesFile(passesFilePath);
 
-// find the highest max elevation pass
-const passesFilePath = path.resolve(config.saveDir, config.passesFile);
+    // find the highest max elevation pass
+    const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+    console.log("Highest max elevation pass of the day:");
+    console.log(highestMaxElevationPass);
 
-// ensure the passes file exists
-ensurePassesFileExists(passesFilePath);
+    // record the highest max elevation pass at the correct time
+    if (highestMaxElevationPass) {
+        const now = new Date();
 
-// read it and parse it
-const passes = readPassesFile(passesFilePath);
+        // combine highestMaxElevationPass.date and highestMaxElevationPass.time to get the recordTime
+        const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
+        const delay = recordTime - now;
 
-// find the highest max elevation pass
-const highestMaxElevationPass = findHighestMaxElevationPass(passes);
-console.log("Highest max elevation pass of the day:");
-console.log(highestMaxElevationPass);
-
-// record the highest max elevation pass at the correct time
-if (highestMaxElevationPass) {
-    const now = new Date();
-
-    // combine highestMaxElevationPass.date and highestMaxElevationPass.time to get the recordTime
-    const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
-    const delay = recordTime - now;
-
-    if (delay > 0) {
-        setTimeout(() => {
-            handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
-        }, delay);
-        console.log(`Scheduled recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.time}`);
+        if (delay > 0) {
+            setTimeout(() => {
+                handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
+            }, delay);
+            console.log(`Scheduled recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.time}`);
+        } else {
+            console.log('The highest max elevation pass time is in the past, skipping recording.');
+        }
     } else {
-        console.log('The highest max elevation pass time is in the past, skipping recording.');
+        console.log('No valid passes found to record.');
     }
-} else {
-    console.log('No valid passes found to record.');
 }
 
 async function handleRecording(item, now, passesFilePath, jsonData) {
@@ -220,7 +197,6 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
     fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
-
 // Function to create an empty passes file if it doesn't exist
 function ensurePassesFileExists(passesFilePath) {
     if (!fs.existsSync(passesFilePath)) {
@@ -236,82 +212,9 @@ function readPassesFile(passesFilePath) {
         return JSON.parse(data);
     } catch (error) {
         logger.error(`Error reading or parsing file at ${passesFilePath}: ${error.message}`);
-        return null;
+        return [];
     }
 }
 
-/*
-// Function to handle the recording of passes
-async function handleRecordingOld(item, now, passesFilePath, jsonData) {
-    const recordTime = new Date(`${item.date} ${item.time}`);
-    const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
-
-    if (now >= recordTime && now <= endRecordTime && !item.recorded) {
-        if (isRecording()) {
-            logger.info('Already recording from within the forEach, returning...');
-            return;
-        }
-
-        if (item.maxElevation < config.minElevation) {
-            logger.info(`Skipping recording of ${item.satellite} due to low elevation (${item.maxElevation}°)`);
-            jsonData = jsonData.filter(pass => pass !== item);
-            fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
-            return;
-        }
-
-        const newDuration = Math.floor((endRecordTime - now) / 60000);
-        logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
-        startRecording(item.frequency, recordTime, item.satellite, newDuration, config, logger);
-
-        const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`, 500);
-        setTimeout(() => {
-            clearInterval(marqueeInterval);
-            clearLCD();
-            printLCD('done recording');
-        }, newDuration * 60000);
-
-        item.recorded = true;  // Mark the item as recorded
-    }
-}
-
-// Function to process passes and manage file backups
-async function processData() {
-    if (isRecording()) {
-        logger.info('Already recording, skipping this cron cycle...');
-        return;
-    }
-
-    const passesFilePath = path.resolve(config.saveDir, config.passesFile);
-    ensurePassesFileExists(passesFilePath);
-
-    let jsonData = readPassesFile(passesFilePath);
-    if (jsonData === null) {
-        logger.error('Failed to read passes file. Retrieving TLE data...');
-        await processPasses(config, logger);
-        return;
-    }
-
-    if (jsonData.length === 0) {
-        logger.info('No passes found. Retrieving TLE data...');
-        await processPasses(config, logger);
-        return;
-    }
-
-    const now = new Date();
-    for (const item of jsonData) {
-        await handleRecording(item, now, passesFilePath, jsonData);
-    }
-
-    const backupFilePath = `${passesFilePath}.bak`;
-    const tempFilePath = `${passesFilePath}.tmp`;
-    fs.copyFileSync(passesFilePath, backupFilePath);
-    fs.writeFileSync(tempFilePath, JSON.stringify(jsonData, null, 2));
-    fs.renameSync(tempFilePath, passesFilePath);
-}
-    */
-
-// Schedule the cron job to run every minute
-// cron.schedule('* * * * *', () => {
-//     printLCD('chillin 4', 'satellites...');
-//     processData().catch(err => logger.error(`Error processing data: ${err.message}`));
-// });
+// Execute the main function
+main().catch(err => logger.error(`Error in main execution: ${err.message}`));
