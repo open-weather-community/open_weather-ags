@@ -20,103 +20,24 @@ const { processPasses } = require('./tle');
 const checkDiskSpace = require('check-disk-space').default;
 const { exec } = require('child_process');  // for wifi-checking
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
+const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
 
 printLCD('booting up', 'groundstation');
 
-const configName = 'ow-config.json';
-const configPathFile = 'configPath.json';
-let config = null;
-
-
-// Function to recursively find the config file in a directory and its subdirectories
-function findConfigFile(dir) {
-    if (!fs.existsSync(dir)) {
-        console.log(`Directory not found while finding config: ${dir}`);
-        return null;
-    }
-
-    let files;
-    try {
-        files = fs.readdirSync(dir);
-    } catch (err) {
-        console.log(`Permission denied accessing directory: ${dir}`);
-        return null;
-    }
-
-    for (const file of files) {
-        const filePath = path.join(dir, file);
-        let stat;
-        try {
-            stat = fs.statSync(filePath);
-        } catch (err) {
-            console.log(`Permission denied accessing: ${filePath}`);
-            continue; // Skip this file or directory
-        }
-
-        if (stat.isDirectory()) {
-            const result = findConfigFile(filePath);
-            if (result) return result;
-        } else if (file === configName) {
-            console.log(`Config file found at: ${filePath}`);
-            return filePath;
-        }
-    }
-    return null;
-}
-
-// Function to load the configuration from the config file
-function loadConfig() {
-    let configPath = null;
-
-    // Check if the configPath.json file exists
-    if (fs.existsSync(configPathFile)) {
-
-        const { configPath: savedConfigPath } = JSON.parse(fs.readFileSync(configPathFile, 'utf8'));
-
-        console.log(`Config file path found in ${configPathFile}: ${savedConfigPath}`);
-
-        if (fs.existsSync(savedConfigPath)) {
-            return JSON.parse(fs.readFileSync(savedConfigPath, 'utf8'));
-        } else {
-            console.log(`Config file at path ${savedConfigPath} not found!`);
-        }
-    }
-
-    // Search for the config file in /mnt/ and /media/openweather/
-    const searchPaths = ['/mnt', '/media/openweather'];
-    for (const basePath of searchPaths) {
-        console.log(`Searching for config file in ${basePath}...`);
-        configPath = findConfigFile(basePath);
-        if (configPath) break;
-    }
-
-    if (configPath) {
-        fs.writeFileSync(configPathFile, JSON.stringify({ configPath }));
-        return JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    } else {
-        console.log('Config file not found in any search paths.');
-        printLCD('no config on', 'usb drive');
-        return null;
-    }
-}
-
-// Load the configuration
-config = loadConfig();
+let config = loadConfig();
 if (!config) {
-    throw new Error("Config could not be loaded. Exiting...");
-} else {
-    printLCD('ground station', 'ready!');
-
-    // set config.saveDir to the configPath in configPath.json without the config file name
-    const saveDir = path.dirname(JSON.parse(fs.readFileSync(configPathFile, 'utf8')).configPath);
-    console.log(`setting saveDir: ${saveDir}`);
-    // save saveDir to the config
-    config.saveDir = saveDir;
-    // save the updated config.json file to the configPath
-    fs.writeFileSync(JSON.parse(fs.readFileSync(configPathFile, 'utf8')).configPath, JSON.stringify(config, null, 2));
-
-
+    console.log('Failed to load configuration');
+    printLCD('config error', 'check log');
+    process.exit(1);
 }
+
+// print the config path dir to the LCD
+printLCD('config loaded', getConfigPath());
+
+// const configName = 'ow-config.json';
+// const configPathFile = 'configPath.json';
+// let config = null;
+
 
 // Function to check the Wi-Fi connection and connect if not connected
 function checkWifiConnection() {
