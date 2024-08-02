@@ -42,6 +42,13 @@ function loadConfig() {
                 const configData = fs.readFileSync(configPath, 'utf8');
                 // save configPath to configPathFile
                 fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
+
+                // set saveDir to configPath
+                configData.saveDir = configPath;
+
+                // write configData to configPath
+                fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
+
                 return JSON.parse(configData);
             } catch (err) {
                 console.log(`Error reading config file: ${err}`);
