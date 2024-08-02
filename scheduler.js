@@ -146,7 +146,7 @@ function findHighestMaxElevationPass(passes) {
     const today = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 
     const validPasses = passes.filter(pass => {
-        const passDate = new Date(`${pass.day} ${pass.time}`);
+        const passDate = new Date(`${pass.date} ${pass.time}`);
         const passDay = passDate.toISOString().split('T')[0];
         return passDay === today && passDate > now;
     });
