@@ -120,14 +120,14 @@ function checkDisk() {
 
 checkDisk();
 
-function updatePasses() {
+async function updatePasses() {
     // totally clear passes.json
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
     fs.writeFileSync(passesFilePath, '[]');
     logger.info(`Blank passes file created at ${passesFilePath}`);
 
     // get TLE data
-    processPasses(config, logger);
+    await processPasses(config, logger);
 
     // clear all but the most recent 100 lines of log.txt
     const logFilePath = path.resolve(config.saveDir, config.logFile);
