@@ -108,7 +108,7 @@ async function updatePasses() {
     // totally clear passes.json
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
     fs.writeFileSync(passesFilePath, '[]');
-    logger.info(`Blank passes file created at ${passesFilePath}`);
+    logger.info(`Cleared passes file at ${passesFilePath}`);
 
     // get TLE data
     await processPasses(config, logger);
@@ -125,6 +125,7 @@ async function updatePasses() {
 async function main() {
     printLCD('updating', 'passes...');
     await updatePasses();
+    printLCD('passes', 'updated');
 
     function findHighestMaxElevationPass(passes) {
         const now = new Date();
@@ -141,6 +142,7 @@ async function main() {
         }, {});
     }
 
+
     // find the highest max elevation pass
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
@@ -152,8 +154,11 @@ async function main() {
 
     // find the highest max elevation pass
     const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+
     console.log("Highest max elevation pass of the day:");
     console.log(highestMaxElevationPass);
+
+    printLCD('will record at', highestMaxElevationPass.time);
 
     // record the highest max elevation pass at the correct time
     if (highestMaxElevationPass) {
