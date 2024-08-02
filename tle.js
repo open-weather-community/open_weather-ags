@@ -228,7 +228,11 @@ async function processPasses(configParam, loggerParam) {
 
 // Entry point for running the script directly
 if (require.main === module) {
-    config = JSON.parse(fs.readFileSync('default.config.json', 'utf8'));
+
+    // Load configuration from the config file
+    const { loadConfig } = require('./config'); // Import config module
+    const config = loadConfig();
+
     const Logger = require('./logger');
     const logger = new Logger(config);
     processPasses(config, logger).catch(console.error);
