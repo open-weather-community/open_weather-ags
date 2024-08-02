@@ -12,7 +12,7 @@ const { uploadFile } = require('./upload');
 
 let recording = false;
 
-const testing = true;
+const testing = false;
 
 // Function to check if recording is in progress
 function isRecording() {
