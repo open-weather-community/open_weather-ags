@@ -85,7 +85,7 @@ add_cron_jobs() {
     (sudo crontab -l 2>/dev/null; echo "0 3 * * * /sbin/shutdown -r now") | sudo crontab -
     # Add cron job to run start_scheduler.sh on boot
     echo "Adding cron job to run start_scheduler.sh on boot..."
-    (sudo crontab -l 2>/dev/null; echo "@reboot /bin/bash /home/openweather/open_weather-apt/start_scheduler.sh") | sudo crontab -
+    (crontab -l 2>/dev/null; echo "@reboot /bin/bash /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
 }
 
 # Allow specific user to modify network settings

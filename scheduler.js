@@ -138,6 +138,7 @@ function updatePasses() {
     }
 }
 
+printLCD('updating', 'passes...');
 updatePasses();
 
 function findHighestMaxElevationPass(passes) {
