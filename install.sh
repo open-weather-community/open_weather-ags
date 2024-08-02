@@ -5,6 +5,12 @@ echo "Installing open-weather automated ground station..."
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Install NVM (Node Version Manager)
+install_nvm() {
+    echo "Installing NVM..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+}
+
 # Load NVM (Node Version Manager)
 load_nvm() {
     echo "Loading NVM..."
@@ -84,6 +90,7 @@ EOF'
 
 # Main script execution
 main() {
+    install_nvm
     load_nvm
     purge_librtlsdr
     install_dependencies
