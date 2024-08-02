@@ -38,10 +38,12 @@ if (!config) {
 }
 
 // print the config path dir to the LCD
-printLCD('config loaded', getConfigPath());
+printLCD('config loaded');
 
 // Check Wi-Fi connection
 checkWifiConnection(config);
+
+printLCD('wifi', 'connected');
 
 // Initialize the logger with the configuration
 const logger = new Logger(config);
@@ -126,7 +128,7 @@ cron.schedule('0 */6 * * *', () => {
 cron.schedule('0 0 */3 * *', () => {
 
     // totally clear passes.json
-    const passesFilePath = path.resolve(__dirname, config.passesFile);
+    const passesFilePath = path.resolve(config.saveDir, config.passesFile);
     fs.writeFileSync(passesFilePath, '[]');
     logger.info(`Blank passes file created at ${passesFilePath}`);
 
@@ -158,7 +160,7 @@ cron.schedule('* * * * *', () => {
 
         try {
             // Resolve the full path to the passes file based on the config
-            const passesFilePath = path.resolve(__dirname, config.passesFile);
+            const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
             // If the passes file does not exist, create it with an empty array
             if (!fs.existsSync(passesFilePath)) {

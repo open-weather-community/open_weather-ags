@@ -26,8 +26,15 @@ async function fetchTLEData() {
 
 // Read existing passes from the specified file
 function readExistingPasses() {
-    if (fs.existsSync(config.passesFile)) {
-        const data = fs.readFileSync(config.passesFile, 'utf8');
+    if (!config.saveDir || !config.passesFile) {
+        logger.error('Save directory or passes file is not specified in the config.');
+        return [];
+    }
+
+    const passesFilePath = path.join(config.saveDir, config.passesFile);
+
+    if (fs.existsSync(passesFilePath)) {
+        const data = fs.readFileSync(passesFilePath, 'utf8');
         if (data.trim() === '') {
             return [];
         }
@@ -37,6 +44,8 @@ function readExistingPasses() {
             logger.error('Error parsing existing passes JSON: ' + error.message);
             return [];
         }
+    } else {
+        logger.error(`Passes file not found: ${passesFilePath}`);
     }
     return [];
 }
