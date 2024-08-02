@@ -43,8 +43,8 @@ function loadConfig() {
                 // save configPath to configPathFile
                 fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
 
-                // set saveDir to configPath
-                configData.saveDir = configPath;
+                // set saveDir to the directory containing the config file
+                configData.saveDir = path.dirname(configPath);
 
                 console.log(`Config file found at: ${configPath}`);
 
