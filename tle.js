@@ -10,8 +10,6 @@ const { DateTime } = require('luxon');
 const fs = require('fs');
 const path = require('path'); // Add this line to import the path module
 
-let logger = null;
-
 // Fetch TLE (Two-Line Element) data from Celestrak
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
@@ -25,7 +23,7 @@ async function fetchTLEData() {
 }
 
 // Read existing passes from the specified file
-function readExistingPasses(config) {
+function readExistingPasses(config, logger) {
     if (!config.saveDir || !config.passesFile) {
         logger.error('Save directory or passes file is not specified in the config.');
         return [];
@@ -47,7 +45,7 @@ function readExistingPasses(config) {
             return [];
         }
     } else {
-        logger.error(`Passes file not found: ${passesFilePath}`);
+        logger.error(`Passes file not found: ${passesFilePath}, creating a new one.`);
     }
     return [];
 }
@@ -158,7 +156,7 @@ async function processPasses(configParam, loggerParam) {
         const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
         logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
 
-        const existingPasses = readExistingPasses(config);
+        const existingPasses = readExistingPasses(config, logger);
 
         // Process each satellite specified in the config
         for (const satName in config.noaaFrequencies) {
