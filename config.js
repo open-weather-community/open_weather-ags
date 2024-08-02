@@ -39,15 +39,21 @@ function loadConfig() {
         const configPath = findConfigFile(dir);
         if (configPath) {
             try {
-                const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                console.log(`Config path: ${configPath}`);
-                console.log(`Config data before setting saveDir: ${JSON.stringify(configData, null, 2)}`);
+                const configData = fs.readFileSync(configPath, 'utf8');
+                // save configPath to configPathFile
+                fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
 
-                // Set saveDir to the directory containing the config file
-                configData.saveDir = path.dirname(configPath);
+                // get the directory of the config file
+                const configDir = path.dirname(configPath);
+                console.log(`Config directory: ${configDir}`);
+                configData.saveDir = configDir;
 
-                console.log(`Config data after setting saveDir: ${JSON.stringify(configData, null, 2)}`);
-                return configData;
+                console.log(`Config file found at: ${configPath}`);
+
+                // write configData to configPath
+                fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
+
+                return JSON.parse(configData);
             } catch (err) {
                 console.log(`Error reading config file: ${err}`);
                 return null;
