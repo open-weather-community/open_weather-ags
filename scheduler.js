@@ -140,7 +140,15 @@ async function updatePasses() {
 }
 
 printLCD('updating', 'passes...');
-await updatePasses();
+
+(async () => {
+    try {
+        await updatePasses();
+        console.log('updatePasses completed successfully');
+    } catch (error) {
+        console.error('Error in updatePasses:', error);
+    }
+})();
 
 function findHighestMaxElevationPass(passes) {
     const now = new Date();
