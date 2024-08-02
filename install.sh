@@ -33,6 +33,9 @@ load_nvm() {
     nvm install 22.3.0
     nvm use 22.3.0
     nvm alias default 22.3.0
+
+    # export the NVM_DIR and load NVM in .bashrc
+    echo "export NVM_DIR=\"$HOME/.nvm\"" >> ~/.bashrc
 }
 
 # Purge existing librtlsdr

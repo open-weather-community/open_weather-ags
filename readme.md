@@ -81,6 +81,24 @@ sudo i2cdetect -y 1
 ```
 This will give you the address (likely 0x27) which should be used when initializing the device in the node project.
 
+### Create an ssh key for the raspberry pi and add it to github as a deploy key
+
+```sh
+ssh-keygen
+```
+
+This will grant access to repo pushing rights, so probably not relevant to most (or any) other people.
+
+### Software (quick way -- manual instructions below)
+
+```bash
+git clone https://github.com/prismspecs/open_weather-ags.git
+cd open_weather-ags
+chmod +x install.sh
+./install.sh
+npm install
+```
+
 ### crontab rebooting
 
 Using sudo, schedule a reboot every morning for 3am
@@ -153,22 +171,8 @@ systemctl daemon-reload
 sudo mount -a
 ```
 
-### Create an ssh key for the raspberry pi and add it to github as a deploy key
 
-```sh
-ssh-keygen
-```
 
-### Software (quick way -- manual instructions below)
-
-```bash
-git clone https://github.com/prismspecs/open_weather-ags.git
-cd open_weather-ags
-chmod +x install.sh
-./install.sh
-```
-
-Sometimes the installer hangs after NVM instructions so I run it twice.
 
 
 ### Check that it is working

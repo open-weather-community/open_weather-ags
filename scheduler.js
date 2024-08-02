@@ -25,6 +25,10 @@ const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./con
 printLCD('booting up', 'groundstation');
 
 let config = loadConfig();
+
+// print config
+console.log(config);
+
 if (!config) {
     console.log('Failed to load configuration');
     printLCD('config error', 'check log');
@@ -37,7 +41,6 @@ printLCD('config loaded', getConfigPath());
 // const configName = 'ow-config.json';
 // const configPathFile = 'configPath.json';
 // let config = null;
-
 
 // Function to check the Wi-Fi connection and connect if not connected
 function checkWifiConnection() {
