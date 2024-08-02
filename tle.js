@@ -30,7 +30,11 @@ function readExistingPasses(config) {
         return [];
     }
 
+    console.log(config);
+
     const passesFilePath = path.join(config.saveDir, config.passesFile);
+
+    console.log('Reading existing passes from: ' + passesFilePath);
 
     if (fs.existsSync(passesFilePath)) {
         const data = fs.readFileSync(passesFilePath, 'utf8');
