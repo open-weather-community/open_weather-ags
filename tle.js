@@ -8,8 +8,7 @@ const satellite = require('satellite.js');
 const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
-// print config
-console.log(config);
+const path = require('path'); // Add this line to import the path module
 
 let logger = null;
 
