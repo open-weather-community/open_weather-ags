@@ -8,6 +8,8 @@ const satellite = require('satellite.js');
 const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
+// print config
+console.log(config);
 
 let logger = null;
 
@@ -29,8 +31,6 @@ function readExistingPasses(config) {
         logger.error('Save directory or passes file is not specified in the config.');
         return [];
     }
-
-    console.log(config);
 
     const passesFilePath = path.join(config.saveDir, config.passesFile);
 
