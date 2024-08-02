@@ -130,7 +130,7 @@ function updatePasses() {
     processPasses(config, logger);
 
     // clear all but the most recent 100 lines of log.txt
-    const logFilePath = path.resolve(__dirname, config.logFile);
+    const logFilePath = path.resolve(config.saveDir, config.logFile);
     const logFile = fs.readFileSync(logFilePath, 'utf8').split('\n');
     const logFileLength = logFile.length;
     if (logFileLength > 100) {

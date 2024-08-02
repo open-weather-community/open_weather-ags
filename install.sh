@@ -83,7 +83,8 @@ add_cron_jobs() {
     # Add cron job for daily restart at 3 AM
     echo "Adding cron job for daily restart at 3 AM..."
     (sudo crontab -l 2>/dev/null; echo "0 3 * * * /sbin/shutdown -r now") | sudo crontab -
-    # Add cron job to run start_scheduler.sh on boot
+    
+    # Add cron job to run start_scheduler.sh on boot (as openweather user)
     echo "Adding cron job to run start_scheduler.sh on boot..."
     (crontab -l 2>/dev/null; echo "@reboot /bin/bash /home/openweather/open_weather-ags/start_scheduler.sh") | crontab -
 }
