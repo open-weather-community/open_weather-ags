@@ -57,7 +57,7 @@ function savePasses(passes) {
         const dateTimeB = DateTime.fromFormat(`${b.date} ${b.time}`, 'dd LLL yyyy HH:mm');
         return dateTimeA - dateTimeB;
     });
-    fs.writeFileSync(config.passesFile, JSON.stringify(passes, null, 2));
+    fs.writeFileSync(path.join(config.saveDir, config.passesFile), JSON.stringify(passes, null, 2));
 }
 
 // Find satellite passes over a specific location
