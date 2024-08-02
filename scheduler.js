@@ -21,6 +21,8 @@ const checkDiskSpace = require('check-disk-space').default;
 const { exec } = require('child_process');  // for wifi-checking
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
+const { checkWifiConnection } = require('./wifi');
+
 
 printLCD('booting up', 'groundstation');
 
@@ -38,53 +40,8 @@ if (!config) {
 // print the config path dir to the LCD
 printLCD('config loaded', getConfigPath());
 
-// const configName = 'ow-config.json';
-// const configPathFile = 'configPath.json';
-// let config = null;
-
-// Function to check the Wi-Fi connection and connect if not connected
-function checkWifiConnection() {
-    // Check current Wi-Fi connection status
-    exec('/usr/bin/nmcli -t -f active,ssid dev wifi', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error checking Wi-Fi connection: ${error.message}`);
-            return;
-        }
-
-        // Determine if connected to any Wi-Fi network
-        const connected = stdout.split('\n').some(line => line.startsWith('yes'));
-
-        if (connected) {
-            console.log('Connected to Wi-Fi');
-        } else {
-            // Not connected to Wi-Fi, connect to the Wi-Fi in the config file
-            const wifiName = config.wifiName;
-            const wifiPassword = config.wifiPassword;
-
-            if (wifiName && wifiPassword) {
-                console.log(`Connecting to Wi-Fi: ${wifiName} with password: ${wifiPassword}`);
-                const command = `/usr/bin/nmcli device wifi connect "${wifiName}" password "${wifiPassword}"`;
-                exec(command, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error connecting to Wi-Fi: ${error.message}`);
-                    } else {
-                        console.log(`Connected to Wi-Fi: ${wifiName}`);
-                    }
-                });
-            } else {
-                console.error('Wi-Fi name or password not found in the config file');
-            }
-        }
-
-        if (stderr) {
-            console.error(`stderr: ${stderr}`);
-        }
-    });
-}
-
-// Call the function to check and connect to Wi-Fi
-checkWifiConnection();
-
+// Check Wi-Fi connection
+checkWifiConnection(config);
 
 // Initialize the logger with the configuration
 const logger = new Logger(config);
