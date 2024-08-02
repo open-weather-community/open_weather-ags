@@ -34,19 +34,21 @@ function findConfigFile(dir) {
 
 // Function to load the configuration
 function loadConfig() {
-    const configPath = findConfigFile(__dirname);
-    if (!configPath) {
-        console.log('Config file not found');
-        return null;
+    const searchDirs = ['/media', '/mnt'];
+    for (const dir of searchDirs) {
+        const configPath = findConfigFile(dir);
+        if (configPath) {
+            try {
+                const configData = fs.readFileSync(configPath, 'utf8');
+                return JSON.parse(configData);
+            } catch (err) {
+                console.log(`Error reading config file: ${err}`);
+                return null;
+            }
+        }
     }
-
-    try {
-        const configData = fs.readFileSync(configPath, 'utf8');
-        return JSON.parse(configData);
-    } catch (err) {
-        console.log(`Error reading config file: ${err}`);
-        return null;
-    }
+    console.log('Config file not found');
+    return null;
 }
 
 // Function to save the configuration
