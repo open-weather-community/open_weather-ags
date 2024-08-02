@@ -12,6 +12,8 @@ const { uploadFile } = require('./upload');
 
 let recording = false;
 
+const testing = true;
+
 // Function to check if recording is in progress
 function isRecording() {
     return recording;
@@ -133,19 +135,21 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                     timestamp: formattedTimestamp,
                 };
 
-                printLCD('uploading...');
+                if (!testing) {
+                    printLCD('uploading...');
 
-                uploadFile(downsampledFile, jsonData)
-                    .then(response => {
-                        // Handle success if needed
-                        console.log('Response:', response);
+                    uploadFile(downsampledFile, jsonData)
+                        .then(response => {
+                            // Handle success if needed
+                            console.log('Response:', response);
 
-                        printLCD('upload completed!');
-                    })
-                    .catch(error => {
-                        // Handle error if needed
-                        console.error('Error:', error);
-                    });
+                            printLCD('upload completed!');
+                        })
+                        .catch(error => {
+                            // Handle error if needed
+                            console.error('Error:', error);
+                        });
+                }
 
             } else {
                 logger.error(`Downsampling failed with code ${code}`);

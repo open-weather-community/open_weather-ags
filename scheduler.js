@@ -3,10 +3,7 @@
 The scheduler is the main app for the project. It is responsible for scheduling the recording of satellite passes based on the TLE data and configuration settings. It also handles other tasks such as checking disk space, updating the configuration, and connecting to Wi-Fi.
 
 to do:
-+ add passes.json to usb
-+ separate finding config file stuff into a separate module
-+ separate wifi checking and connecting into a separate module
-+ add more LCD feedback
+
 
 */
 
@@ -119,10 +116,7 @@ function checkDisk() {
 
 }
 
-// cron job to check disk space every 6 hours
-cron.schedule('0 */6 * * *', () => {
-    checkDisk();
-});
+checkDisk();
 
 // every 3 days... maintenance on log and passes files
 cron.schedule('0 0 */3 * *', () => {
@@ -153,10 +147,48 @@ function findHighestMaxElevationPass(passes) {
 
 // find the highest max elevation pass
 const passesFilePath = path.resolve(config.saveDir, config.passesFile);
-// conver tot json
+// convert to json
 const passes = JSON.parse(fs.readFileSync(passesFilePath, 'utf8'));
 const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+console.log("Highest max elevation pass of the day:");
 console.log(highestMaxElevationPass);
+
+// record the highest max elevation pass at the correct time
+if (highestMaxElevationPass) {
+    const now = new Date();
+    const recordTime = new Date(highestMaxElevationPass.time);
+    const delay = recordTime - now;
+
+    if (delay > 0) {
+        setTimeout(() => {
+            handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
+        }, delay);
+        console.log(`Scheduled recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.time}`);
+    } else {
+        console.log('The highest max elevation pass time is in the past, skipping recording.');
+    }
+} else {
+    console.log('No valid passes found to record.');
+}
+
+async function handleRecording(item, now, passesFilePath, jsonData) {
+    const recordTime = new Date(`${item.date} ${item.time}`);
+    const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+
+    const newDuration = Math.floor((endRecordTime - now) / 60000);
+    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
+    startRecording(item.frequency, recordTime, item.satellite, newDuration, config, logger);
+
+    const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`, 500);
+    setTimeout(() => {
+        clearInterval(marqueeInterval);
+        clearLCD();
+        printLCD('done recording');
+    }, newDuration * 60000);
+
+    item.recorded = true;  // Mark the item as recorded
+}
+
 
 // Function to create an empty passes file if it doesn't exist
 function ensurePassesFileExists(passesFilePath) {
@@ -178,7 +210,7 @@ function readPassesFile(passesFilePath) {
 }
 
 // Function to handle the recording of passes
-async function handleRecording(item, now, passesFilePath, jsonData) {
+async function handleRecordingOld(item, now, passesFilePath, jsonData) {
     const recordTime = new Date(`${item.date} ${item.time}`);
     const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
 
@@ -246,7 +278,7 @@ async function processData() {
 }
 
 // Schedule the cron job to run every minute
-cron.schedule('* * * * *', () => {
-    printLCD('chillin 4', 'satellites...');
-    processData().catch(err => logger.error(`Error processing data: ${err.message}`));
-});
+// cron.schedule('* * * * *', () => {
+//     printLCD('chillin 4', 'satellites...');
+//     processData().catch(err => logger.error(`Error processing data: ${err.message}`));
+// });
