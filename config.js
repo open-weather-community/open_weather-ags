@@ -32,6 +32,7 @@ function findConfigFile(dir) {
     return null;
 }
 
+
 // Function to load the configuration
 function loadConfig() {
     const searchDirs = ['/media', '/mnt'];
@@ -39,21 +40,23 @@ function loadConfig() {
         const configPath = findConfigFile(dir);
         if (configPath) {
             try {
-                const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                // save configPath to configPathFile
+                const configData = fs.readFileSync(configPath, 'utf8');
+                const configJson = JSON.parse(configData);
+
+                // Save configPath to configPathFile
                 fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
 
-                // get the directory of the config file
+                // Get the directory of the config file
                 const configDir = path.dirname(configPath);
                 console.log(`Config directory: ${configDir}`);
-                configData.saveDir = configDir;
+                configJson.saveDir = configDir;
 
                 console.log(`Config file found at: ${configPath}`);
 
-                // write configData to configPath
-                fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
+                // Write the updated configData back to the configPath
+                fs.writeFileSync(configPath, JSON.stringify(configJson, null, 2), 'utf8');
 
-                return JSON.parse(configData);
+                return configJson;
             } catch (err) {
                 console.log(`Error reading config file: ${err}`);
                 return null;
