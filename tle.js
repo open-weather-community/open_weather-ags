@@ -9,7 +9,6 @@ const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
 
-let config = null;
 let logger = null;
 
 // Fetch TLE (Two-Line Element) data from Celestrak
@@ -25,7 +24,7 @@ async function fetchTLEData() {
 }
 
 // Read existing passes from the specified file
-function readExistingPasses() {
+function readExistingPasses(config) {
     if (!config.saveDir || !config.passesFile) {
         logger.error('Save directory or passes file is not specified in the config.');
         return [];
@@ -147,9 +146,6 @@ async function findSatellitePasses(satName, tleLine1, tleLine2) {
 async function processPasses(configParam, loggerParam) {
     config = configParam;
     logger = loggerParam;
-
-    // print config
-    console.log(config);
 
     try {
         logger.info('Starting TLE data processing...');
