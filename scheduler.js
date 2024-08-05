@@ -155,8 +155,8 @@ async function main() {
     // find the highest max elevation pass
     const highestMaxElevationPass = findHighestMaxElevationPass(passes);
 
-    console.log("Highest max elevation pass of the day:");
-    console.log(highestMaxElevationPass);
+    logger.log("Highest max elevation pass of the day:");
+    logger.log(JSON.stringify(highestMaxElevationPass));
 
     printLCD('will record at', highestMaxElevationPass.time);
 
@@ -172,24 +172,31 @@ async function main() {
             setTimeout(() => {
                 handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
             }, delay);
-            console.log(`Scheduled recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.time}`);
+
+            // const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
+            // const endRecordTime = new Date(recordTime.getTime() + highestMaxElevationPass.duration * 60000);
+            // const newDuration = Math.floor((endRecordTime - recordTime) / 60000);
+            logger.info(`Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`);
+
         } else {
-            console.log('The highest max elevation pass time is in the past, skipping recording.');
+            logger.log('The highest max elevation pass time is in the past, skipping recording.');
         }
     } else {
-        console.log('No valid passes found to record.');
+        logger.log('No valid passes found to record.');
     }
 }
 
 async function handleRecording(item, now, passesFilePath, jsonData) {
+
     const recordTime = new Date(`${item.date} ${item.time}`);
-    const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+    // const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+    // const newDuration = Math.floor((endRecordTime - now) / 60000);
 
-    const newDuration = Math.floor((endRecordTime - now) / 60000);
-    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`);
-    startRecording(item.frequency, recordTime, item.satellite, newDuration, config, logger);
+    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`);
 
-    const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${newDuration} minutes...`, 500);
+    startRecording(item.frequency, recordTime, item.satellite, item.duration, config, logger);
+
+    const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`, 500);
     setTimeout(() => {
         clearInterval(marqueeInterval);
         clearLCD();

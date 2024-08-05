@@ -8,3 +8,5 @@ passes.json
 configPath.json
 rtl-sdr-blog/
 *.blend1
+log.txt
+passes.json
