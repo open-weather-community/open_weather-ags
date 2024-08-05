@@ -158,6 +158,9 @@ set mouse=a " Enable mouse support
 
 " Key binding to toggle NERDTree
 map <C-n> :NERDTreeToggle<CR>
+
+" Get rid of annoying error
+let g:coc_disable_startup_warning = 1
 EOF
 
     # Install plugins
@@ -166,14 +169,14 @@ EOF
 
 # Main script execution
 main() {
-    # install_nvm
-    # load_nvm
-    # purge_librtlsdr
-    # install_dependencies
-    # build_rtl_sdr_blog
-    # blacklist_old_drivers
-    # add_cron_jobs
-    # configure_polkit
+    install_nvm
+    load_nvm
+    purge_librtlsdr
+    install_dependencies
+    build_rtl_sdr_blog
+    blacklist_old_drivers
+    add_cron_jobs
+    configure_polkit
     install_neovim
 }
 
