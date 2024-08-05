@@ -201,7 +201,7 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
         clearInterval(marqueeInterval);
         clearLCD();
         printLCD('done recording');
-    }, newDuration * 60000);
+    }, item.duration * 60000);
 
     item.recorded = true;  // Mark the item as recorded
 
