@@ -103,16 +103,78 @@ EOF'
     # to check this... nmcli general permissions
 }
 
+# Install Neovim and configure it
+install_neovim() {
+    echo "Installing Neovim and configuring it..."
+
+    # Update package list and install Neovim and curl
+    sudo apt update
+    sudo apt install -y neovim curl
+
+    # Install vim-plug for Neovim
+    curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+    # Create Neovim configuration directory
+    mkdir -p ~/.config/nvim
+
+    # Create init.vim with the provided configuration
+    cat <<EOF > ~/.config/nvim/init.vim
+" Specify a directory for plugins
+call plug#begin('~/.local/share/nvim/plugged')
+
+" Add plugins here
+Plug 'morhetz/gruvbox' " Gruvbox theme
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } " Fuzzy finder
+Plug 'junegunn/fzf.vim' " FZF Vim integration
+Plug 'tpope/vim-sensible' " Basic sensible settings
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'preservim/nerdtree'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'sheerun/vim-polyglot'
+Plug 'sbdchd/neoformat'
+
+" Initialize plugin system
+call plug#end()
+
+let g:neoformat_enabled_javascript = ['prettier']
+
+" Enable Gruvbox theme
+syntax enable
+set background=dark
+colorscheme gruvbox
+
+" Basic settings
+set number " Show line numbers
+set relativenumber " Show relative line numbers
+set tabstop=4 " Number of spaces that a <Tab> in the file counts for
+set shiftwidth=4 " Number of spaces to use for each step of (auto)indent
+set expandtab " Use spaces instead of tabs
+set smartindent " Smart auto-indenting
+set clipboard=unnamedplus " Use the system clipboard
+set mouse=a " Enable mouse support
+
+" Key binding to toggle NERDTree
+map <C-n> :NERDTreeToggle<CR>
+EOF
+
+    # Install plugins
+    nvim +PlugInstall +qall
+}
+
 # Main script execution
 main() {
-    install_nvm
-    load_nvm
-    purge_librtlsdr
-    install_dependencies
-    build_rtl_sdr_blog
-    blacklist_old_drivers
-    add_cron_jobs
-    configure_polkit
+    # install_nvm
+    # load_nvm
+    # purge_librtlsdr
+    # install_dependencies
+    # build_rtl_sdr_blog
+    # blacklist_old_drivers
+    # add_cron_jobs
+    # configure_polkit
+    install_neovim
 }
 
 # Run the main function

@@ -17,26 +17,26 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
 
 ```json
 {
-    "wifiName": "your wifi network name",
-    "wifiPassword": "password",
-    "myID": 1,
-    "locLat": 52.495480,
-    "locLon": 13.468430,
-    "gain": 38.0,
-    "maxDistance": 2200000,
-    "daysToPropagate": 7,
-    "minElevation": 30,
-    "bufferMinutes": 3,
-    "noaaFrequencies": {
-        "NOAA 19": "137.1M",
-        "NOAA 18": "137.9125M",
-        "NOAA 15": "137.62M"
-    },
-    "passesFile": "passes.json",
-    "saveDir": "/mnt/o-w",
-    "logFile": "log.txt",
-    "rtl_fm_path": "/usr/local/bin/rtl_fm",
-    "sox_path": "/usr/bin/sox"
+  "wifiName": "wifi name",
+  "wifiPassword": "wifi password",
+  "myID": 1,
+  "locLat": 52.49548,
+  "locLon": 13.46843,
+  "gain": 38,
+  "maxDistance": 2200000,
+  "daysToPropagate": 1,
+  "minElevation": 30,
+  "bufferMinutes": 0,
+  "noaaFrequencies": {
+    "NOAA 19": "137.1M",
+    "NOAA 18": "137.9125M",
+    "NOAA 15": "137.62M"
+  },
+  "passesFile": "passes.json",
+  "saveDir": "/media/openweather/ow",
+  "logFile": "log.txt",
+  "rtl_fm_path": "/usr/local/bin/rtl_fm",
+  "sox_path": "/usr/bin/sox"
 }
 
 ```
