@@ -10,3 +10,4 @@ rtl-sdr-blog/
 *.blend1
 log.txt
 passes.json
+passes.json.bak
