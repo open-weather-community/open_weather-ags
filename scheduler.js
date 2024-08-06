@@ -158,7 +158,8 @@ async function main() {
     logger.log("Highest max elevation pass of the day:");
     logger.log(JSON.stringify(highestMaxElevationPass));
 
-    printLCD('will record at', highestMaxElevationPass.time);
+    // printLCD('will record at', highestMaxElevationPass.time);
+    printLCD('ground station', 'ready!');
 
     // record the highest max elevation pass at the correct time
     if (highestMaxElevationPass) {
@@ -201,7 +202,7 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
         clearInterval(marqueeInterval);
         clearLCD();
         printLCD('done recording');
-    }, newDuration * 60000);
+    }, item.duration * 60000);
 
     item.recorded = true;  // Mark the item as recorded
 
