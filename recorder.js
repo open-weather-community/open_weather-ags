@@ -62,83 +62,34 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         '-g', config.gain
     ]);
 
-    // Start sox process to save the captured signal to a file
-    const sox = spawn(config.sox_path, [
-        '-t', 'raw',
-        '-e', 'signed',
-        '-c', '1',
-        '-b', '16',
-        '-r', '48000',
-        '-',
-        rawFile
-    ]);
-
-    // Pipe rtl_fm output to sox input
-    rtlFm.stdout.pipe(sox.stdin);
-
-    // Capture and log rtl_fm output
-    rtlFm.stdout.on('data', (data) => {
-        logger.info(`rtl_fm output: ${data}`);
-    });
-
-    // Capture and log rtl_fm error output
+    // Log rtl_fm stderr for debugging
     rtlFm.stderr.on('data', (data) => {
         logger.error(`rtl_fm error: ${data}`);
     });
 
-    // Capture and log sox output
-    sox.stdout.on('data', (data) => {
-        logger.info(`Sox output: ${data}`);
-    });
-
-    // Capture and log sox error output
-    sox.stderr.on('data', (data) => {
-        logger.error(`Sox error: ${data}`);
-    });
+    // Write rtl_fm stdout directly to a raw file
+    const rawStream = fs.createWriteStream(rawFile);
+    rtlFm.stdout.pipe(rawStream);
 
     // Handle potential errors in the rtl_fm process
     rtlFm.on('error', (error) => {
         logger.error('rtl_fm process error: ' + error.message);
         recording = false;
-        sox.kill();
+        rawStream.close();
     });
 
-    // Handle potential errors in the sox process
-    sox.on('error', (error) => {
-        logger.error('Sox process error: ' + error.message);
-        recording = false;
-        rtlFm.kill();
-    });
-
-    // Handle process exit events
+    // Handle rtl_fm process exit
     rtlFm.on('close', (code) => {
         logger.info(`rtl_fm process exited with code ${code}`);
-    });
+        rawStream.close();
 
-    sox.on('close', (code) => {
-        logger.info(`Sox process exited with code ${code}`);
-    });
-
-    // Stop the recording after the specified duration
-    setTimeout(() => {
-        logger.info('Stopping recording...');
-        rtlFm.kill();
-        sox.kill();
-        recording = false;
-
-        // Ensure the file handles are closed properly
-        setTimeout(() => {
+        if (code === 0) {
             // Downsample the recorded file to 11025 Hz
             const soxDownsample = spawn(config.sox_path, [
                 rawFile,
                 '-r', '11025',
                 downsampledFile
             ]);
-
-            // Capture and log Sox output
-            soxDownsample.stdout.on('data', (data) => {
-                logger.info(`Sox output: ${data}`);
-            });
 
             // Capture and log Sox error output
             soxDownsample.stderr.on('data', (data) => {
@@ -149,8 +100,6 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
             soxDownsample.on('close', (code) => {
                 if (code === 0) {
                     logger.info(`Successfully downsampled to ${downsampledFile}`);
-                    // Optionally, remove the raw file after downsampling
-                    fs.unlinkSync(rawFile);
 
                     // Upload the downsampled file
                     // Get json data from the config
@@ -187,7 +136,16 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
             soxDownsample.on('error', (error) => {
                 logger.error('Sox downsample process error: ' + error.message);
             });
-        }, 1000); // Ensure file handles are closed
+        } else {
+            logger.error('rtl_fm did not exit cleanly, skipping downsampling.');
+        }
+    });
+
+    // Stop the recording after the specified duration
+    setTimeout(() => {
+        logger.info('Stopping recording...');
+        rtlFm.kill();
+        recording = false;
     }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
 }
 
