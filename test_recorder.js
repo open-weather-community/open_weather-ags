@@ -18,12 +18,10 @@ function startRecording(frequency, durationMinutes) {
     // Format the timestamp for a filesystem-friendly filename
     const formattedTimestamp = formatTimestamp(Date.now());
 
-    // Define file paths for raw and downsampled recordings
-    const outputPath = path.join(dir, `${frequency}-${formattedTimestamp}`);
-    const rawFile = `${outputPath}-raw.wav`;
-    const downsampledFile = `${outputPath}.wav`;
+    // Define file paths for downsampled recordings
+    const downsampledFile = path.join(dir, `${frequency}-${formattedTimestamp}.wav`);
 
-    console.log('Recording to ' + rawFile);
+    console.log('Recording to ' + downsampledFile);
 
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn("/usr/local/bin/rtl_fm", [
@@ -41,52 +39,49 @@ function startRecording(frequency, durationMinutes) {
         console.log(`rtl_fm log: ${data}`);
     });
 
-    // Write rtl_fm stdout directly to a raw file
-    const rawStream = fs.createWriteStream(rawFile);
-    rtlFm.stdout.pipe(rawStream);
+    // Use sox to process the stream directly and save as WAV
+    const soxDownsample = spawn("/usr/bin/sox", [
+        '-t', 'raw', // Input type
+        '-r', '48000', // Input sample rate
+        '-e', 'signed-integer', // Input encoding
+        '-b', '16', // Input bit depth
+        '-c', '1', // Input channels
+        '-', // Input from stdin
+        '-r', '11025', // Output sample rate
+        downsampledFile
+    ]);
 
-    // Handle potential errors in the rtl_fm process
-    rtlFm.on('error', (error) => {
-        console.log('rtl_fm process error: ' + error.message);
-        recording = false;
-        rawStream.close();
+    // Pipe rtl_fm output directly to sox
+    rtlFm.stdout.pipe(soxDownsample.stdin);
+
+    // Capture and log Sox error output
+    soxDownsample.stderr.on('data', (data) => {
+        console.log(`Sox error: ${data}`);
+    });
+
+    // Handle sox process completion
+    soxDownsample.on('close', (code) => {
+        if (code === 0) {
+            console.log(`Successfully recorded to ${downsampledFile}`);
+        } else {
+            console.log(`Sox processing failed with code ${code}`);
+        }
+    });
+
+    // Handle potential errors in the sox process
+    soxDownsample.on('error', (error) => {
+        console.log('Sox process error: ' + error.message);
     });
 
     // Handle rtl_fm process exit
     rtlFm.on('close', (code) => {
         console.log(`rtl_fm process exited with code ${code}`);
-        rawStream.close();
+    });
 
-        if (code === 0) {
-            // Downsample the recorded file to 11025 Hz
-            const soxDownsample = spawn("/usr/bin/sox", [
-                rawFile,
-                '-r', '11025',
-                downsampledFile
-            ]);
-
-            // Capture and log Sox error output
-            soxDownsample.stderr.on('data', (data) => {
-                console.log(`Sox error: ${data}`);
-            });
-
-            // Handle downsample completion
-            soxDownsample.on('close', (code) => {
-                if (code === 0) {
-                    console.log(`Successfully downsampled to ${downsampledFile}`);
-
-                } else {
-                    console.log(`Downsampling failed with code ${code}`);
-                }
-            });
-
-            // Handle potential errors in the downsample process
-            soxDownsample.on('error', (error) => {
-                console.log('Sox downsample process error: ' + error.message);
-            });
-        } else {
-            console.log('rtl_fm did not exit cleanly, skipping downsampling.');
-        }
+    // Handle potential errors in the rtl_fm process
+    rtlFm.on('error', (error) => {
+        console.log('rtl_fm process error: ' + error.message);
+        recording = false;
     });
 
     // Stop the recording after the specified duration
