@@ -1,8 +1,3 @@
-// recorder.js
-// This script contains the logic to start and stop recording audio from the RTL-SDR dongle
-// It uses the rtl_fm and SoX command-line tools to capture and process the radio signal
-// The recorded audio is saved to a file, downsampled, and uploaded to the server using the upload.js module
-
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -81,6 +76,26 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Pipe rtl_fm output to sox input
     rtlFm.stdout.pipe(sox.stdin);
 
+    // Capture and log rtl_fm output
+    rtlFm.stdout.on('data', (data) => {
+        logger.info(`rtl_fm output: ${data}`);
+    });
+
+    // Capture and log rtl_fm error output
+    rtlFm.stderr.on('data', (data) => {
+        logger.error(`rtl_fm error: ${data}`);
+    });
+
+    // Capture and log sox output
+    sox.stdout.on('data', (data) => {
+        logger.info(`Sox output: ${data}`);
+    });
+
+    // Capture and log sox error output
+    sox.stderr.on('data', (data) => {
+        logger.error(`Sox error: ${data}`);
+    });
+
     // Handle potential errors in the rtl_fm process
     rtlFm.on('error', (error) => {
         logger.error('rtl_fm process error: ' + error.message);
@@ -95,6 +110,15 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         rtlFm.kill();
     });
 
+    // Handle process exit events
+    rtlFm.on('close', (code) => {
+        logger.info(`rtl_fm process exited with code ${code}`);
+    });
+
+    sox.on('close', (code) => {
+        logger.info(`Sox process exited with code ${code}`);
+    });
+
     // Stop the recording after the specified duration
     setTimeout(() => {
         logger.info('Stopping recording...');
@@ -102,64 +126,68 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         sox.kill();
         recording = false;
 
-        // Downsample the recorded file to 11025 Hz
-        const soxDownsample = spawn(config.sox_path, [
-            rawFile,
-            '-r', '11025',
-            downsampledFile
-        ]);
+        // Ensure the file handles are closed properly
+        setTimeout(() => {
+            // Downsample the recorded file to 11025 Hz
+            const soxDownsample = spawn(config.sox_path, [
+                rawFile,
+                '-r', '11025',
+                downsampledFile
+            ]);
 
-        // Capture and log Sox output
-        soxDownsample.stdout.on('data', (data) => {
-            logger.info(`Sox output: ${data}`);
-        });
+            // Capture and log Sox output
+            soxDownsample.stdout.on('data', (data) => {
+                logger.info(`Sox output: ${data}`);
+            });
 
-        soxDownsample.stderr.on('data', (data) => {
-            logger.error(`Sox error: ${data}`);
-        });
+            // Capture and log Sox error output
+            soxDownsample.stderr.on('data', (data) => {
+                logger.error(`Sox error: ${data}`);
+            });
 
-        // Handle downsample completion
-        soxDownsample.on('close', (code) => {
-            if (code === 0) {
-                logger.info(`Successfully downsampled to ${downsampledFile}`);
-                // Optionally, remove the raw file after downsampling
-                fs.unlinkSync(rawFile);
+            // Handle downsample completion
+            soxDownsample.on('close', (code) => {
+                if (code === 0) {
+                    logger.info(`Successfully downsampled to ${downsampledFile}`);
+                    // Optionally, remove the raw file after downsampling
+                    fs.unlinkSync(rawFile);
 
-                // upload the downsampled file
-                // get json data from the config
-                const jsonData = {
-                    myID: config.myID,
-                    locLat: config.locLat,
-                    locLon: config.locLon,
-                    gain: config.gain,
-                    timestamp: formattedTimestamp,
-                };
+                    // Upload the downsampled file
+                    // Get json data from the config
+                    const jsonData = {
+                        myID: config.myID,
+                        locLat: config.locLat,
+                        locLon: config.locLon,
+                        gain: config.gain,
+                        timestamp: formattedTimestamp,
+                    };
 
-                if (!testing) {
-                    printLCD('uploading...');
+                    if (!testing) {
+                        printLCD('uploading...');
 
-                    uploadFile(downsampledFile, jsonData)
-                        .then(response => {
-                            // Handle success if needed
-                            console.log('Response:', response);
+                        uploadFile(downsampledFile, jsonData)
+                            .then(response => {
+                                // Handle success if needed
+                                console.log('Response:', response);
 
-                            printLCD('upload completed!');
-                        })
-                        .catch(error => {
-                            // Handle error if needed
-                            console.error('Error:', error);
-                        });
+                                printLCD('upload completed!');
+                            })
+                            .catch(error => {
+                                // Handle error if needed
+                                console.error('Error:', error);
+                            });
+                    }
+
+                } else {
+                    logger.error(`Downsampling failed with code ${code}`);
                 }
+            });
 
-            } else {
-                logger.error(`Downsampling failed with code ${code}`);
-            }
-        });
-
-        // Handle potential errors in the downsample process
-        soxDownsample.on('error', (error) => {
-            logger.error('Sox downsample process error: ' + error.message);
-        });
+            // Handle potential errors in the downsample process
+            soxDownsample.on('error', (error) => {
+                logger.error('Sox downsample process error: ' + error.message);
+            });
+        }, 1000); // Ensure file handles are closed
     }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
 }
 
