@@ -5,7 +5,7 @@ const { startRecording } = require('./recorder'); // Adjust the path if necessar
 // Configuration object
 const config = {
     saveDir: path.join('/media/openweather/o-w1/testrecordings'), // Directory to save recordings
-    rtl_fm_path: '/usr/bin/rtl_fm', // Path to rtl_fm executable
+    rtl_fm_path: '/usr/local/bin/rtl_fm', // Path to rtl_fm executable
     gain: '50' // Gain setting for rtl_fm
 };
 
