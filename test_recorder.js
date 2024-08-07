@@ -59,7 +59,7 @@ function startRecording(frequency, durationMinutes) {
 
         if (code === 0) {
             // Downsample the recorded file to 11025 Hz
-            const soxDownsample = spawn(config.sox_path, [
+            const soxDownsample = spawn("/usr/bin/sox", [
                 rawFile,
                 '-r', '11025',
                 downsampledFile
