@@ -15,11 +15,8 @@ function startRecording(frequency, durationMinutes) {
     // Ensure the recordings directory exists
     const dir = path.join('/media/openweather/o-w1/testrecordings');
 
-    // Format the timestamp for a filesystem-friendly filename
-    const formattedTimestamp = formatTimestamp(Date.now());
-
     // Define file paths for downsampled recordings
-    const downsampledFile = path.join(dir, `${frequency}-${formattedTimestamp}.wav`);
+    const downsampledFile = path.join(dir, `test.wav`);
 
     console.log('Recording to ' + downsampledFile);
 
