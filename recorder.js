@@ -44,12 +44,10 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Format the timestamp for a filesystem-friendly filename
     const formattedTimestamp = formatTimestamp(timestamp);
 
-    // Define file paths for raw and downsampled recordings
-    const outputPath = path.join(dir, `${satellite}-${formattedTimestamp}`);
-    const rawFile = `${outputPath}-raw.wav`;
-    const downsampledFile = `${outputPath}.wav`;
+    // Define the file path for the final downsampled recording
+    const downsampledFile = path.join(dir, `${satellite}-${formattedTimestamp}.wav`);
 
-    logger.info('Recording to ' + rawFile);
+    logger.info('Recording to ' + downsampledFile);
 
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
@@ -62,47 +60,49 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         '-g', config.gain
     ]);
 
+    // Start sox process to downsample the audio on the fly
+    const soxDownsample = spawn(config.sox_path, [
+        '-t', 'raw',
+        '-r', '48k',
+        '-e', 'signed',
+        '-b', '16',
+        '-c', '1',
+        '-',
+        '-r', '11025',
+        downsampledFile
+    ]);
+
     // Log rtl_fm stderr for debugging
     rtlFm.stderr.on('data', (data) => {
         logger.error(`rtl_fm error: ${data}`);
     });
 
-    // Write rtl_fm stdout directly to a raw file
-    const rawStream = fs.createWriteStream(rawFile);
-    rtlFm.stdout.pipe(rawStream);
+    // Log sox stderr for debugging
+    soxDownsample.stderr.on('data', (data) => {
+        logger.error(`Sox error: ${data}`);
+    });
+
+    // Pipe the output of rtl_fm directly into sox
+    rtlFm.stdout.pipe(soxDownsample.stdin);
 
     // Handle potential errors in the rtl_fm process
     rtlFm.on('error', (error) => {
         logger.error('rtl_fm process error: ' + error.message);
         recording = false;
-        rawStream.close();
+        soxDownsample.stdin.end();
     });
 
     // Handle rtl_fm process exit
     rtlFm.on('close', (code) => {
         logger.info(`rtl_fm process exited with code ${code}`);
-        rawStream.close();
+        soxDownsample.stdin.end();
 
         if (code === 0) {
-            // Downsample the recorded file to 11025 Hz
-            const soxDownsample = spawn(config.sox_path, [
-                rawFile,
-                '-r', '11025',
-                downsampledFile
-            ]);
-
-            // Capture and log Sox error output
-            soxDownsample.stderr.on('data', (data) => {
-                logger.error(`Sox error: ${data}`);
-            });
-
-            // Handle downsample completion
-            soxDownsample.on('close', (code) => {
-                if (code === 0) {
+            soxDownsample.on('close', (soxCode) => {
+                if (soxCode === 0) {
                     logger.info(`Successfully downsampled to ${downsampledFile}`);
 
                     // Upload the downsampled file
-                    // Get json data from the config
                     const jsonData = {
                         myID: config.myID,
                         locLat: config.locLat,
@@ -116,19 +116,16 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
                         uploadFile(downsampledFile, jsonData)
                             .then(response => {
-                                // Handle success if needed
                                 console.log('Response:', response);
-
                                 printLCD('upload completed!');
                             })
                             .catch(error => {
-                                // Handle error if needed
                                 console.error('Error:', error);
                             });
                     }
 
                 } else {
-                    logger.error(`Downsampling failed with code ${code}`);
+                    logger.error(`Downsampling failed with code ${soxCode}`);
                 }
             });
 
