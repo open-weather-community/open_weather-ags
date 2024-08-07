@@ -1,34 +1,100 @@
+const { spawn } = require('child_process');
+const fs = require('fs');
 const path = require('path');
-const logger = console; // Using console for logging in this test script
-const { startRecording } = require('./recorder'); // Adjust the path if necessary
 
-// Configuration object
-const config = {
-    saveDir: path.join('/media/openweather/o-w1/testrecordings'), // Directory to save recordings
-    rtl_fm_path: '/usr/local/bin/rtl_fm', // Path to rtl_fm executable
-    gain: '50' // Gain setting for rtl_fm
-};
-
-// Ensure the recordings directory exists
-function ensureDirectoryExists(dir) {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-}
-
-// Format the timestamp for filenames
+// Function to format the timestamp for filenames
 function formatTimestamp(timestamp) {
     return new Date(timestamp).toISOString().replace(/:/g, '-');
 }
 
-// Test function to start recording
-function testRecorder(frequency) {
-    const timestamp = Date.now();
-    const satellite = 'test_satellite';
-    const durationMinutes = 1; // Record for 1 minute
+// Function to start recording
+function startRecording(frequency, durationMinutes) {
 
-    startRecording(frequency, timestamp, satellite, durationMinutes, config, logger);
+    recording = true;
+
+    // Ensure the recordings directory exists
+    const dir = path.join('/media/openweather/o-w1/testrecordings');
+
+    // Format the timestamp for a filesystem-friendly filename
+    const formattedTimestamp = formatTimestamp(Date.now());
+
+    // Define file paths for raw and downsampled recordings
+    const outputPath = path.join(dir, `${frequency}-${formattedTimestamp}`);
+    const rawFile = `${outputPath}-raw.wav`;
+    const downsampledFile = `${outputPath}.wav`;
+
+    console.log('Recording to ' + rawFile);
+
+    // Start rtl_fm process to capture radio signal
+    const rtlFm = spawn("/usr/local/bin/rtl_fm", [
+        '-f', frequency,
+        '-M', 'fm',
+        '-s', '48k',    // Recording sample rate, match with sox input rate
+        '-A', 'fast',
+        '-l', '0',
+        '-E', 'deemp',
+        '-g', '30'
+    ]);
+
+    // Log rtl_fm stderr for debugging
+    rtlFm.stderr.on('data', (data) => {
+        console.log(`rtl_fm log: ${data}`);
+    });
+
+    // Write rtl_fm stdout directly to a raw file
+    const rawStream = fs.createWriteStream(rawFile);
+    rtlFm.stdout.pipe(rawStream);
+
+    // Handle potential errors in the rtl_fm process
+    rtlFm.on('error', (error) => {
+        console.log('rtl_fm process error: ' + error.message);
+        recording = false;
+        rawStream.close();
+    });
+
+    // Handle rtl_fm process exit
+    rtlFm.on('close', (code) => {
+        console.log(`rtl_fm process exited with code ${code}`);
+        rawStream.close();
+
+        if (code === 0) {
+            // Downsample the recorded file to 11025 Hz
+            const soxDownsample = spawn(config.sox_path, [
+                rawFile,
+                '-r', '11025',
+                downsampledFile
+            ]);
+
+            // Capture and log Sox error output
+            soxDownsample.stderr.on('data', (data) => {
+                console.log(`Sox error: ${data}`);
+            });
+
+            // Handle downsample completion
+            soxDownsample.on('close', (code) => {
+                if (code === 0) {
+                    logger.info(`Successfully downsampled to ${downsampledFile}`);
+
+                } else {
+                    console.log(`Downsampling failed with code ${code}`);
+                }
+            });
+
+            // Handle potential errors in the downsample process
+            soxDownsample.on('error', (error) => {
+                console.log('Sox downsample process error: ' + error.message);
+            });
+        } else {
+            console.log('rtl_fm did not exit cleanly, skipping downsampling.');
+        }
+    });
+
+    // Stop the recording after the specified duration
+    setTimeout(() => {
+        logger.info('Stopping recording...');
+        rtlFm.kill();
+        recording = false;
+    }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
 }
 
-// Example usage: Record at 100 MHz
-testRecorder(104600000); // Frequency in Hz
+startRecording("1045000000", 1);
