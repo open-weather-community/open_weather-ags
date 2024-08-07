@@ -89,4 +89,4 @@ function startRecording(frequency, durationMinutes) {
     }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
 }
 
-startRecording("1045000000", 1);
+startRecording("104500000", 1);
