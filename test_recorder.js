@@ -73,7 +73,7 @@ function startRecording(frequency, durationMinutes) {
             // Handle downsample completion
             soxDownsample.on('close', (code) => {
                 if (code === 0) {
-                    logger.info(`Successfully downsampled to ${downsampledFile}`);
+                    console.log(`Successfully downsampled to ${downsampledFile}`);
 
                 } else {
                     console.log(`Downsampling failed with code ${code}`);
@@ -91,7 +91,7 @@ function startRecording(frequency, durationMinutes) {
 
     // Stop the recording after the specified duration
     setTimeout(() => {
-        logger.info('Stopping recording...');
+        console.log('Stopping recording...');
         rtlFm.kill();
         recording = false;
     }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
