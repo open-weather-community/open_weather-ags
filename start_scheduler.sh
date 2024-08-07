@@ -3,6 +3,18 @@
 # Log to cronlog.txt that it is booting up
 echo "Booting up at $(date)" >> /home/openweather/cronlog.txt
 
+# Check if cronlog.txt has more than 1000 lines
+LOG_FILE="/home/openweather/cronlog.txt"
+MAX_LINES=1000
+LINES_TO_DELETE=800
+
+LINE_COUNT=$(wc -l < "$LOG_FILE")
+
+if [ "$LINE_COUNT" -gt "$MAX_LINES" ]; then
+    # Delete the first 800 lines
+    sed -i "1,${LINES_TO_DELETE}d" "$LOG_FILE"
+fi
+
 # Export the NVM environment variables
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
