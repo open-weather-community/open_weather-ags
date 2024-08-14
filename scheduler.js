@@ -138,7 +138,9 @@ async function main() {
         });
 
         return validPasses.reduce((maxPass, currentPass) => {
-            return currentPass.maxElevation > (maxPass.maxElevation || 0) ? currentPass : maxPass;
+            const maxElevation = parseFloat(maxPass.maxElevation) || 0;
+            const currentElevation = parseFloat(currentPass.maxElevation);
+            return currentElevation > maxElevation ? currentPass : maxPass;
         }, {});
     }
 
