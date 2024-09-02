@@ -105,6 +105,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                     // Upload the downsampled file
                     const jsonData = {
                         myID: config.myID,
+                        satellite: satellite,
                         locLat: config.locLat,
                         locLon: config.locLon,
                         gain: config.gain,
