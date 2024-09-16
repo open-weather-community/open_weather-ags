@@ -1,4 +1,5 @@
 // scheduler.js
+const VERSION = '0.1a';
 const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');
@@ -161,7 +162,7 @@ async function main() {
     logger.log(JSON.stringify(highestMaxElevationPass));
 
     // printLCD('will record at', highestMaxElevationPass.time);
-    printLCD('ground station', 'ready!');
+    printLCD('ground station', 'ready!' + VERSION);
 
     // record the highest max elevation pass at the correct time
     if (highestMaxElevationPass) {
