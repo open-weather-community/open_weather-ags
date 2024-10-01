@@ -37,11 +37,3 @@ git reset --hard origin/main >> /home/openweather/cronlog.txt 2>&1
 
 # Log the completion of the script
 echo "Script completed at $(date)" >> /home/openweather/cronlog.txt
-
-# Check if the directory /media/openweather/O-W exists, and copy cronlog.txt to it if it does
-if [ -d "/media/openweather/O-W" ]; then
-    cp /home/openweather/cronlog.txt /media/openweather/O-W/
-    echo "cronlog.txt copied to /media/openweather/O-W at $(date)" >> /home/openweather/cronlog.txt
-else
-    echo "Directory /media/openweather/O-W does not exist, skipping copy" >> /home/openweather/cronlog.txt
-fi
