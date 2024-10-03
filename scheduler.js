@@ -1,5 +1,5 @@
 // scheduler.js
-const VERSION = '0.1d';
+const VERSION = '0.1e';
 const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');
@@ -37,33 +37,6 @@ logger.info('Logger loaded');
 logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
 logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
 logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
-
-// request update from server, get json file back'
-// add this later if necessary
-if (false) {    // don't do this for now
-    fetch('https://example.com/data')
-        .then(response => {
-            // Check if the response is ok (status in the range 200-299)
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json(); // Parse JSON from the response body
-        })
-        .then(data => {
-            console.log(data); // Handle the data from the response
-            // if we receive any of the keys from config.json, update the config.json file
-            for (const key in data) {
-                if (data.hasOwnProperty(key) && config.hasOwnProperty(key)) {
-                    config[key] = data[key];
-                }
-            }
-            // save the updated config.json file
-            fs.writeFileSync('config.json', JSON.stringify(config, null, 2));
-        })
-        .catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
-        });
-}
 
 // check disk space of mediaPath
 function checkDisk() {
