@@ -8,6 +8,8 @@ function checkWifiConnection(config) {
     exec('/usr/bin/nmcli -t -f active,ssid dev wifi', (error, stdout, stderr) => {
         if (error) {
             console.error(`Error checking Wi-Fi connection: ${error.message}`);
+            printLCD('unable to connect', 'to WIFI');
+            process.exit(1);
             return;
         }
 
@@ -27,16 +29,21 @@ function checkWifiConnection(config) {
                 exec(command, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`Error connecting to Wi-Fi: ${error.message}`);
+                        printLCD('unable to connect', 'to WIFI');
+                        process.exit(1);
                     } else {
                         console.log('Successfully connected to Wi-Fi');
                     }
                 });
             } else {
                 console.log('Wi-Fi credentials not found in config');
+                printLCD('unable to connect', 'to WIFI');
+                process.exit(1);
             }
         }
     });
 }
+
 
 module.exports = {
     checkWifiConnection

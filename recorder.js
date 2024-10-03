@@ -74,7 +74,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
     // Log rtl_fm stderr for debugging
     rtlFm.stderr.on('data', (data) => {
-        logger.error(`rtl_fm error: ${data}`);
+        logger.info(`rtl_fm info: ${data}`);
     });
 
     // Log sox stderr for debugging
@@ -117,11 +117,23 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
                         uploadFile(downsampledFile, jsonData)
                             .then(response => {
-                                console.log('Response:', response);
-                                printLCD('upload completed!');
+                                if (response.success === false) {
+                                    // Handle the error response from uploadFile
+                                    console.error('Upload failed:', response.message);
+                                    if (response.status) {
+                                        console.error('Status:', response.status);
+                                    }
+                                    if (response.data) {
+                                        console.error('Data:', response.data);
+                                    }
+                                } else {
+                                    console.log('Response:', response);
+                                    printLCD('upload completed!');
+                                }
                             })
                             .catch(error => {
-                                console.error('Error:', error);
+                                // This catch block is for any unexpected errors that might not be handled inside uploadFile
+                                console.error('Unexpected error:', error);
                             });
                     }
 

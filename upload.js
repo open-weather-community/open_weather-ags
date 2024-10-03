@@ -1,8 +1,3 @@
-// upload.js
-// This script uploads the recorded audio file to the server using the Axios library
-// It reads the recorded audio file, appends additional JSON data, and uploads it to the server
-// The server URL and authorization token are stored in the .env file
-
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
@@ -10,6 +5,11 @@ require('dotenv').config(); // Load environment variables from .env file
 
 const uploadFile = async (filePath, jsonData) => {
     try {
+        // Check if the file exists
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`File not found: ${filePath}`);
+        }
+
         const fileStream = fs.createReadStream(filePath);
         const form = new FormData();
         form.append('wavfile', fileStream, 'audio.wav');
@@ -37,8 +37,23 @@ const uploadFile = async (filePath, jsonData) => {
         console.log('File uploaded successfully:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error uploading file:', error);
-        throw error;
+        if (error.response) {
+            // Server responded with a status other than 2xx
+            console.error('Server responded with an error:', error.response.status, error.response.data);
+        } else if (error.request) {
+            // Request was made but no response was received
+            console.error('No response received from server:', error.request);
+        } else {
+            // Something else happened while setting up the request
+            console.error('Error setting up the request:', error.message);
+        }
+
+        // Return a meaningful error message or status code
+        return {
+            success: false,
+            message: error.message,
+            ...(error.response && { status: error.response.status, data: error.response.data })
+        };
     }
 };
 
