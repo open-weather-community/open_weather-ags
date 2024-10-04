@@ -9,7 +9,7 @@ const checkDiskSpace = require('check-disk-space').default;
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
 const { checkWifiConnection } = require('./wifi');
-const { checkDisk } = require('./disk'); // Import the disk module
+const { checkDisk, deleteOldestRecordings } = require('./disk');
 
 printLCD('booting up', 'groundstation');
 
@@ -45,8 +45,7 @@ logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
 logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
 logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
 
-checkDisk(logger, config.saveDir, require('./disk').deleteOldestRecordings);
-
+checkDisk(logger, config.saveDir, deleteOldestRecordings);
 
 async function updatePasses() {
     // totally clear passes.json
