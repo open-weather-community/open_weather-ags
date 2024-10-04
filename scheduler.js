@@ -1,6 +1,6 @@
 // scheduler.js
 const VERSION = '0.1e';
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
@@ -10,125 +10,158 @@ const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD mod
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
 const { checkWifiConnection } = require('./wifi');
 
-async function main() {
-    printLCD('booting up', 'groundstation');
+printLCD('booting up', 'groundstation');
 
-    let config;
-    try {
-        config = loadConfig();
-        if (!config) throw new Error('Failed to load configuration');
-    } catch (error) {
-        console.error(error.message);
-        printLCD('config error', 'check log');
-        process.exit(1);
-    }
+let config = loadConfig();
 
-    console.log(config);
-    printLCD('config loaded');
+// print config
+console.log(config);
 
-    try {
-        await checkWifiConnection(config);
-        printLCD('wifi', 'connected');
-    } catch (error) {
-        console.error(`Error checking Wi-Fi connection: ${error.message}`);
-        printLCD('unable to connect', 'to WIFI');
-        process.exit(1);
-    }
-
-    const logger = new Logger(config);
-    logger.info('Logger loaded');
-    logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
-    logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
-    logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
-
-    await checkDisk(config, logger);
-    await updatePasses(config, logger);
-    await handleMainLogic(config, logger);
+if (!config) {
+    console.log('Failed to load configuration');
+    printLCD('config error', 'check log');
+    process.exit(1);
 }
 
-async function checkDisk(config, logger) {
+// print the config path dir to the LCD
+printLCD('config loaded');
+
+// Check Wi-Fi connection
+checkWifiConnection(config);
+
+printLCD('wifi', 'connected');
+
+// Initialize the logger with the configuration
+const logger = new Logger(config);
+logger.info('Logger loaded');
+logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
+logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
+logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
+
+// check disk space of mediaPath
+function checkDisk() {
     const mediaPath = config.saveDir;
+
     logger.info(`Checking disk space on ${mediaPath}...`);
 
-    try {
-        const { free, size } = await checkDiskSpace(mediaPath);
-        const percentFree = (free / size) * 100;
-        logger.info(`Disk space on ${mediaPath}: ${free} bytes free, or ${percentFree.toFixed(2)}%`);
+    checkDiskSpace(mediaPath).then((diskSpace) => {
+        let percentFree = (diskSpace.free / diskSpace.size) * 100;
+        logger.info(`Disk space on ${mediaPath}: ${diskSpace.free} bytes free, or ${percentFree.toFixed(2)}%`);
 
+        // if less than 10% free space, delete oldest 2 recordings
         if (percentFree < 10) {
             logger.info(`Less than 10% free space on ${mediaPath}. Deleting oldest 2 recordings...`);
+            deleteOldestRecordings(mediaPath, 2);
+        }
 
-            const files = await fs.readdir(mediaPath);
-            const wavFiles = files.filter(file => file.endsWith('.wav'));
+    }).catch((error) => {
+        logger.error(`Error checking disk space: ${error.message}`);
+    });
+}
 
-            const sortedWavFiles = await sortFilesByCreationTime(wavFiles, mediaPath);
+function deleteOldestRecordings(directory, count) {
+    try {
+        // Get the list of files in the media path
+        const files = fs.readdirSync(directory);
 
-            for (let i = 0; i < 2 && i < sortedWavFiles.length; i++) {
-                const fileToDelete = path.join(mediaPath, sortedWavFiles[i]);
-                await fs.unlink(fileToDelete);
-                logger.info(`Deleted file: ${fileToDelete}`);
-            }
+        // Filter the files to only include .wav files
+        const wavFiles = files.filter(file => file.endsWith('.wav'));
+
+        // Sort the .wav files by creation time in ascending order
+        wavFiles.sort((a, b) => {
+            return fs.statSync(path.join(directory, a)).birthtime - fs.statSync(path.join(directory, b)).birthtime;
+        });
+
+        // Delete the oldest .wav files
+        for (let i = 0; i < count && i < wavFiles.length; i++) {
+            const fileToDelete = path.join(directory, wavFiles[i]);
+            fs.unlinkSync(fileToDelete);
+            logger.info(`Deleted file: ${fileToDelete}`);
         }
     } catch (error) {
-        logger.error(`Error checking disk space: ${error.message}`);
+        logger.error(`Error deleting oldest recordings: ${error.message}`);
     }
 }
 
-async function sortFilesByCreationTime(files, directory) {
-    const fileStats = await Promise.all(files.map(async file => {
-        const filePath = path.join(directory, file);
-        const stats = await fs.stat(filePath);
-        return { file, birthtime: stats.birthtime };
-    }));
+checkDisk();
 
-    return fileStats.sort((a, b) => a.birthtime - b.birthtime).map(stat => stat.file);
-}
-
-async function updatePasses(config, logger) {
+async function updatePasses() {
+    // totally clear passes.json
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
-    await fs.writeFile(passesFilePath, '[]');
+    fs.writeFileSync(passesFilePath, '[]');
     logger.info(`Cleared passes file at ${passesFilePath}`);
 
+    // get TLE data
     await processPasses(config, logger);
 
+    // clear all but the most recent 100 lines of log.txt
     const logFilePath = path.resolve(config.saveDir, config.logFile);
-    const logFileContent = await fs.readFile(logFilePath, 'utf8');
-    const logFileLines = logFileContent.split('\n');
-    if (logFileLines.length > 100) {
-        const recentLogs = logFileLines.slice(-100).join('\n');
-        await fs.writeFile(logFilePath, recentLogs);
+    const logFile = fs.readFileSync(logFilePath, 'utf8').split('\n');
+    const logFileLength = logFile.length;
+    if (logFileLength > 100) {
+        fs.writeFileSync(logFilePath, logFile.slice(logFileLength - 100).join('\n'));
     }
 }
 
-async function handleMainLogic(config, logger) {
+async function main() {
     printLCD('updating', 'passes...');
-    await updatePasses(config, logger);
+    await updatePasses();
     printLCD('passes', 'updated');
 
+    function findHighestMaxElevationPass(passes) {
+        const now = new Date();
+        const today = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+
+        const validPasses = passes.filter(pass => {
+            const passDate = new Date(`${pass.date} ${pass.time}`);
+            const passDay = passDate.toISOString().split('T')[0];
+            return passDay === today && passDate > now;
+        });
+
+        return validPasses.reduce((maxPass, currentPass) => {
+            const maxElevation = parseFloat(maxPass.maxElevation) || 0;
+            const currentElevation = parseFloat(currentPass.maxElevation);
+            return currentElevation > maxElevation ? currentPass : maxPass;
+        }, {});
+    }
+
+
+    // find the highest max elevation pass
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
-    await ensurePassesFileExists(passesFilePath);
+    // ensure the passes file exists
+    ensurePassesFileExists(passesFilePath);
 
-    const passes = await readPassesFile(passesFilePath);
+    // read it and parse it
+    const passes = readPassesFile(passesFilePath);
 
+    // find the highest max elevation pass
     const highestMaxElevationPass = findHighestMaxElevationPass(passes);
 
     logger.log("Highest max elevation pass of the day:");
     logger.log(JSON.stringify(highestMaxElevationPass));
 
+    // printLCD('will record at', highestMaxElevationPass.time);
     printLCD('ground station', 'ready!' + ' v' + VERSION);
 
+    // record the highest max elevation pass at the correct time
     if (highestMaxElevationPass) {
         const now = new Date();
+
+        // combine highestMaxElevationPass.date and highestMaxElevationPass.time to get the recordTime
         const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
         const delay = recordTime - now;
 
         if (delay > 0) {
             setTimeout(() => {
-                handleRecording(highestMaxElevationPass, now, passesFilePath, passes, config, logger);
+                handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
             }, delay);
 
+            // const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
+            // const endRecordTime = new Date(recordTime.getTime() + highestMaxElevationPass.duration * 60000);
+            // const newDuration = Math.floor((endRecordTime - recordTime) / 60000);
             logger.info(`Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`);
+
         } else {
             logger.log('The highest max elevation pass time is in the past, skipping recording.');
         }
@@ -137,8 +170,12 @@ async function handleMainLogic(config, logger) {
     }
 }
 
-async function handleRecording(item, now, passesFilePath, jsonData, config, logger) {
+async function handleRecording(item, now, passesFilePath, jsonData) {
+
     const recordTime = new Date(`${item.date} ${item.time}`);
+    // const endRecordTime = new Date(recordTime.getTime() + item.duration * 60000);
+    // const newDuration = Math.floor((endRecordTime - now) / 60000);
+
     logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`);
 
     startRecording(item.frequency, recordTime, item.satellite, item.duration, config, logger);
@@ -150,23 +187,24 @@ async function handleRecording(item, now, passesFilePath, jsonData, config, logg
         printLCD('done recording');
     }, item.duration * 60000);
 
-    item.recorded = true;
+    item.recorded = true;  // Mark the item as recorded
 
-    await fs.writeFile(passesFilePath, JSON.stringify(jsonData, null, 2));
+    // write the updated jsonData to the passes file
+    fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
-async function ensurePassesFileExists(passesFilePath) {
-    try {
-        await fs.access(passesFilePath);
-    } catch (error) {
-        await fs.writeFile(passesFilePath, '[]');
+// Function to create an empty passes file if it doesn't exist
+function ensurePassesFileExists(passesFilePath) {
+    if (!fs.existsSync(passesFilePath)) {
+        fs.writeFileSync(passesFilePath, '[]');
         logger.info(`Blank passes file created at ${passesFilePath}`);
     }
 }
 
-async function readPassesFile(passesFilePath) {
+// Function to read and parse the passes file
+function readPassesFile(passesFilePath) {
     try {
-        const data = await fs.readFile(passesFilePath, 'utf8');
+        const data = fs.readFileSync(passesFilePath, 'utf8');
         return JSON.parse(data);
     } catch (error) {
         logger.error(`Error reading or parsing file at ${passesFilePath}: ${error.message}`);
@@ -174,25 +212,5 @@ async function readPassesFile(passesFilePath) {
     }
 }
 
-function findHighestMaxElevationPass(passes) {
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-
-    const validPasses = passes.filter(pass => {
-        const passDate = new Date(`${pass.date} ${pass.time}`);
-        const passDay = passDate.toISOString().split('T')[0];
-        return passDay === today && passDate > now;
-    });
-
-    return validPasses.reduce((maxPass, currentPass) => {
-        const maxElevation = parseFloat(maxPass.maxElevation) || 0;
-        const currentElevation = parseFloat(currentPass.maxElevation);
-        return currentElevation > maxElevation ? currentPass : maxPass;
-    }, {});
-}
-
-main().catch(err => {
-    console.error(`Error in main execution: ${err.message}`);
-    printLCD('unexpected error', 'check log');
-    process.exit(1);
-});
+// Execute the main function
+main().catch(err => logger.error(`Error in main execution: ${err.message}`));
