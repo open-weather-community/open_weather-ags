@@ -9,6 +9,7 @@ const checkDiskSpace = require('check-disk-space').default;
 const { printLCD, clearLCD, startMarquee } = require('./lcd'); // Import LCD module
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config'); // Import config module
 const { checkWifiConnection } = require('./wifi');
+const { checkDisk } = require('./disk'); // Import the disk module
 
 printLCD('booting up', 'groundstation');
 
@@ -44,52 +45,8 @@ logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
 logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
 logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
 
-// check disk space of mediaPath
-function checkDisk() {
-    const mediaPath = config.saveDir;
+checkDisk(logger, config.saveDir, require('./disk').deleteOldestRecordings);
 
-    logger.info(`Checking disk space on ${mediaPath}...`);
-
-    checkDiskSpace(mediaPath).then((diskSpace) => {
-        let percentFree = (diskSpace.free / diskSpace.size) * 100;
-        logger.info(`Disk space on ${mediaPath}: ${diskSpace.free} bytes free, or ${percentFree.toFixed(2)}%`);
-
-        // if less than 10% free space, delete oldest 2 recordings
-        if (percentFree < 10) {
-            logger.info(`Less than 10% free space on ${mediaPath}. Deleting oldest 2 recordings...`);
-            deleteOldestRecordings(mediaPath, 2);
-        }
-
-    }).catch((error) => {
-        logger.error(`Error checking disk space: ${error.message}`);
-    });
-}
-
-function deleteOldestRecordings(directory, count) {
-    try {
-        // Get the list of files in the media path
-        const files = fs.readdirSync(directory);
-
-        // Filter the files to only include .wav files
-        const wavFiles = files.filter(file => file.endsWith('.wav'));
-
-        // Sort the .wav files by creation time in ascending order
-        wavFiles.sort((a, b) => {
-            return fs.statSync(path.join(directory, a)).birthtime - fs.statSync(path.join(directory, b)).birthtime;
-        });
-
-        // Delete the oldest .wav files
-        for (let i = 0; i < count && i < wavFiles.length; i++) {
-            const fileToDelete = path.join(directory, wavFiles[i]);
-            fs.unlinkSync(fileToDelete);
-            logger.info(`Deleted file: ${fileToDelete}`);
-        }
-    } catch (error) {
-        logger.error(`Error deleting oldest recordings: ${error.message}`);
-    }
-}
-
-checkDisk();
 
 async function updatePasses() {
     // totally clear passes.json
