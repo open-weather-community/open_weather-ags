@@ -13,16 +13,22 @@ const { checkDisk } = require('./diskOperations'); // Import disk operations
 
 printLCD('booting up', 'groundstation');
 
-let config = loadConfig();
+let configPath;
+let config;
 
-// print config
-console.log(config);
-
-if (!config) {
-    console.log('Failed to load configuration');
+try {
+    configPath = getConfigPath();
+    console.log(`Config file path: ${configPath}`);
+    config = loadConfig();
+    if (!config) throw new Error('Failed to load configuration');
+} catch (error) {
+    console.error(`Error loading configuration: ${error.message}`);
     printLCD('config error', 'check log');
     process.exit(1);
 }
+
+// print config
+console.log(config);
 
 // print the config path dir to the LCD
 printLCD('config loaded');
@@ -113,9 +119,6 @@ async function main() {
                 handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
             }, delay);
 
-            // const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
-            // const endRecordTime = new Date(recordTime.getTime() + highestMaxElevationPass.duration * 60000);
-            // const newDuration = Math.floor((endRecordTime - recordTime) / 60000);
             logger.info(`Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`);
 
         } else {
