@@ -29,7 +29,7 @@ class Logger {
       second: "2-digit",
       timeZoneName: "short",
     };
-    const timestamp = now.toISOString().replace('T', ' ').replace('Z', ' UTC');
+    const timestamp = new Date().toLocaleString("en-US", options);
 
     const logMessage = `${timestamp} - ${level} - ${message}\n`;
 
