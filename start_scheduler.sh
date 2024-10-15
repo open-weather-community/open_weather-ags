@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Acquire a lock to prevent concurrent executions
+exec 200>/var/lock/openweather_startup.lockfile
+flock -n 200 || exit 1
+
 # Log to cronlog.txt that it is booting up
 echo "Booting up at $(date)" >> /home/openweather/cronlog.txt
 
@@ -31,11 +35,16 @@ sleep 30
 
 # Change the current working directory to the directory where the scheduler.js file is located
 cd /home/openweather/open_weather-ags 2>> /home/openweather/cronlog.txt
+if [ $? -ne 0 ]; then
+    echo "Failed to change directory to /home/openweather/open_weather-ags" >> /home/openweather/cronlog.txt
+    exit 1
+fi
 
 # Fetch latest changes from Git repository
 # Reset the local branch to match the remote branch
-git fetch --depth=1 origin main >> /home/openweather/cronlog.txt 2>&1
+git fetch origin main >> /home/openweather/cronlog.txt 2>&1
 git reset --hard origin/main >> /home/openweather/cronlog.txt 2>&1
+git clean -fdx >> /home/openweather/cronlog.txt 2>&1
 
 # Launch the Node.js process using the node executable in the current working directory
 /home/openweather/.nvm/versions/node/v22.3.0/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
