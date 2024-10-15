@@ -44,7 +44,6 @@ fi
 # Reset the local branch to match the remote branch
 git fetch origin main >> /home/openweather/cronlog.txt 2>&1
 git reset --hard origin/main >> /home/openweather/cronlog.txt 2>&1
-git clean -fdx >> /home/openweather/cronlog.txt 2>&1
 
 # Launch the Node.js process using the node executable in the current working directory
 /home/openweather/.nvm/versions/node/v22.3.0/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
