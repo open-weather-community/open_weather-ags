@@ -15,6 +15,12 @@ if [ "$LINE_COUNT" -gt "$MAX_LINES" ]; then
     sed -i "1,${LINES_TO_DELETE}d" "$LOG_FILE"
 fi
 
+# Reset the local time
+echo "Resetting local time at $(date)" >> /home/openweather/cronlog.txt
+sudo timedatectl set-ntp true
+#sudo timedatectl set-timezone "UTC" # Change "UTC" to your desired timezone, e.g., "America/New_York"
+
+
 # Export the NVM environment variables
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
@@ -27,9 +33,8 @@ sleep 30
 cd /home/openweather/open_weather-ags 2>> /home/openweather/cronlog.txt
 
 # Fetch latest changes from Git repository
-git fetch origin >> /home/openweather/cronlog.txt 2>&1
-
 # Reset the local branch to match the remote branch
+git fetch --depth=1 origin main >> /home/openweather/cronlog.txt 2>&1
 git reset --hard origin/main >> /home/openweather/cronlog.txt 2>&1
 
 # Launch the Node.js process using the node executable in the current working directory
