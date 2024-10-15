@@ -18,7 +18,7 @@ fi
 # Reset the local time
 echo "Resetting local time at $(date)" >> /home/openweather/cronlog.txt
 sudo timedatectl set-ntp true
-#sudo timedatectl set-timezone "UTC" # Change "UTC" to your desired timezone, e.g., "America/New_York"
+sudo timedatectl set-timezone "UTC"
 
 
 # Export the NVM environment variables
