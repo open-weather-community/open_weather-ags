@@ -1,5 +1,5 @@
 // scheduler.js
-const VERSION = '0.1d';
+const VERSION = '0.1e';
 const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');
