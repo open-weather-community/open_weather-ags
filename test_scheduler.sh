@@ -111,7 +111,7 @@ else
 fi
 
 # Launch the Node.js process using the node executable in the current working directory
-/home/openweather/.nvm/versions/node/v22.3.0/bin/node scheduler.js >> /home/openweather/cronlog.txt 2>&1
+/home/openweather/.nvm/versions/node/v22.3.0/bin/node $LOCAL_DIR/scheduler.js >> /home/openweather/cronlog.txt 2>&1
 
 # Log the completion of the script
 echo "Script completed at $(date)" >> /home/openweather/cronlog.txt
