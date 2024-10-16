@@ -67,7 +67,7 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
     mkdir -p $TMP_DIR
 
     # Step 4: Download and extract the tarball
-    wget -qO- $DOWNLOAD_URL | tar xz -C $TMP_DIR || { echo "Failed to download and extract the tarball" >> /home/openweather/cronlog.txt; exit 1; }
+    curl -L $DOWNLOAD_URL | tar xz -C $TMP_DIR || { echo "Failed to download and extract the tarball" >> /home/openweather/cronlog.txt; exit 1; }
 
     # Step 5: Remove old files but preserve important configurations (like .env)
     if [ -d "$LOCAL_DIR" ]; then
