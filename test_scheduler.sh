@@ -35,12 +35,20 @@ timedatectl set-timezone "UTC"
 
 # Step 1: Fetch the latest release information from the GitHub API
 RELEASE_INFO=$(curl -s $RELEASE_API_URL)
-LATEST_RELEASE=$(echo $RELEASE_INFO | grep "tag_name" | cut -d '"' -f 4)
+echo "Release Info: $RELEASE_INFO" >> /home/openweather/cronlog.txt
 
-if [ -z "$LATEST_RELEASE" ]; then
-    echo "Failed to retrieve the latest release from the GitHub API." >> /home/openweather/cronlog.txt
+# Use jq to parse the release info
+LATEST_RELEASE=$(echo $RELEASE_INFO | jq -r .tag_name)
+DOWNLOAD_URL=$(echo $RELEASE_INFO | jq -r .tarball_url)  # Correct URL for tarball
+
+# Check if LATEST_RELEASE or DOWNLOAD_URL are empty
+if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
+    echo "Failed to retrieve the latest release or tarball URL from the GitHub API." >> /home/openweather/cronlog.txt
     exit 1
 fi
+
+echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> /home/openweather/cronlog.txt
+
 
 # Step 2: Check if the current version matches the latest release
 if [ ! -f "$LOCAL_DIR/version.txt" ]; then
@@ -54,7 +62,6 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
     echo "New release found: $LATEST_RELEASE. Updating..."
 
      # Step 3: Extract the tarball download URL from the API response
-    DOWNLOAD_URL=$(echo $RELEASE_INFO | grep "tarball_url" | cut -d '"' -f 4)
 
     TMP_DIR="/tmp/open_weather_update"
     
