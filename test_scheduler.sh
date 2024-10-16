@@ -38,8 +38,8 @@ RELEASE_INFO=$(curl -s $RELEASE_API_URL)
 echo "Release Info: $RELEASE_INFO" >> /home/openweather/cronlog.txt
 
 # Use jq to parse the release info
-LATEST_RELEASE=$(echo $RELEASE_INFO | jq -r .tag_name)
-DOWNLOAD_URL=$(echo $RELEASE_INFO | jq -r .tarball_url)  # Correct URL for tarball
+LATEST_RELEASE=$(echo $RELEASE_INFO | grep -oP '"tag_name":\s*"\K[^"]+')
+DOWNLOAD_URL=$(echo $RELEASE_INFO | grep -oP '"tarball_url":\s*"\K[^"]+')
 
 # Check if LATEST_RELEASE or DOWNLOAD_URL are empty
 if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
