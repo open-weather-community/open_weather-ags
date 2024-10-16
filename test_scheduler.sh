@@ -66,8 +66,11 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
     
     mkdir -p $TMP_DIR
 
-    # Step 4: Download and extract the tarball
+    # Step 4: Download and extract the tarball using curl -L
     curl -L $DOWNLOAD_URL | tar xz -C $TMP_DIR || { echo "Failed to download and extract the tarball" >> /home/openweather/cronlog.txt; exit 1; }
+
+    # Find the extracted directory (it will have a hash in the name)
+    EXTRACTED_DIR=$(find $TMP_DIR -mindepth 1 -maxdepth 1 -type d)
 
     # Step 5: Remove old files but preserve important configurations (like .env)
     if [ -d "$LOCAL_DIR" ]; then
@@ -78,6 +81,9 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
 
         # Remove all files except for .env
         rm -rf "$LOCAL_DIR"/*
+
+        # Copy the contents from the extracted directory to $LOCAL_DIR
+        cp -r $EXTRACTED_DIR/* $LOCAL_DIR/
 
         # Restore the .env file
         if [ -f /tmp/.env_backup ]; then
