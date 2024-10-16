@@ -1,5 +1,6 @@
 // scheduler.js
-const VERSION = '0.1e';
+const packageJson = require('./package.json');
+const VERSION = packageJson.version;
 const fs = require('fs');
 const path = require('path');
 const Logger = require('./logger');

@@ -20,9 +20,9 @@ if [ "$LINE_COUNT" -gt "$MAX_LINES" ]; then
 fi
 
 # Reset the local time
-echo "Resetting local time at $(date)" >> /home/openweather/cronlog.txt
-sudo timedatectl set-ntp true
-sudo timedatectl set-timezone "UTC"
+echo "Setting ntp true and timezone to UTC at $(date)" >> /home/openweather/cronlog.txt
+timedatectl set-ntp true
+timedatectl set-timezone "UTC"
 
 
 # Export the NVM environment variables
@@ -42,6 +42,7 @@ fi
 
 # Fetch latest changes from Git repository
 # Reset the local branch to match the remote branch
+echo "Fetching and reseting" >> /home/openweather/cronlog.txt
 git fetch origin main >> /home/openweather/cronlog.txt 2>&1
 git reset --hard origin/main >> /home/openweather/cronlog.txt 2>&1
 

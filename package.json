@@ -1,7 +1,7 @@
 {
-  "name": "usb-auto-save",
+  "name": "open-weather_ags",
   "version": "1.0.0",
-  "description": "",
+  "description": "open-weather automated ground station",
   "main": "scheduler.js",
   "scripts": {
     "start": "node scheduler.js"
@@ -22,6 +22,6 @@
     "raspberrypi-liquid-crystal": "^1.20.0",
     "satellite.js": "^5.0.0"
   },
-  "author": "",
+  "author": "Grayson Earle",
   "license": "ISC"
 }
