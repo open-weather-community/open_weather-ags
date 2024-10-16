@@ -41,14 +41,13 @@ echo "Release Info: $RELEASE_INFO" >> /home/openweather/cronlog.txt
 LATEST_RELEASE=$(echo $RELEASE_INFO | grep -oP '"tag_name":\s*"\K[^"]+')
 DOWNLOAD_URL=$(echo $RELEASE_INFO | grep -oP '"tarball_url":\s*"\K[^"]+')
 
+echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> /home/openweather/cronlog.txt
+
 # Check if LATEST_RELEASE or DOWNLOAD_URL are empty
 if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
     echo "Failed to retrieve the latest release or tarball URL from the GitHub API." >> /home/openweather/cronlog.txt
     exit 1
 fi
-
-echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> /home/openweather/cronlog.txt
-
 
 # Step 2: Check if the current version matches the latest release
 if [ ! -f "$LOCAL_DIR/version.txt" ]; then
