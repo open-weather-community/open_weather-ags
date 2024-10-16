@@ -1,4 +1,9 @@
 #!/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Source NVM and set up Node.js environment
+export NVM_DIR="/home/openweather/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm use 22.3.0
 
 REPO="https://github.com/prismspecs/open_weather-ags"
 LOCAL_DIR="/home/openweather/open_weather-ags"
@@ -28,16 +33,14 @@ if [ "$LINE_COUNT" -gt "$LOG_MAX_LINES" ]; then
     sed -i "1,${LOG_LINES_TO_DELETE}d" "$LOG_FILE" || echo "Failed to truncate log file" >> $LOG_FILE
 fi
 
-# Reset the local time
-echo "Setting ntp true and timezone to UTC at $(date)" >> /home/openweather/cronlog.txt
-timedatectl set-ntp true
-timedatectl set-timezone "UTC"
+# Give the system time to connect to the network
+sleep 20
 
 # Step 1: Fetch the latest release information from the GitHub API
-RELEASE_INFO=$(curl -s $RELEASE_API_URL)
+RELEASE_INFO=$(/usr/bin/curl -s $RELEASE_API_URL)
 echo "Release Info: $RELEASE_INFO" >> /home/openweather/cronlog.txt
 
-# Use jq to parse the release info
+# Parse the release info
 LATEST_RELEASE=$(echo $RELEASE_INFO | grep -oP '"tag_name":\s*"\K[^"]+')
 DOWNLOAD_URL=$(echo $RELEASE_INFO | grep -oP '"tarball_url":\s*"\K[^"]+')
 
@@ -67,7 +70,7 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
     mkdir -p $TMP_DIR
 
     # Step 4: Download and extract the tarball using curl -L
-    curl -L $DOWNLOAD_URL | tar xz -C $TMP_DIR || { echo "Failed to download and extract the tarball" >> /home/openweather/cronlog.txt; exit 1; }
+    /usr/bin/curl -L $DOWNLOAD_URL | tar xz -C $TMP_DIR || { echo "Failed to download and extract the tarball" >> /home/openweather/cronlog.txt; exit 1; }
 
     # Find the extracted directory (it will have a hash in the name)
     EXTRACTED_DIR=$(find $TMP_DIR -mindepth 1 -maxdepth 1 -type d)

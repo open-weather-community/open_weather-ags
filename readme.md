@@ -107,6 +107,12 @@ sudo crontab -e
 0 3 * * * /sbin/shutdown -r now
 ```
 
+### set time to UTC and enable NTP
+```sh
+timedatectl set-ntp true
+timedatectl set-timezone "UTC"
+```
+
 ### Policy for user to do networking
 
 Since the app needs to connect to wifi networks based on the config file, we need to give the user the necessary permissions to do so.
