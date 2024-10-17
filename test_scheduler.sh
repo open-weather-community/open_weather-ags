@@ -75,14 +75,19 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
     # Find the extracted directory (it will have a hash in the name)
     EXTRACTED_DIR=$(find $TMP_DIR -mindepth 1 -maxdepth 1 -type d)
 
-    # Step 5: Remove old files but preserve important configurations (like .env)
+    # Step 5: Remove old files but preserve important configurations (like .env and configPath.json)
     if [ -d "$LOCAL_DIR" ]; then
         # Move the .env file to a safe location temporarily
         if [ -f "$LOCAL_DIR/.env" ]; then
             mv "$LOCAL_DIR/.env" /tmp/.env_backup
         fi
 
-        # Remove all files except for .env
+        # Move the configPath.json file to a safe location temporarily
+        if [ -f "$LOCAL_DIR/configPath.json" ]; then
+            mv "$LOCAL_DIR/configPath.json" /tmp/configPath_backup.json
+        fi
+
+        # Remove all files except for .env and configPath.json
         rm -rf "$LOCAL_DIR"/*
 
         # Copy the contents from the extracted directory to $LOCAL_DIR
@@ -91,6 +96,11 @@ if [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; then
         # Restore the .env file
         if [ -f /tmp/.env_backup ]; then
             mv /tmp/.env_backup "$LOCAL_DIR/.env"
+        fi
+
+        # Restore the configPath.json file
+        if [ -f /tmp/configPath_backup.json ]; then
+            mv /tmp/configPath_backup.json "$LOCAL_DIR/configPath.json"
         fi
     else
         echo "Directory $LOCAL_DIR does not exist" >> /home/openweather/cronlog.txt

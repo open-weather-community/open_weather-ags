@@ -2,7 +2,6 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { printLCD, clearLCD } = require('./lcd'); // Import LCD module
-require('dotenv').config(); // Load environment variables from .env file
 const { uploadFile } = require('./upload');
 
 let recording = false;
@@ -110,6 +109,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                         locLon: config.locLon,
                         gain: config.gain,
                         timestamp: formattedTimestamp,
+                        auth_token: config.auth_token,
                     };
 
                     if (!testing) {

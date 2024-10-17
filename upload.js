@@ -1,7 +1,6 @@
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
-require('dotenv').config(); // Load environment variables from .env file
 
 const uploadFile = async (filePath, jsonData) => {
     try {
@@ -24,7 +23,7 @@ const uploadFile = async (filePath, jsonData) => {
         const config = {
             headers: {
                 ...form.getHeaders(),
-                'Authorization': `Bearer ${process.env.AUTH_TOKEN}`
+                'Authorization': `Bearer ${jsonData.auth_token}`
             },
             onUploadProgress: progressEvent => {
                 console.log(`Uploaded ${Math.round(progressEvent.loaded / progressEvent.total * 100)}%`);
