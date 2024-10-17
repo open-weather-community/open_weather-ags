@@ -19,13 +19,12 @@ function findConfigFile(dir) {
         console.log(`Permission denied accessing directory: ${dir}`);
         return null;
     }
-    // print files
-    console.log("found files:");
 
     for (const file of files) {
         const fullPath = path.join(dir, file);
-        console.log(fullPath);
+        console.log(`found file ${fullPath}`);
         if (fs.statSync(fullPath).isDirectory()) {
+            console.log(`recursing into dir ${fullPath}`);
             const result = findConfigFile(fullPath);
             if (result) return result;
         } else if (file === configName) {
