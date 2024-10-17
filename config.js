@@ -6,6 +6,7 @@ const configPathFile = 'configPath.json';
 
 // Function to recursively find the config file in a directory and its subdirectories
 function findConfigFile(dir) {
+    console.log("finding config file");
     if (!fs.existsSync(dir)) {
         console.log(`Directory not found while finding config: ${dir}`);
         return null;
@@ -61,14 +62,14 @@ function loadConfig() {
             }
         }
     }
-    console.log('Config file not found');
+    console.log('Config file not found (loadConfig)');
     return null;
 }
 
 // Function to save the configuration
 function saveConfig(config) {
-    const configPath = findConfigFile(__dirname);
-    if (!configPath) {
+    const configPath = getConfigPath();
+    if (!configPath || !fs.existsSync(configPath)) {
         console.log('Config file not found');
         return false;
     }
