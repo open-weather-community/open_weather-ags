@@ -49,7 +49,7 @@ checkDisk(logger, config.saveDir, deleteOldestRecordings);
 
 async function main() {
     printLCD('updating', 'passes...');
-    await updatePasses(config, logger);
+    // await updatePasses(config, logger);
     printLCD('passes', 'updated');
 
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
