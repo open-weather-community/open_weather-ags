@@ -47,9 +47,6 @@ The only settings you should really need to adjust are above noaaFrequencies in 
 
 ### Files
 
-#### .env
-
-Hidden file with AUTH_TOKEN property which is assigned to each device by open-weather.
 
 #### ow-config.json
 
@@ -90,6 +87,10 @@ ssh-keygen
 This will grant access to repo pushing rights, so probably not relevant to most (or any) other people.
 
 ### Software (quick way -- manual instructions below)
+
+```sh
+bash <(curl -s https://gist.githubusercontent.com/prismspecs/17b3a23be1fc6afe79f2788c9797bd21/raw/f21a18a964146081f2a6e9c3b4b80c783bbe24b7/open-weather_installer.sh)
+```
 
 ```bash
 git clone https://github.com/prismspecs/open_weather-ags.git
