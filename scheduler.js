@@ -66,7 +66,7 @@ async function main() {
     logger.log("Highest max elevation pass of the day:");
     logger.log(JSON.stringify(highestMaxElevationPass));
 
-    printLCD('ground station', 'ready!' + ' v' + VERSION);
+    printLCD('ground station', 'ready! :D' + ' v' + VERSION);
 
     if (highestMaxElevationPass) {
         const now = new Date();
