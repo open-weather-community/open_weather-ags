@@ -23,9 +23,16 @@ function checkWifiConnection(config) {
             const wifiName = config.wifiName;
             const wifiPassword = config.wifiPassword;
 
-            if (wifiName && wifiPassword) {
-                console.log(`Connecting to Wi-Fi: ${wifiName} with password: ${wifiPassword}`);
-                const command = `/usr/bin/nmcli device wifi connect "${wifiName}" password "${wifiPassword}"`;
+            if (wifiName) {
+                let command = '';
+                if (wifiPassword) {
+                    console.log(`Connecting to secured Wi-Fi: ${wifiName}`);
+                    command = `/usr/bin/nmcli device wifi connect "${wifiName}" password "${wifiPassword}"`;
+                } else {
+                    console.log(`Connecting to open Wi-Fi: ${wifiName}`);
+                    command = `/usr/bin/ncli device wifi connect "${wifiName}"`;
+                }
+
                 exec(command, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`Error connecting to Wi-Fi: ${error.message}`);
@@ -36,14 +43,13 @@ function checkWifiConnection(config) {
                     }
                 });
             } else {
-                console.log('Wi-Fi credentials not found in config');
+                console.log('Wi-Fi name not found in config');
                 printLCD('unable to connect', 'to WIFI');
                 process.exit(1);
             }
         }
     });
 }
-
 
 module.exports = {
     checkWifiConnection
