@@ -100,19 +100,16 @@ if [ "$UPDATE_FAILED" = false ]; then
             if [ "$UPDATE_FAILED" = false ]; then
                 # Step 6: Install/update dependencies
                 cd "$LOCAL_DIR" || { echo "Failed to change directory to $LOCAL_DIR" >> "$LOG_FILE"; UPDATE_FAILED=true; }
-                if ! npm install --production; then
-                    echo "npm install failed" >> "$LOG_FILE"
-                    UPDATE_FAILED=true
-                else
-                    # Step 7: Update the current version
-                    echo "$LATEST_RELEASE" > version.txt
+                npm install --production || echo "npm install failed, continuing..." >> "$LOG_FILE"
+                
+                # Step 7: Update the current version
+                echo "$LATEST_RELEASE" > version.txt
 
-                    # Step 8: Clean up
-                    rm -rf "$TMP_DIR"
+                # Step 8: Clean up
+                rm -rf "$TMP_DIR"
 
-                    # Step 9: Reboot the device
-                    sudo reboot
-                fi
+                # Step 9: Reboot the device
+                sudo reboot
             fi
         fi
     else

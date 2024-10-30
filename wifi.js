@@ -30,7 +30,7 @@ function checkWifiConnection(config) {
                     command = `/usr/bin/nmcli device wifi connect "${wifiName}" password "${wifiPassword}"`;
                 } else {
                     console.log(`Connecting to open Wi-Fi: ${wifiName}`);
-                    command = `/usr/bin/ncli device wifi connect "${wifiName}"`;
+                    command = `/usr/bin/nmcli device wifi connect "${wifiName}"`;
                 }
 
                 exec(command, (error, stdout, stderr) => {
