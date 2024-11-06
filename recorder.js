@@ -112,7 +112,8 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                         locLon: config.locLon,
                         gain: config.gain,
                         timestamp: formattedTimestamp,
-                        auth_token: config.auth_token,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        auth_token: config.auth_token
                     };
 
                     if (!testing) {
