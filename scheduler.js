@@ -37,11 +37,8 @@ printLCD('config loaded');
 // check Wi-Fi connection
 try {
     await checkWifiConnection(config);
-    printLCD('wifi', 'connected');
 } catch (error) {
     console.error(`Error checking Wi-Fi connection: ${error.message}`);
-    printLCD('unable to connect', 'to wifi');
-    process.exit(1);
 }
 
 // Initialize the logger with the configuration
