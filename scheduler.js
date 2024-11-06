@@ -10,6 +10,7 @@ const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./con
 const { checkWifiConnection } = require('./wifi');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
 const { updatePasses, findHighestMaxElevationPass, ensurePassesFileExists, readPassesFile } = require('./passes'); // Import passes module
+const axios = require('axios');
 
 printLCD('booting up', 'groundstation');
 
@@ -33,10 +34,15 @@ console.log(config);
 // print the config path dir to the LCD
 printLCD('config loaded');
 
-// Check Wi-Fi connection
-checkWifiConnection(config);
-
-printLCD('wifi', 'connected');
+// check Wi-Fi connection
+try {
+    await checkWifiConnection(config);
+    printLCD('wifi', 'connected');
+} catch (error) {
+    console.error(`Error checking Wi-Fi connection: ${error.message}`);
+    printLCD('unable to connect', 'to wifi');
+    process.exit(1);
+}
 
 // Initialize the logger with the configuration
 const logger = new Logger(config);
@@ -142,5 +148,7 @@ async function getLocalTimeAndTimezone() {
         return null;
     }
 }
+
+
 
 main().catch(err => logger.error(`Error in main execution: ${err.message}`));
