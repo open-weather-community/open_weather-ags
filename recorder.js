@@ -116,6 +116,9 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                         auth_token: config.auth_token
                     };
 
+                    // log jsonData
+                    logger.info(jsonData);
+
                     if (!testing) {
                         printLCD('uploading...');
 

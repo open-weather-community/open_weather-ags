@@ -82,7 +82,7 @@ async function main() {
     if (highestMaxElevationPass) {
         const now = new Date();
 
-        const recordTime = new Date(
+        let recordTime = new Date(
             `${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`
         );
         const delay = recordTime - now;
@@ -134,7 +134,7 @@ async function main() {
 }
 
 async function handleRecording(item, now, passesFilePath, jsonData, config, logger) {
-    const recordTime = new Date(`${item.date} ${item.time}`);
+    let recordTime = new Date(`${item.date} ${item.time}`);
     logger.info(
         `Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`
     );
