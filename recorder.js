@@ -61,14 +61,17 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
     // Start sox process to downsample the audio on the fly
     const soxDownsample = spawn(config.sox_path, [
-        '-t', 'raw',
-        '-r', '48k',
-        '-e', 'signed',
-        '-b', '16',
-        '-c', '1',
-        '-',
-        '-r', '11025',
-        downsampledFile
+        '-t', 'raw',          // Input type
+        '-r', '48k',          // Input sample rate
+        '-e', 'signed',       // Input encoding
+        '-b', '16',           // Input bit depth
+        '-c', '1',            // Input channels
+        '-',                  // Read from stdin
+        '-b', '16',           // Output bit depth
+        '-e', 'signed',       // Output encoding
+        '-t', 'wav',          // Output type
+        downsampledFile,      // Output file
+        'rate', '-v', '11025' // Use 'rate' effect with 'very high' quality
     ]);
 
     // Log rtl_fm stderr for debugging

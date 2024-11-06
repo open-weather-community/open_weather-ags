@@ -188,7 +188,13 @@ async function processPasses(configParam, loggerParam) {
 
                 const bufferStart = formattedStart.minus({ minutes: config.bufferMinutes });
                 const bufferEnd = formattedEnd.plus({ minutes: config.bufferMinutes });
-                const bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
+                let bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
+
+                // Ensure the bufferDuration is at least 2 minutes
+                if (bufferDuration < 2) {
+                    bufferDuration = 2;
+                    bufferEnd = bufferStart.plus({ minutes: 2 });
+                }
 
                 const newPass = {
                     frequency: config.noaaFrequencies[satName],

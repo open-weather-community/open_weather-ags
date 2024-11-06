@@ -80,6 +80,27 @@ async function main() {
             }, delay);
 
             logger.info(`Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`);
+
+            // after 2 minutes, display scheduled recording on the LCD
+            const localTimeInfo = await getLocalTimeAndTimezone();
+
+            if (localTimeInfo) {
+                logger.info(`Current local time: ${localTimeInfo.localTime}`);
+                logger.info(`Timezone: ${localTimeInfo.timezone}`);
+
+                // convert the record time to local time
+                const localRecordTime = new Date(recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone }));
+
+                setTimeout(() => {
+                    printLCD('recording pass at', `${localRecordTime.toLocaleTimeString()} ${localTimeInfo.timezone}`);
+                }, delay - 120000);
+
+            } else {
+                logger.error('Failed to fetch local time and timezone.');
+                process.exit(1);
+            }
+
+
         } else {
             logger.log('The highest max elevation pass time is in the past, skipping recording.');
         }
@@ -105,6 +126,21 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
 
     // write the updated jsonData to the passes file
     fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
+}
+
+
+async function getLocalTimeAndTimezone() {
+    try {
+        const response = await axios.get('http://worldtimeapi.org/api/ip');
+        const data = response.data;
+        return {
+            localTime: data.datetime,
+            timezone: data.timezone
+        };
+    } catch (error) {
+        console.error('Error fetching local time and timezone:', error);
+        return null;
+    }
 }
 
 main().catch(err => logger.error(`Error in main execution: ${err.message}`));
