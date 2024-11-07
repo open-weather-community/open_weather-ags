@@ -1,6 +1,12 @@
 #!/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# Set system timezone to UTC
+sudo timedatectl set-timezone UTC
+
+# Set script timezone to UTC
+export TZ=UTC
+
 # Source NVM and set up Node.js environment
 export NVM_DIR="/home/openweather/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -19,12 +25,6 @@ flock -n 200 || exit 1
 
 # Log to cronlog.txt that it is booting up
 echo "Booting up at $(date)" >> "$LOG_FILE"
-
-# --- Begin Time Zone Configuration ---
-# Set the system time zone to UTC
-echo "Setting system time zone to UTC" >> "$LOG_FILE"
-sudo timedatectl set-timezone UTC || echo "Failed to set time zone to UTC" >> "$LOG_FILE"
-# --- End Time Zone Configuration ---
 
 # Ensure the log file exists
 if [ ! -f "$LOG_FILE" ]; then
