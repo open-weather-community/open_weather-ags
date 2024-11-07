@@ -9,87 +9,113 @@ const { printLCD, clearLCD, startMarquee } = require('./lcd');
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config');
 const { checkWifiConnection } = require('./wifi');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
-const { updatePasses, findHighestMaxElevationPass, ensurePassesFileExists, readPassesFile } = require('./passes'); // Import passes module
+const {
+    updatePasses,
+    findHighestMaxElevationPass,
+    ensurePassesFileExists,
+    readPassesFile,
+} = require('./passes'); // Import passes module
+const axios = require('axios');
+
+let config;
+let logger;
 
 printLCD('booting up', 'groundstation');
 
-let configPath;
-let config;
-
-try {
-    configPath = getConfigPath();
-    console.log(`Config file path: ${configPath}`);
-    config = loadConfig();
-    if (!config) throw new Error('Failed to load configuration');
-} catch (error) {
-    console.error(`Error loading configuration: ${error.message}`);
-    printLCD('config error', 'check log');
-    process.exit(1);
-}
-
-// print config
-console.log(config);
-
-// print the config path dir to the LCD
-printLCD('config loaded');
-
-// Check Wi-Fi connection
-checkWifiConnection(config);
-
-printLCD('wifi', 'connected');
-
-// Initialize the logger with the configuration
-const logger = new Logger(config);
-logger.info('Logger loaded');
-logger.info(`as user: ${process.getuid()}`);  // Log the user ID of the process
-logger.info(`as group: ${process.getgid()}`);  // Log the group ID of the process
-logger.info(`current working directory: ${process.cwd()}`);  // Log the current working directory
-
-checkDisk(logger, config.saveDir, deleteOldestRecordings);
-
 async function main() {
+    let configPath;
+    try {
+        configPath = getConfigPath();
+        console.log(`Config file path: ${configPath}`);
+        config = loadConfig();
+        if (!config) throw new Error('Failed to load configuration');
+    } catch (error) {
+        console.error(`Error loading configuration: ${error.message}`);
+        printLCD('config error', 'check log');
+        process.exit(1);
+    }
+
+    // Print config
+    console.log(config);
+
+    // Indicate on LCD that config is loaded
+    printLCD('config loaded');
+
+    // Check Wi-Fi connection
+    try {
+        await checkWifiConnection(config);
+    } catch (error) {
+        console.error(`Error checking Wi-Fi connection: ${error.message}`);
+    }
+
+    let localTimeInfo = getLocalTimeAndTimezone();
+
+    // Initialize the logger with the configuration
+    logger = new Logger(config);
+    logger.info('Logger loaded');
+    logger.info(`as user: ${process.getuid()}`); // Log the user ID of the process
+    logger.info(`as group: ${process.getgid()}`); // Log the group ID of the process
+    logger.info(`current working directory: ${process.cwd()}`); // Log the current working directory
+
+    // Check disk space and delete oldest recordings if necessary
+    checkDisk(logger, config.saveDir, deleteOldestRecordings);
+
+    // Update passes
     printLCD('updating', 'passes...');
     await updatePasses(config, logger);
     printLCD('passes', 'updated');
 
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
-    // ensure the passes file exists
+    // Ensure the passes file exists
     ensurePassesFileExists(passesFilePath, logger);
 
-    // read it and parse it
+    // Read and parse the passes file
     const passes = readPassesFile(passesFilePath, logger);
 
-    // find the highest max elevation pass
+    // Find the highest max elevation pass
     const highestMaxElevationPass = findHighestMaxElevationPass(passes);
 
-    logger.log("Highest max elevation pass of the day:");
+    logger.log('Highest max elevation pass of the day:');
     logger.log(JSON.stringify(highestMaxElevationPass));
 
-    printLCD('ground station', 'ready! :D' + ' v' + VERSION);
+    printLCD('ground station', `ready! :D v${VERSION}`);
 
     if (highestMaxElevationPass) {
         const now = new Date();
 
-        const recordTime = new Date(`${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`);
+        let recordTime = new Date(
+            `${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`
+        );
         const delay = recordTime - now;
 
         if (delay > 0) {
-            setTimeout(() => {
-                handleRecording(highestMaxElevationPass, now, passesFilePath, passes);
+            setTimeout(async () => {
+                await handleRecording(
+                    highestMaxElevationPass,
+                    now,
+                    passesFilePath,
+                    passes,
+                    config,
+                    logger
+                );
             }, delay);
 
-            logger.info(`Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`);
+            logger.info(
+                `Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`
+            );
 
-            // after 2 minutes, display scheduled recording on the LCD
-            const localTimeInfo = await getLocalTimeAndTimezone();
+            // After 2 minutes, display scheduled recording on the LCD
+
 
             if (localTimeInfo) {
                 logger.info(`Current local time: ${localTimeInfo.localTime}`);
                 logger.info(`Timezone: ${localTimeInfo.timezone}`);
 
-                // convert the record time to local time
-                const localRecordTime = new Date(recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone }));
+                // Convert the record time to local time
+                const localRecordTime = new Date(
+                    recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone })
+                );
 
                 setTimeout(() => {
                     printLCD('recording pass at', `${localRecordTime.toLocaleTimeString()} ${localTimeInfo.timezone}`);
@@ -97,10 +123,8 @@ async function main() {
 
             } else {
                 logger.error('Failed to fetch local time and timezone.');
-                process.exit(1);
+                //process.exit(1);
             }
-
-
         } else {
             logger.log('The highest max elevation pass time is in the past, skipping recording.');
         }
@@ -109,13 +133,18 @@ async function main() {
     }
 }
 
-async function handleRecording(item, now, passesFilePath, jsonData) {
-    const recordTime = new Date(`${item.date} ${item.time}`);
-    logger.info(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`);
+async function handleRecording(item, now, passesFilePath, jsonData, config, logger) {
+    let recordTime = new Date(`${item.date} ${item.time}`);
+    logger.info(
+        `Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`
+    );
 
     startRecording(item.frequency, recordTime, item.satellite, item.duration, config, logger);
 
-    const marqueeInterval = startMarquee(`Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`, 500);
+    const marqueeInterval = startMarquee(
+        `Recording ${item.satellite} at ${item.date} ${item.time} for ${item.duration} minutes...`,
+        500
+    );
     setTimeout(() => {
         clearInterval(marqueeInterval);
         clearLCD();
@@ -124,18 +153,18 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
 
     item.recorded = true;
 
-    // write the updated jsonData to the passes file
+    // Write the updated jsonData to the passes file
     fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
-
-async function getLocalTimeAndTimezone() {
+function getLocalTimeAndTimezone() {
     try {
-        const response = await axios.get('http://worldtimeapi.org/api/ip');
-        const data = response.data;
+        const now = new Date();
+        const localTime = now.toLocaleString();
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         return {
-            localTime: data.datetime,
-            timezone: data.timezone
+            localTime,
+            timezone,
         };
     } catch (error) {
         console.error('Error fetching local time and timezone:', error);
@@ -143,4 +172,7 @@ async function getLocalTimeAndTimezone() {
     }
 }
 
-main().catch(err => logger.error(`Error in main execution: ${err.message}`));
+main().catch((err) => {
+    console.error(`Error in main execution: ${err.message}`);
+    if (logger) logger.error(`Error in main execution: ${err.message}`);
+});
