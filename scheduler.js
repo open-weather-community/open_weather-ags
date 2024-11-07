@@ -93,7 +93,7 @@ async function main() {
 
                 setTimeout(() => {
                     printLCD('recording pass at', `${localRecordTime.toLocaleTimeString()} ${localTimeInfo.timezone}`);
-                }, delay - 120000);
+                }, 120000);
 
             } else {
                 logger.error('Failed to fetch local time and timezone.');
