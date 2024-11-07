@@ -48,6 +48,8 @@ async function main() {
         console.error(`Error checking Wi-Fi connection: ${error.message}`);
     }
 
+    let localTimeInfo = getLocalTimeAndTimezone();
+
     // Initialize the logger with the configuration
     logger = new Logger(config);
     logger.info('Logger loaded');
@@ -104,7 +106,7 @@ async function main() {
             );
 
             // After 2 minutes, display scheduled recording on the LCD
-            const localTimeInfo = await getLocalTimeAndTimezone();
+
 
             if (localTimeInfo) {
                 logger.info(`Current local time: ${localTimeInfo.localTime}`);
