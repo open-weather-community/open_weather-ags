@@ -186,8 +186,8 @@ async function processPasses(configParam, loggerParam) {
                 const avgDistance = pass.avgDistance || 'N/A';
                 const minDistance = pass.minDistance || 'N/A';
 
-                const bufferStart = formattedStart.minus({ minutes: config.bufferMinutes });
-                const bufferEnd = formattedEnd.plus({ minutes: config.bufferMinutes });
+                let bufferStart = formattedStart.minus({ minutes: config.bufferMinutes });
+                let bufferEnd = formattedEnd.plus({ minutes: config.bufferMinutes });
                 let bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
 
                 // Ensure the bufferDuration is at least 2 minutes
