@@ -57,7 +57,6 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Set downsampling preference to config.downsample, or default to false
     const doDownsample = config.downsample ?? false;
 
-
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
         '-f', frequency,
@@ -101,16 +100,18 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     } else {
         // Use SoX to convert raw audio to WAV without changing the sample rate
         soxProcess = spawn(config.sox_path, [
-            '-t', 'raw',      // Input type is raw
-            '-r', sampleRate, // Input sample rate
-            '-e', 'signed',   // Input encoding
-            '-b', '16',       // Input bit depth
-            '-c', '1',        // Input channels
-            '-',              // Read from stdin
-            '-b', '16',       // Output bit depth
-            '-e', 'signed',   // Output encoding
-            '-t', 'wav',      // Output type is WAV
-            finalFile         // Output file
+            '-t', 'raw',        // Input type is raw
+            '-r', sampleRate,   // Input sample rate
+            '-e', 'signed',     // Input encoding
+            '-b', '16',         // Input bit depth
+            '-c', '1',          // Input channels
+            '-',                // Read from stdin
+            '-t', 'wav',        // Output type is WAV
+            '-r', sampleRate,   // Output sample rate (explicitly specified)
+            '-e', 'signed',     // Output encoding
+            '-b', '16',         // Output bit depth
+            '-c', '1',          // Output channels
+            finalFile           // Output file
         ]);
     }
 
