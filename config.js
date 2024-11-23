@@ -6,7 +6,7 @@ const configPathFile = 'configPath.json';
 
 // Function to recursively find the config file in a directory and its subdirectories
 function findConfigFile(dir) {
-    console.log("finding config file");
+    //console.log("finding config file");
     if (!fs.existsSync(dir)) {
         console.log(`Directory not found while finding config: ${dir}`);
         return null;
