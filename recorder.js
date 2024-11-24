@@ -64,7 +64,8 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         '-s', sampleRate,
         '-l', '0',
         '-E', 'deemp',
-        '-g', gain
+        '-g', gain,
+        '-b', '40k'
     ]);
 
     // Log rtl_fm stderr for debugging
