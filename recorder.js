@@ -60,7 +60,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
         '-f', frequency,
-        '-M', 'wbfm',
+        '-M', 'fm',
         '-s', sampleRate,
         '-l', '0',
         '-g', gain
