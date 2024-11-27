@@ -48,8 +48,8 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
     logger.info('Recording to ' + finalFile);
 
-    // Set sampleRate to config.sampleRate, or default to 60000
-    const sampleRate = config.sampleRate ?? '60000';
+    // Set sampleRate to config.sampleRate, or default to ...
+    const sampleRate = config.sampleRate ?? '48k';
 
     // Set gain to config.gain, or default to 40
     const gain = config.gain ?? '40';
@@ -60,10 +60,9 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
         '-f', frequency,
-        '-M', 'fm',
+        '-M', 'wbfm',
         '-s', sampleRate,
         '-l', '0',
-        '-E', 'deemp',
         '-g', gain
     ]);
 
@@ -91,7 +90,6 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
             '-b', '16',           // Input bit depth
             '-c', '1',            // Input channels
             '-',                  // Read from stdin
-            '-b', '16',           // Output bit depth
             '-e', 'signed',       // Output encoding
             '-t', 'wav',          // Output type is WAV
             finalFile,            // Output file
