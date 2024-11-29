@@ -55,7 +55,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     const gain = config.gain ?? '40';
 
     // Set downsampling preference to config.downsample, or default to false
-    const doDownsample = config.downsample ?? false;
+    const doDownsample = config.downsample ?? true;
 
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
