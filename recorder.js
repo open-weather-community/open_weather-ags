@@ -47,8 +47,8 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Set gain to config.gain, or default to '40'
     const gain = config.gain ?? '40';
 
-    // Set downsampling preference to config.downsample, or default to false
-    const doDownsample = config.downsample ?? false;
+    // Set downsampling preference to config.downsample
+    const doDownsample = config.downsample ?? true;
 
     // Define file paths
     const rawFile = path.join(dir, `${satellite}-${formattedTimestamp}.raw`);
