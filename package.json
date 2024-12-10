@@ -1,6 +1,6 @@
 {
   "name": "open-weather_ags",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "open-weather automated ground station",
   "main": "scheduler.js",
   "scripts": {

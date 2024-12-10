@@ -6,8 +6,6 @@ const { uploadFile } = require('./upload');
 
 let recording = false;
 
-const testing = false;
-
 // Function to check if recording is in progress
 function isRecording() {
     return recording;
@@ -43,19 +41,20 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     // Format the timestamp for a filesystem-friendly filename
     const formattedTimestamp = formatTimestamp(timestamp);
 
-    // Define the file path for the final recording
-    const finalFile = path.join(dir, `${satellite}-${formattedTimestamp}.wav`);
-
-    logger.info('Recording to ' + finalFile);
-
-    // Set sampleRate to config.sampleRate, or default to ...
+    // Set sampleRate to config.sampleRate, or default to '48k'
     const sampleRate = config.sampleRate ?? '48k';
 
-    // Set gain to config.gain, or default to 40
+    // Set gain to config.gain, or default to '40'
     const gain = config.gain ?? '40';
 
     // Set downsampling preference to config.downsample, or default to false
-    const doDownsample = config.downsample ?? true;
+    const doDownsample = config.downsample ?? false;
+
+    // Define file paths
+    const rawFile = path.join(dir, `${satellite}-${formattedTimestamp}.raw`);
+    const wavFile = path.join(dir, `${satellite}-${formattedTimestamp}.wav`);
+
+    logger.info('Recording raw data to ' + rawFile);
 
     // Start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
@@ -75,107 +74,107 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     rtlFm.on('error', (error) => {
         logger.error('rtl_fm process error: ' + error.message);
         recording = false;
-        if (soxProcess) {
-            soxProcess.stdin.end();
-        }
+        writeStream.end();
     });
 
-    let soxProcess = null;
-    if (doDownsample) {
-        // Use SoX to downsample and convert raw audio to WAV
-        soxProcess = spawn(config.sox_path, [
-            '-t', 'raw',          // Input type is raw
-            '-r', sampleRate,     // Input sample rate
-            '-e', 'signed',       // Input encoding
-            '-b', '16',           // Input bit depth
-            '-c', '1',            // Input channels
-            '-',                  // Read from stdin
-            '-e', 'signed',       // Output encoding
-            '-t', 'wav',          // Output type is WAV
-            finalFile,            // Output file
-            'rate', '-v', '11025' // Resample to 11025 Hz with very high quality
-        ]);
-    } else {
-        // Use SoX to convert raw audio to WAV without changing the sample rate
-        soxProcess = spawn(config.sox_path, [
-            '-t', 'raw',        // Input type is raw
-            '-r', sampleRate,   // Input sample rate
-            '-e', 'signed',     // Input encoding
-            '-b', '16',         // Input bit depth
-            '-c', '1',          // Input channels
-            '-',                // Read from stdin
-            '-t', 'wav',        // Output type is WAV
-            '-r', sampleRate,   // Output sample rate (explicitly specified)
-            '-e', 'signed',     // Output encoding
-            '-b', '16',         // Output bit depth
-            '-c', '1',          // Output channels
-            finalFile           // Output file
-        ]);
-    }
+    // Write raw data to file
+    const writeStream = fs.createWriteStream(rawFile);
 
-    // Log SoX stderr for debugging
-    soxProcess.stderr.on('data', (data) => {
-        logger.error(`SoX error: ${data}`);
-    });
+    // Pipe the output of rtl_fm directly into the write stream
+    rtlFm.stdout.pipe(writeStream);
 
-    // Pipe the output of rtl_fm directly into SoX
-    rtlFm.stdout.pipe(soxProcess.stdin);
+    writeStream.on('finish', () => {
+        logger.info(`Successfully saved raw audio to ${rawFile}`);
 
-    // Handle potential errors in the SoX process
-    soxProcess.on('error', (error) => {
-        logger.error('SoX process error: ' + error.message);
-    });
+        if (doDownsample) {
+            // Use SoX to downsample and convert raw audio to WAV
+            logger.info('Starting SoX process to downsample and convert to WAV');
+            const soxProcess = spawn(config.sox_path, [
+                '-t', 'raw',          // Input type is raw
+                '-r', sampleRate,     // Input sample rate
+                '-e', 'signed',       // Input encoding
+                '-b', '16',           // Input bit depth
+                '-c', '1',            // Input channels
+                rawFile,              // Input file
+                '-e', 'signed',       // Output encoding
+                '-t', 'wav',          // Output type is WAV
+                wavFile,              // Output file
+                'rate', '-v', '11025' // Resample to 11025 Hz with very high quality
+            ]);
 
-    // Handle SoX process exit
-    soxProcess.on('close', (soxCode) => {
-        if (soxCode === 0) {
-            logger.info(`Successfully processed audio to ${finalFile}`);
+            // Log SoX stderr for debugging
+            soxProcess.stderr.on('data', (data) => {
+                logger.error(`SoX error: ${data}`);
+            });
 
-            // Upload the final file
-            const jsonData = {
-                myID: config.myID,
-                satellite: satellite,
-                locLat: config.locLat,
-                locLon: config.locLon,
-                gain: config.gain,
-                timestamp: formattedTimestamp,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                auth_token: config.auth_token
-            };
+            // Handle potential errors in the SoX process
+            soxProcess.on('error', (error) => {
+                logger.error('SoX process error: ' + error.message);
+                recording = false;
+            });
 
-            // Log jsonData
-            logger.info(jsonData);
+            // Handle SoX process exit
+            soxProcess.on('close', (soxCode) => {
+                if (soxCode === 0) {
+                    logger.info(`Successfully processed audio to ${wavFile}`);
 
-            if (!testing) {
-                printLCD('uploading...');
+                    // Upload the WAV file
+                    const jsonData = {
+                        myID: config.myID,
+                        satellite: satellite,
+                        locLat: config.locLat,
+                        locLon: config.locLon,
+                        gain: config.gain,
+                        timestamp: formattedTimestamp,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        auth_token: config.auth_token
+                    };
 
-                uploadFile(finalFile, jsonData)
-                    .then(response => {
-                        if (response.success === false) {
-                            // Handle the error response from uploadFile
-                            console.error('Upload failed:', response.message);
-                            if (response.status) {
-                                console.error('Status:', response.status);
+                    // Log jsonData
+                    logger.info(jsonData);
+
+                    printLCD('uploading...');
+
+                    uploadFile(wavFile, jsonData)
+                        .then(response => {
+                            if (response.success === false) {
+                                // Handle the error response from uploadFile
+                                logger.error('Upload failed:', response.message);
+                                if (response.status) {
+                                    logger.error('Status:', response.status);
+                                }
+                                if (response.data) {
+                                    logger.error('Data:', response.data);
+                                }
+                            } else {
+                                logger.info('Upload successful:', response);
+                                printLCD('upload completed!');
                             }
-                            if (response.data) {
-                                console.error('Data:', response.data);
-                            }
-                        } else {
-                            console.log('Response:', response);
-                            printLCD('upload completed!');
-                        }
-                    })
-                    .catch(error => {
-                        // Catch any unexpected errors
-                        console.error('Unexpected error:', error);
-                    });
-            }
+                        })
+                        .catch(error => {
+                            // Catch any unexpected errors
+                            logger.error('Unexpected error during upload:', error);
+                        })
+                        .finally(() => {
+                            recording = false; // Ensure recording flag is reset
+                        });
+
+                } else {
+                    logger.error(`SoX processing failed with code ${soxCode}`);
+                    recording = false; // Ensure recording flag is reset
+                }
+            });
 
         } else {
-            logger.error(`SoX processing failed with code ${soxCode}`);
+            // No downsampling; recording is complete.
+            logger.info('Downsampling not enabled; recording complete.');
+            recording = false; // Ensure recording flag is reset
         }
+    });
 
-        recording = false; // Ensure recording flag is reset
+    writeStream.on('error', (error) => {
+        logger.error('Write stream error: ' + error.message);
+        recording = false;
     });
 
     // Handle rtl_fm process exit
@@ -183,10 +182,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         logger.info(`rtl_fm process exited with code ${code}`);
         if (code !== 0) {
             logger.error('rtl_fm did not exit cleanly.');
-            // End SoX process if rtl_fm exits unexpectedly
-            if (soxProcess) {
-                soxProcess.stdin.end();
-            }
+            writeStream.end();
             recording = false;
         }
     });
@@ -195,6 +191,14 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     setTimeout(() => {
         logger.info('Stopping recording...');
         rtlFm.kill();
+
+        // If recording is still in progress after killing rtl_fm, set a timeout to forcefully end it
+        setTimeout(() => {
+            if (recording) {
+                logger.warn('Forcing recording to stop due to timeout.');
+                recording = false;
+            }
+        }, 10000); // 10 seconds grace period
     }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
 }
 

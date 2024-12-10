@@ -6,7 +6,6 @@ const configPathFile = 'configPath.json';
 
 // Function to recursively find the config file in a directory and its subdirectories
 function findConfigFile(dir) {
-    //console.log("finding config file");
     if (!fs.existsSync(dir)) {
         console.log(`Directory not found while finding config: ${dir}`);
         return null;
@@ -22,9 +21,13 @@ function findConfigFile(dir) {
 
     for (const file of files) {
         const fullPath = path.join(dir, file);
-        // console.log(`found file ${fullPath}`);
+
+        // Skip hidden directories like .Trashes or .Trash-* and other files/folders starting with '.'
         if (fs.statSync(fullPath).isDirectory()) {
-            // console.log(`recursing into dir ${fullPath}`);
+            const baseName = path.basename(fullPath);
+            if (baseName.startsWith('.')) {
+                continue; // Skip hidden folders
+            }
             const result = findConfigFile(fullPath);
             if (result) return result;
         } else if (file === configName) {

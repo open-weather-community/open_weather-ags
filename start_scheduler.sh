@@ -39,7 +39,7 @@ if [ "$LINE_COUNT" -gt "$LOG_MAX_LINES" ]; then
 fi
 
 # Give the system time to connect to the network
-sleep 20
+sleep 30
 
 UPDATE_FAILED=false
 

@@ -13,7 +13,7 @@ const { checkWifiConnection } = require('./wifi');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
 const {
     updatePasses,
-    findHighestMaxElevationPass,
+    findTopMaxElevationPasses,
     ensurePassesFileExists,
     readPassesFile,
 } = require('./passes');
@@ -78,62 +78,79 @@ async function main() {
     // Read and parse the passes file
     const passes = readPassesFile(passesFilePath, logger);
 
-    // Find the highest max elevation pass
-    const highestMaxElevationPass = findHighestMaxElevationPass(passes);
+    // Get the number of passes to record from config, default to 1
+    const numberOfPassesToRecord = config.numberOfPassesPerDay ?? 1;
 
-    logger.info('Highest max elevation pass of the day:');
-    logger.info(JSON.stringify(highestMaxElevationPass));
+    // Find the top X max elevation passes
+    const topMaxElevationPasses = findTopMaxElevationPasses(passes, numberOfPassesToRecord);
+
+    logger.info(`Top ${numberOfPassesToRecord} max elevation passes of the day:`);
+    logger.info(JSON.stringify(topMaxElevationPasses, null, 2));
 
     printLCD('ground station', `ready! :D v${VERSION}`);
 
-    if (highestMaxElevationPass) {
-        const now = new Date();
+    if (topMaxElevationPasses && topMaxElevationPasses.length > 0) {
+        for (const pass of topMaxElevationPasses) {
+            const now = new Date();
 
-        const recordTime = new Date(
-            `${highestMaxElevationPass.date} ${highestMaxElevationPass.time}`
-        );
-        const delay = recordTime - now;
+            const recordTime = new Date(`${pass.date} ${pass.time}`);
+            const delay = recordTime - now;
 
-        if (delay > 0) {
-            setTimeout(async () => {
-                await handleRecording(
-                    highestMaxElevationPass,
-                    now,
-                    passesFilePath,
-                    passes
-                );
-            }, delay);
-
-            logger.info(
-                `Scheduling recording for ${highestMaxElevationPass.satellite} at ${highestMaxElevationPass.date} ${highestMaxElevationPass.time} for ${highestMaxElevationPass.duration} minutes...`
-            );
-
-            // After 2 minutes, display scheduled recording on the LCD
-            const localTimeInfo = await getLocalTimeAndTimezone();
-
-            if (localTimeInfo) {
-                logger.info(`Current local time: ${localTimeInfo.localTime}`);
-                logger.info(`Timezone: ${localTimeInfo.timezone}`);
-
-                // Convert the record time to local time
-                const localRecordTime = new Date(
-                    recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone })
-                );
-
-                setTimeout(() => {
-                    printLCD(
-                        'will record at',
-                        `${localRecordTime.toLocaleTimeString()}`
+            if (delay > 0) {
+                setTimeout(async () => {
+                    await handleRecording(
+                        pass,
+                        now,
+                        passesFilePath,
+                        passes
                     );
-                }, 60000);
+                }, delay);
+
+                logger.info(
+                    `Scheduling recording for ${pass.satellite} at ${pass.date} ${pass.time} for ${pass.duration} minutes...`
+                );
+
+                // get local time info from API if its not listed in the config
+                let localTimeInfo;
+                if (!config.timezone) {
+                    localTimeInfo = await getLocalTimeAndTimezone();
+
+                    // add it to config
+                    config.timezone = localTimeInfo.timezone;
+                    // save config
+                    saveConfig(config, configPath);
+
+                } else {
+                    localTimeInfo = {
+                        timezone: config.timezone,
+                        localTime: new Date().toLocaleString('en-US', { timeZone: config.timezone }),
+                    };
+                }
+
+                if (localTimeInfo) {
+                    logger.info(`Current local time: ${localTimeInfo.localTime}`);
+                    logger.info(`Timezone: ${localTimeInfo.timezone}`);
+
+                    // Convert the record time to local time
+                    const localRecordTime = new Date(
+                        recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone })
+                    );
+
+                    setTimeout(() => {
+                        printLCD(
+                            'will record at',
+                            `${localRecordTime.toLocaleTimeString()}`
+                        );
+                    }, 60000);
+                } else {
+                    logger.error('Failed to fetch local time and timezone.');
+                    process.exit(1);
+                }
             } else {
-                logger.error('Failed to fetch local time and timezone.');
-                process.exit(1);
+                logger.info(
+                    `The pass time for ${pass.satellite} is in the past, skipping recording.`
+                );
             }
-        } else {
-            logger.info(
-                'The highest max elevation pass time is in the past, skipping recording.'
-            );
         }
     } else {
         logger.info('No valid passes found to record.');
