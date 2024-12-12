@@ -195,7 +195,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         // If recording is still in progress after killing rtl_fm, set a timeout to forcefully end it
         setTimeout(() => {
             if (recording) {
-                logger.warn('Forcing recording to stop due to timeout.');
+                logger.notice('Forcing recording to stop due to timeout.');
                 recording = false;
             }
         }, 10000); // 10 seconds grace period
