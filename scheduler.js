@@ -136,10 +136,13 @@ async function main() {
                         recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone })
                     );
 
+                    const options = { hour12: false, timeZone: localTimeInfo.timezone };
+                    const timeString = new Date().toLocaleTimeString('en-GB', options);
+
                     setTimeout(() => {
                         printLCD(
-                            'will record at',
-                            `${localRecordTime.toLocaleTimeString()}`
+                            'Next recording',
+                            `${pass.satellite} at ${timeString}`
                         );
                     }, 60000);
                 } else {
