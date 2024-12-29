@@ -132,17 +132,12 @@ async function main() {
                     logger.info(`Timezone: ${localTimeInfo.timezone}`);
 
                     // Convert the record time to local time
-                    const localRecordTime = new Date(
-                        recordTime.toLocaleString('en-US', { timeZone: localTimeInfo.timezone, hour12: false })
-                    );
-
-                    const options = { hour12: false, timeZone: localTimeInfo.timezone };
-                    // const timeString = new Date().toLocaleTimeString('en-GB', options);
+                    const localRecordTimeString = recordTime.toLocaleTimeString('en-GB', { timeZone: localTimeInfo.timezone, hour12: false });
 
                     setTimeout(() => {
                         printLCD(
                             'Next recording',
-                            `${pass.satellite} at ${localRecordTime}`
+                            `${pass.satellite} at ${localRecordTimeString}`
                         );
                     }, 60000);
                 } else {
