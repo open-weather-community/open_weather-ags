@@ -1,5 +1,8 @@
 // scheduler.js
 // this is the main app which schedules recordings based on the passes data
+// to do:
+// passes stuff can be moved back to local storage
+// timezone can possibly be removed from config
 
 const packageJson = require('./package.json');
 const VERSION = packageJson.version;
@@ -38,20 +41,23 @@ async function main() {
         process.exit(1);
     }
 
-    // Print config
-    console.log(config);
+    // print config without password and auth_token
+    const obscuredConfig = { ...config };
+    obscuredConfig.password = '********';
+    obscuredConfig.auth_token = '********';
+    console.log(obscuredConfig);
 
-    // Indicate on LCD that config is loaded
+    // indicate on LCD that config is loaded
     printLCD('config loaded');
 
-    // Initialize the logger with the configuration
+    // initialize the logger with the configuration
     logger = new Logger(config);
     logger.info('Logger loaded');
     logger.info(`as user: ${process.getuid()}`); // Log the user ID of the process
     logger.info(`as group: ${process.getgid()}`); // Log the group ID of the process
     logger.info(`current working directory: ${process.cwd()}`); // Log the current working directory
 
-    // Check Wi-Fi connection
+    // check Wi-Fi connection
     printLCD('checking', 'Wi-Fi...');
     try {
         await checkWifiConnection(config);
@@ -110,40 +116,16 @@ async function main() {
                     `Scheduling recording for ${pass.satellite} at ${pass.date} ${pass.time} for ${pass.duration} minutes...`
                 );
 
-                // get local time info from API if its not listed in the config
-                let localTimeInfo;
-                if (!config.timezone) {
-                    localTimeInfo = await getLocalTimeAndTimezone();
+                // print the next recording time on the LCD, as a 24-hour time string
+                const recordTimeString = recordTime.toLocaleTimeString('en-GB', { hour12: false });
 
-                    // add it to config
-                    config.timezone = localTimeInfo.timezone;
-                    // save config
-                    saveConfig(config, configPath);
+                setTimeout(() => {
+                    printLCD(
+                        'Next recording',
+                        `${pass.satellite} at ${recordTimeString}`
+                    );
+                }, 60000);
 
-                } else {
-                    localTimeInfo = {
-                        timezone: config.timezone,
-                        localTime: new Date().toLocaleString('en-US', { timeZone: config.timezone }),
-                    };
-                }
-
-                if (localTimeInfo) {
-                    logger.info(`Current local time: ${localTimeInfo.localTime}`);
-                    logger.info(`Timezone: ${localTimeInfo.timezone}`);
-
-                    // Convert the record time to local time
-                    const localRecordTimeString = recordTime.toLocaleTimeString('en-GB', { timeZone: localTimeInfo.timezone, hour12: false });
-
-                    setTimeout(() => {
-                        printLCD(
-                            'Next recording',
-                            `${pass.satellite} at ${localRecordTimeString}`
-                        );
-                    }, 60000);
-                } else {
-                    logger.error('Failed to fetch local time and timezone.');
-                    process.exit(1);
-                }
             } else {
                 logger.info(
                     `The pass time for ${pass.satellite} is in the past, skipping recording.`
@@ -179,25 +161,6 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
     fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
-async function getLocalTimeAndTimezone() {
-    try {
-        const response = await axios.get('https://ipapi.co/timezone');
-        const timezone = response.data;
-
-        return {
-            timezone,
-            localTime: new Date().toLocaleString('en-US', { timeZone: timezone }),
-        };
-    } catch (error) {
-        console.error('Error fetching local time and timezone:', error);
-        logger.error(`Error fetching local time and timezone: ${error.message}`);
-        // Return UTC as fallback
-        return {
-            timezone: 'UTC',
-            localTime: new Date().toLocaleString('en-US', { timeZone: 'UTC' }),
-        };
-    }
-}
 
 main().catch((err) => {
     console.error(`Error in main execution: ${err.message}`);

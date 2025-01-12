@@ -133,6 +133,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                     };
 
                     // Log jsonData
+                    logger.info('JSON data for upload:');
                     logger.info(jsonData);
 
                     printLCD('uploading...');

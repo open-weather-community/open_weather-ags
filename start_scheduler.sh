@@ -1,12 +1,6 @@
 #!/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Set system timezone to UTC
-sudo timedatectl set-timezone UTC
-
-# Set script timezone to UTC
-export TZ=UTC
-
 # Source NVM and set up Node.js environment
 export NVM_DIR="/home/openweather/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -41,6 +35,8 @@ fi
 # Give the system time to connect to the network
 sleep 60
 
+
+
 UPDATE_FAILED=false
 
 # Step 1: Fetch the latest release information from the GitHub API
@@ -55,7 +51,7 @@ echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> "$LOG_FIL
 
 # Check if LATEST_RELEASE or DOWNLOAD_URL are empty
 if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
-    echo "Failed to retrieve the latest release or tarball URL from the GitHub API." >> "$LOG_FILE"
+    echo "Failed to retrieve the latest release or tarball URL from GitHub." >> "$LOG_FILE"
     echo "Continuing without updating." >> "$LOG_FILE"
     UPDATE_FAILED=true
 fi
@@ -106,7 +102,10 @@ if [ "$UPDATE_FAILED" = false ]; then
 
             if [ "$UPDATE_FAILED" = false ]; then
                 # Step 6: Install/update dependencies
-                cd "$LOCAL_DIR" || { echo "Failed to change directory to $LOCAL_DIR" >> "$LOG_FILE"; UPDATE_FAILED=true; }
+                cd "$LOCAL_DIR" || { 
+                    echo "Failed to change directory to $LOCAL_DIR" >> "$LOG_FILE"
+                    UPDATE_FAILED=true
+                }
                 npm install --production || echo "npm install failed, continuing..." >> "$LOG_FILE"
                 
                 # Step 7: Update the current version
@@ -123,6 +122,40 @@ if [ "$UPDATE_FAILED" = false ]; then
         echo "Already up to date." >> "$LOG_FILE"
     fi
 fi
+
+
+# ----------------------------------------------------------------------
+# Install tzupdate via pipx if needed, then run tzupdate
+# ----------------------------------------------------------------------
+echo "Ensuring pipx is installed..." >> "$LOG_FILE"
+if ! command -v pipx &>/dev/null
+then
+    sudo apt-get update >> "$LOG_FILE" 2>&1
+    sudo apt-get install -y pipx >> "$LOG_FILE" 2>&1
+    echo "pipx installed." >> "$LOG_FILE"
+fi
+
+echo "Installing tzupdate via pipx if not present..." >> "$LOG_FILE"
+if ! pipx list | grep -q 'package tzupdate '
+then
+    if pipx install tzupdate >> "$LOG_FILE" 2>&1
+    then
+        echo "tzupdate installed via pipx." >> "$LOG_FILE"
+    else
+        echo "Failed to install tzupdate via pipx." >> "$LOG_FILE"
+    fi
+else
+    echo "tzupdate is already installed via pipx." >> "$LOG_FILE"
+fi
+
+echo "Running tzupdate..." >> "$LOG_FILE"
+if ! sudo -H pipx run tzupdate >> "$LOG_FILE" 2>&1
+then
+    echo "tzupdate encountered an error." >> "$LOG_FILE"
+fi
+echo "Finished running tzupdate." >> "$LOG_FILE"
+
+
 
 # Continue to launch the Node.js process regardless of update success
 echo "Launching Node.js application..." >> "$LOG_FILE"
