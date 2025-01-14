@@ -2,7 +2,6 @@
 // this is the main app which schedules recordings based on the passes data
 // to do:
 // passes stuff can be moved back to local storage
-// timezone can possibly be removed from config
 
 const packageJson = require('./package.json');
 const VERSION = packageJson.version;
@@ -43,7 +42,7 @@ async function main() {
 
     // print config without password and auth_token
     const obscuredConfig = { ...config };
-    obscuredConfig.password = '********';
+    obscuredConfig.wifiPassword = '********';
     obscuredConfig.auth_token = '********';
     console.log(obscuredConfig);
 
