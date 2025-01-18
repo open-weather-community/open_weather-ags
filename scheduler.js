@@ -97,32 +97,31 @@ async function main() {
     if (topMaxElevationPasses && topMaxElevationPasses.length > 0) {
         for (const pass of topMaxElevationPasses) {
             const now = new Date();
-
             const recordTime = new Date(`${pass.date} ${pass.time}`);
             const delay = recordTime - now;
 
+            // 1) Check if pass time is near midnight
+            if (willOverlapReboot(recordTime)) {
+                logger.info(
+                    `Skipping pass due to reboot overlap: ${pass.satellite} starts at ${pass.date} ${pass.time} for ${pass.duration}m.`
+                );
+                continue;
+            }
+
+            // 2) If pass time is in the future, schedule it
             if (delay > 0) {
                 setTimeout(async () => {
-                    await handleRecording(
-                        pass,
-                        now,
-                        passesFilePath,
-                        passes
-                    );
+                    await handleRecording(pass, now, passesFilePath, passes);
                 }, delay);
 
                 logger.info(
                     `Scheduling recording for ${pass.satellite} at ${pass.date} ${pass.time} for ${pass.duration} minutes...`
                 );
 
-                // print the next recording time on the LCD, as a 24-hour time string
+                // Print the next recording time on LCD in 24-hour format
                 const recordTimeString = recordTime.toLocaleTimeString('en-GB', { hour12: false });
-
                 setTimeout(() => {
-                    printLCD(
-                        'Next recording',
-                        `${pass.satellite} at ${recordTimeString}`
-                    );
+                    printLCD('Next recording', `${pass.satellite} at ${recordTimeString}`);
                 }, 60000);
 
             } else {
@@ -160,6 +159,28 @@ async function handleRecording(item, now, passesFilePath, jsonData) {
     fs.writeFileSync(passesFilePath, JSON.stringify(jsonData, null, 2));
 }
 
+/**
+ * Returns true if the pass [passStart, passEnd) overlaps the 2:50-3:10 window.
+ */
+function willOverlapReboot(passStart, durationMinutes) {
+    // Convert pass times to timestamps
+    const passStartMs = passStart.getTime();
+    const passEndMs = passStartMs + durationMinutes * 60_000; // convert min -> ms
+
+    // Build the daily buffer window for the same date as passStart
+    const year = passStart.getFullYear();
+    const month = passStart.getMonth();
+    const day = passStart.getDate();
+
+    // 2:50 AM
+    const bufferStart = new Date(year, month, day, 2, 50).getTime();
+
+    // 3:10 AM
+    const bufferEnd = new Date(year, month, day, 3, 10).getTime();
+
+    // Overlap if passStart < bufferEnd and passEnd > bufferStart
+    return passStartMs < bufferEnd && passEndMs > bufferStart;
+}
 
 main().catch((err) => {
     console.error(`Error in main execution: ${err.message}`);

@@ -134,15 +134,21 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
                     // Log jsonData
                     logger.info('JSON data for upload:');
-                    logger.info(jsonData);
+                    logger.info(JSON.stringify(jsonData, null, 2));
+
+                    // Log filesize
+                    const stats = fs.statSync(wavFile);
+                    const fileSizeInBytes = stats.size;
+                    const fileSizeInKilobytes = fileSizeInBytes / 1024;
+                    logger.info(`File size: ${fileSizeInKilobytes} KB`);
 
                     printLCD('uploading...');
 
-                    uploadFile(wavFile, jsonData)
+                    uploadFile(wavFile, jsonData, logger)
                         .then(response => {
                             if (response.success === false) {
                                 // Handle the error response from uploadFile
-                                logger.error('Upload failed:', response.message);
+                                logger.error('Upload failed:', JSON.stringify(response));
                                 if (response.status) {
                                     logger.error('Status:', response.status);
                                 }

@@ -17,6 +17,10 @@ class Logger {
 
     this.info("\n========================================\n");
     this.info(`Logger initialized to file: ${this.logFilePath}`);
+    // print version number from package.json
+    const packageJson = require("./package.json");
+    this.info(`Version: ${packageJson.version}`);
+
   }
 
   log(message, level = "INFO") {

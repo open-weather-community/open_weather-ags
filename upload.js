@@ -2,7 +2,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
 
-const uploadFile = async (filePath, jsonData) => {
+const uploadFile = async (filePath, jsonData, logger) => {
     try {
         // Check if the file exists
         if (!fs.existsSync(filePath)) {
@@ -33,18 +33,18 @@ const uploadFile = async (filePath, jsonData) => {
         const url = 'https://open-weather.community/wp-json/ow/v1/ground-stations';
 
         const response = await axios.post(url, form, config);
-        console.log('File uploaded successfully:', response.data);
+        logger.info('Upload response:', response.data);
         return response.data;
     } catch (error) {
         if (error.response) {
             // Server responded with a status other than 2xx
-            console.error('Server responded with an error:', error.response.status, error.response.data);
+            logger.error('Server responded with an error:', error.response.status, error.response.data);
         } else if (error.request) {
             // Request was made but no response was received
-            console.error('No response received from server:', error.request);
+            logger.error('No response received from server:', error.request);
         } else {
             // Something else happened while setting up the request
-            console.error('Error setting up the request:', error.message);
+            logger.error('Error setting up the request:', error.message);
         }
 
         // Return a meaningful error message or status code
