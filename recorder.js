@@ -1,31 +1,49 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { printLCD, clearLCD } = require('./lcd'); // Import LCD module
-const { uploadFile } = require('./upload');
+const { printLCD, clearLCD } = require('./lcd');
+const { uploadFile, uploadFileWithRetries } = require('./upload');
 
 let recording = false;
 
-// Function to check if recording is in progress
+// function to check if recording is in progress
 function isRecording() {
     return recording;
 }
 
-// Function to create directory recursively
+// function to create directory recursively
 function ensureDirectoryExists(directory) {
     if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
     }
 }
 
-// Function to format the timestamp for filenames
+// function to format the timestamp for filenames
 function formatTimestamp(timestamp) {
     return new Date(timestamp).toISOString().replace(/:/g, '-');
 }
 
-// Function to start recording
+// convert to ISO 8601 format with timezone offset
+function toLocalISOString(date) {
+    const pad = (num) => String(num).padStart(2, '0'); // pads single digits with a leading zero
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1); // getMonth is zero-based
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+    const timezoneOffset = -date.getTimezoneOffset(); // minutes offset from UTC
+    const offsetSign = timezoneOffset >= 0 ? '+' : '-';
+    const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+    const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${offsetHours}:${offsetMinutes}`;
+}
+
+// function to start recording
 function startRecording(frequency, timestamp, satellite, durationMinutes, config, logger) {
-    // Check if a recording is already in progress
+    // check if a recording is already in progress
     if (recording) {
         logger.info('Already recording...');
         return;
@@ -34,29 +52,30 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
     recording = true;
     logger.info('Starting recording of ' + satellite);
 
-    // Ensure the recordings directory exists
+    // ensure the recordings directory exists
     const dir = path.join(config.saveDir, 'recordings');
     ensureDirectoryExists(dir);
 
-    // Format the timestamp for a filesystem-friendly filename
-    const formattedTimestamp = formatTimestamp(timestamp);
+    // format the timestamp for a filesystem-friendly filename
+    const formattedTimestamp = toLocalISOString(timestamp);
 
-    // Set sampleRate to config.sampleRate, or default to '48k'
+    // set sampleRate to config.sampleRate, or default to '48k'
     const sampleRate = config.sampleRate ?? '48k';
 
-    // Set gain to config.gain, or default to '40'
+    // set gain to config.gain, or default to '40'
     const gain = config.gain ?? '40';
 
-    // Set downsampling preference to config.downsample
+    // set downsampling preference to config.downsample
     const doDownsample = config.downsample ?? true;
 
-    // Define file paths
-    const rawFile = path.join(dir, `${satellite}-${formattedTimestamp}.raw`);
-    const wavFile = path.join(dir, `${satellite}-${formattedTimestamp}.wav`);
+    // define file paths
+    const fileTimestamp = formattedTimestamp.replace(/:/g, '-');    // otherwise it will be an invalid filename
+    const rawFile = path.join(dir, `${satellite}-${fileTimestamp}.raw`);
+    const wavFile = path.join(dir, `${satellite}-${fileTimestamp}.wav`);
 
     logger.info('Recording raw data to ' + rawFile);
 
-    // Start rtl_fm process to capture radio signal
+    // start rtl_fm process to capture radio signal
     const rtlFm = spawn(config.rtl_fm_path, [
         '-f', frequency,          // Frequency
         '-M', 'fm',               // Modulation type
@@ -67,60 +86,60 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         '-F', '9'                 // Set filtering mode
     ]);
 
-    // Log rtl_fm stderr for debugging
+    // log rtl_fm stderr for debugging
     rtlFm.stderr.on('data', (data) => {
         logger.info(`rtl_fm info: ${data}`);
     });
 
-    // Handle potential errors in the rtl_fm process
+    // handle potential errors in the rtl_fm process
     rtlFm.on('error', (error) => {
         logger.error('rtl_fm process error: ' + error.message);
         recording = false;
         writeStream.end();
     });
 
-    // Write raw data to file
+    // write raw data to file
     const writeStream = fs.createWriteStream(rawFile);
 
-    // Pipe the output of rtl_fm directly into the write stream
+    // pipe the output of rtl_fm directly into the write stream
     rtlFm.stdout.pipe(writeStream);
 
     writeStream.on('finish', () => {
         logger.info(`Successfully saved raw audio to ${rawFile}`);
 
         if (doDownsample) {
-            // Use SoX to downsample and convert raw audio to WAV
+            // use SoX to downsample and convert raw audio to WAV
             logger.info('Starting SoX process to downsample and convert to WAV');
             const soxProcess = spawn(config.sox_path, [
-                '-t', 'raw',          // Input type is raw
-                '-r', sampleRate,     // Input sample rate
-                '-e', 'signed',       // Input encoding
-                '-b', '16',           // Input bit depth
-                '-c', '1',            // Input channels
-                rawFile,              // Input file
-                '-e', 'signed',       // Output encoding
-                '-t', 'wav',          // Output type is WAV
-                wavFile,              // Output file
-                'rate', '-v', '11025' // Resample to 11025 Hz with very high quality
+                '-t', 'raw',          // input type is raw
+                '-r', sampleRate,     // input sample rate
+                '-e', 'signed',       // input encoding
+                '-b', '16',           // input bit depth
+                '-c', '1',            // input channels
+                rawFile,              // input file
+                '-e', 'signed',       // iutput encoding
+                '-t', 'wav',          // iutput type is WAV
+                wavFile,              // iutput file
+                'rate', '-v', '11025' // resample to 11025 Hz with very high quality
             ]);
 
-            // Log SoX stderr for debugging
+            // log SoX stderr for debugging
             soxProcess.stderr.on('data', (data) => {
                 logger.error(`SoX error: ${data}`);
             });
 
-            // Handle potential errors in the SoX process
+            // handle potential errors in the SoX process
             soxProcess.on('error', (error) => {
                 logger.error('SoX process error: ' + error.message);
                 recording = false;
             });
 
-            // Handle SoX process exit
+            // handle SoX process exit
             soxProcess.on('close', (soxCode) => {
                 if (soxCode === 0) {
                     logger.info(`Successfully processed audio to ${wavFile}`);
 
-                    // Upload the WAV file
+                    // upload the WAV file
                     const jsonData = {
                         myID: config.myID,
                         satellite: satellite,
@@ -132,11 +151,17 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
                         auth_token: config.auth_token
                     };
 
-                    // Log jsonData
+                    // log jsonData
                     logger.info('JSON data for upload:');
-                    logger.info(JSON.stringify(jsonData, null, 2));
 
-                    // Log filesize
+                    // don't log the auth_token though
+                    const sanitizedData = {
+                        ...jsonData,
+                        auth_token: jsonData.auth_token ? '*'.repeat(jsonData.auth_token.length) : '[REDACTED]'
+                    };
+                    logger.info(JSON.stringify(sanitizedData, null, 2));
+
+                    // log filesize
                     const stats = fs.statSync(wavFile);
                     const fileSizeInBytes = stats.size;
                     const fileSizeInKilobytes = fileSizeInBytes / 1024;
@@ -144,40 +169,33 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
 
                     printLCD('uploading...');
 
-                    uploadFile(wavFile, jsonData, logger)
+                    uploadFileWithRetries(wavFile, jsonData, logger, 5, 10000) // e.g. up to 5 attempts, 10-second delay
                         .then(response => {
                             if (response.success === false) {
-                                // Handle the error response from uploadFile
-                                logger.error('Upload failed:', JSON.stringify(response));
-                                if (response.status) {
-                                    logger.error('Status:', response.status);
-                                }
-                                if (response.data) {
-                                    logger.error('Data:', response.data);
-                                }
+                                logger.error('Upload ultimately failed after retries:', JSON.stringify(response, null, 2));
                             } else {
                                 logger.info('Upload successful:', response);
                                 printLCD('upload completed!');
                             }
                         })
                         .catch(error => {
-                            // Catch any unexpected errors
-                            logger.error('Unexpected error during upload:', error);
+                            // catch any unexpected thrown errors
+                            logger.error('Unexpected error during upload retries:', error);
                         })
                         .finally(() => {
-                            recording = false; // Ensure recording flag is reset
+                            recording = false; // ensure recording flag is reset
                         });
 
                 } else {
                     logger.error(`SoX processing failed with code ${soxCode}`);
-                    recording = false; // Ensure recording flag is reset
+                    recording = false; // ensure recording flag is reset
                 }
             });
 
         } else {
-            // No downsampling; recording is complete.
+            // no downsampling; recording is complete.
             logger.info('Downsampling not enabled; recording complete.');
-            recording = false; // Ensure recording flag is reset
+            recording = false; // ensure recording flag is reset
         }
     });
 
@@ -186,7 +204,7 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         recording = false;
     });
 
-    // Handle rtl_fm process exit
+    // handle rtl_fm process exit
     rtlFm.on('close', (code) => {
         logger.info(`rtl_fm process exited with code ${code}`);
         if (code !== 0) {
@@ -196,19 +214,19 @@ function startRecording(frequency, timestamp, satellite, durationMinutes, config
         }
     });
 
-    // Stop the recording after the specified duration
+    // stop the recording after the specified duration
     setTimeout(() => {
         logger.info('Stopping recording...');
         rtlFm.kill();
 
-        // If recording is still in progress after killing rtl_fm, set a timeout to forcefully end it
+        // if recording is still in progress after killing rtl_fm, set a timeout to forcefully end it
         setTimeout(() => {
             if (recording) {
                 logger.notice('Forcing recording to stop due to timeout.');
                 recording = false;
             }
         }, 10000); // 10 seconds grace period
-    }, durationMinutes * 60 * 1000); // Convert minutes to milliseconds
+    }, durationMinutes * 60 * 1000); // convert minutes to milliseconds
 }
 
 module.exports = { isRecording, startRecording };

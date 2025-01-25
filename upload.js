@@ -1,3 +1,4 @@
+// upload.js
 const fs = require('fs');
 const FormData = require('form-data');
 const axios = require('axios');
@@ -31,8 +32,8 @@ const uploadFile = async (filePath, jsonData, logger) => {
         };
 
         const url = 'https://open-weather.community/wp-json/ow/v1/ground-stations';
-
         const response = await axios.post(url, form, config);
+
         logger.info('Upload response:', response.data);
         return response.data;
     } catch (error) {
@@ -47,7 +48,7 @@ const uploadFile = async (filePath, jsonData, logger) => {
             logger.error('Error setting up the request:', error.message);
         }
 
-        // Return a meaningful error message or status code
+        // Return a structured failure
         return {
             success: false,
             message: error.message,
@@ -56,6 +57,42 @@ const uploadFile = async (filePath, jsonData, logger) => {
     }
 };
 
+/**
+ * Attempts to upload the file multiple times if it fails.
+ * @param {string} filePath - Path to the WAV file
+ * @param {object} jsonData - The JSON metadata to send along
+ * @param {object} logger - Your logger instance
+ * @param {number} [maxRetries=3] - How many times to try before giving up
+ * @param {number} [delayMs=5000] - Delay (in ms) between attempts
+ * @returns {object} - The successful response data or a final failure object
+ */
+const uploadFileWithRetries = async (filePath, jsonData, logger, maxRetries = 3, delayMs = 5000) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        logger.info(`Upload attempt #${attempt} of ${maxRetries}`);
+        const response = await uploadFile(filePath, jsonData, logger);
+
+        if (response && response.success !== false) {
+            // The upload succeeded
+            return response;
+        } else {
+            logger.error(`Upload attempt #${attempt} failed. Response: ${JSON.stringify(response)}`);
+        }
+
+        // If there's still another attempt left, wait before retrying
+        if (attempt < maxRetries) {
+            logger.info(`Waiting ${delayMs} ms before the next attempt...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+
+    // If we exhaust all retries, return a final failure
+    return {
+        success: false,
+        message: `All ${maxRetries} upload attempts failed.`
+    };
+};
+
 module.exports = {
-    uploadFile
+    uploadFile,
+    uploadFileWithRetries
 };

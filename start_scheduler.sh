@@ -35,6 +35,12 @@ fi
 # Give the system time to connect to the network
 sleep 60
 
+# ------------------------------------------------------------------------------
+# Replace the *entire* root crontab to run "sudo sync && sudo shutdown -r now" daily at 3 AM
+# ------------------------------------------------------------------------------
+echo "Replacing entire root crontab with new command..." >> "$LOG_FILE"
+echo "0 3 * * * sudo sync && sudo shutdown -r now" | sudo crontab -
+echo "Crontab replacement complete." >> "$LOG_FILE"
 
 
 UPDATE_FAILED=false
