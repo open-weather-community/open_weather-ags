@@ -1,3 +1,8 @@
+/* passes.js
+    This module contains functions to update passes, find the highest max elevation pass of the day,
+    and find the top X max elevation passes of the day.
+*/
+
 const fs = require('fs');
 const path = require('path');
 const { processPasses } = require('./tle');
@@ -24,11 +29,19 @@ async function updatePasses(config, logger) {
 // Function to find the highest max elevation pass of the day
 function findHighestMaxElevationPass(passes) {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = now.toLocaleDateString('en-CA'); // YYYY-MM-DD format in local time
 
     const validPasses = passes.filter(pass => {
         const passDate = new Date(`${pass.date} ${pass.time}`);
-        const passDay = passDate.toISOString().split('T')[0];
+
+        // Ensure the date is valid before proceeding
+        if (isNaN(passDate.getTime())) {
+            console.error("Invalid Date detected for pass:", pass);
+            return false;
+        }
+
+        const passDay = passDate.toLocaleDateString('en-CA');
+
         return passDay === today && passDate > now;
     });
 
@@ -39,23 +52,33 @@ function findHighestMaxElevationPass(passes) {
     }, {});
 }
 
-// New Function: Find top X max elevation passes of the day
+
+
 function findTopMaxElevationPasses(passes, topCount = 1) {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = now.toLocaleDateString('en-CA'); // Local time YYYY-MM-DD
 
-    // Filter passes for today that are in the future
     const validPasses = passes.filter(pass => {
+        // Create the date using a correct format
         const passDate = new Date(`${pass.date} ${pass.time}`);
-        const passDay = passDate.toISOString().split('T')[0];
+
+        // Ensure the date is valid before proceeding
+        if (isNaN(passDate.getTime())) {
+            console.error("Invalid Date detected for pass:", pass);
+            return false;
+        }
+
+        const passDay = passDate.toLocaleDateString('en-CA');
+
+        // only satellite passes that occur later today (after the current time) are considered valid
         return passDay === today && passDate > now;
     });
 
-    // Sort passes by maxElevation in descending order and return top X
     return validPasses
         .sort((a, b) => parseFloat(b.maxElevation) - parseFloat(a.maxElevation))
         .slice(0, topCount);
 }
+
 
 function ensurePassesFileExists(passesFilePath, logger) {
     if (!fs.existsSync(passesFilePath)) {

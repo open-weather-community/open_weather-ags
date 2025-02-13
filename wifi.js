@@ -37,7 +37,12 @@ async function checkWifiConnection(config) {
 
                     exec(command, (error, stdout, stderr) => {
                         if (error) {
-                            console.error(`Error connecting to Wi-Fi: ${error.message}`);
+                            let message = error.message || stderr;
+
+                            // Sanitize message: Remove password from nmcli command output
+                            message = message.replace(/password\s+"[^"]+"/, 'password "***"');
+
+                            console.error(`Error connecting to Wi-Fi: ${message}`);
                             printLCD('unable to connect', 'to WIFI');
                             reject(new Error('Unable to connect to Wi-Fi'));
                         } else {
@@ -45,6 +50,7 @@ async function checkWifiConnection(config) {
                             resolve();
                         }
                     });
+
                 } else {
                     console.log('Wi-Fi name not found in config');
                     printLCD('unable to connect', 'to WIFI');

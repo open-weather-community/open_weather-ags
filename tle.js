@@ -61,7 +61,7 @@ function savePasses(passes) {
 }
 
 // Find satellite passes over a specific location
-async function findSatellitePasses(satName, tleLine1, tleLine2) {
+async function findSatellitePasses(tleLine1, tleLine2) {
     const satrec = satellite.twoline2satrec(tleLine1, tleLine2); // Convert TLE lines to satellite record
     const startTime = DateTime.utc();
     const endTime = startTime.plus({ days: config.daysToPropagate });
@@ -175,7 +175,7 @@ async function processPasses(configParam, loggerParam) {
             }
 
             logger.info(`Processing satellite: ${satName}`);
-            const passes = await findSatellitePasses(satName, tleLine1, tleLine2);
+            const passes = await findSatellitePasses(tleLine1, tleLine2);
 
             // Format and add new passes
             passes.forEach(pass => {
