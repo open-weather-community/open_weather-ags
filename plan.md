@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-The Open-weather Automatic Ground Station (AGS) is an open-source hardware and software project that automatically receives weather satellite imagery from NOAA satellites (NOAA-15, NOAA-18, NOAA-19) using Automatic Picture Transmission (APT). This project enables distributed, autonomous collection of weather data for the open-weather Public Archive.
+The Open-weather Automatic Ground Station (AGS) is an open-source hardware and software project that automatically receives weather satellite imagery from NOAA satellites (NOAA-15, NOAA-19) using Automatic Picture Transmission (APT). This project enables distributed, autonomous collection of weather data for the open-weather Public Archive.
+
+**Note:** NOAA-18 has been removed from the default configuration as it reached end-of-life in 2024 and is no longer operational.
 
 ## Project Goals
 
@@ -116,7 +118,6 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage:
   "downsample": true,          // Enable audio downsampling
   "noaaFrequencies": {         // Satellite frequencies
     "NOAA 19": "137.1M",
-    "NOAA 18": "137.9125M", 
     "NOAA 15": "137.62M"
   },
   "wifiName": "network_name",

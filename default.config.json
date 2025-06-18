@@ -8,7 +8,6 @@
     "bufferMinutes": 3,
     "noaaFrequencies": {
         "NOAA 19": "137.1M",
-        "NOAA 18": "137.9125M",
         "NOAA 15": "137.62M"
     },
     "passesFile": "passes.json",

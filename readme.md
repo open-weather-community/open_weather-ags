@@ -29,7 +29,6 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
   "bufferMinutes": 0,
   "noaaFrequencies": {
     "NOAA 19": "137.1M",
-    "NOAA 18": "137.9125M",
     "NOAA 15": "137.62M"
   },
   "passesFile": "passes.json",
@@ -42,6 +41,8 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
 ```
 
 The only settings you should really need to adjust are above noaaFrequencies in the config file. The rest is for advanced use. You should change the ID based on what open-weather provides you, and find your lat/long and enter those as well. The gain can be adjusted depending on the quality of the recordings. maxDistance is the maximum distance in meters (to the satelite from your location) to be considered a viable pass. daysToPropagate is how many dates in advance your device should predict NOAA passes. bufferMinutes gives a little buffer before and after the pass of X minutes.
+
+**Note:** NOAA-18 has been removed from the default configuration as it reached end-of-life in 2024 and is no longer operational. The configuration now only includes NOAA-19 and NOAA-15 by default.
 
 ## Explanation of files involved
 
@@ -332,7 +333,7 @@ map <C-n> :Ntree<CR>
 
 ## helpful links etc
 + [10-day predictions for NOAA-19](https://www.n2yo.com/passes/?s=33591#)
-+ [10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)
 + [10-day predictions for NOAA-15](https://www.n2yo.com/passes/?s=25338)
++ ~~[10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)~~ *(NOAA-18 end-of-life)*
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
