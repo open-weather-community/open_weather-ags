@@ -55,11 +55,13 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
   - Reboot overlap detection (2:50-3:10 AM buffer)
 
 #### 2. Configuration System (`config.js`)
-- **Purpose:** Dynamic configuration management
+- **Purpose:** Dynamic configuration management with backup recovery
 - **Functions:**
   - USB-based config file discovery
   - Runtime configuration loading/saving
   - Multi-mount point searching (`/media`, `/mnt`)
+  - Automatic backup config creation and restoration
+  - Config validation and error recovery
 
 #### 3. Satellite Pass Prediction (`passes.js`, `tle.js`)
 - **Purpose:** Calculate and manage satellite passes
@@ -101,7 +103,7 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 
 ## Configuration Schema
 
-The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage:
+The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage. The system automatically creates a backup file (`ow-config-backup.json`) to protect against config file corruption or disappearance:
 
 ```json
 {
@@ -212,6 +214,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage:
 
 /media/[usb-device]/
 ├── ow-config.json      # Station configuration
+├── ow-config-backup.json # Automatic backup of configuration
 ├── passes.json         # Calculated satellite passes
 ├── log.txt            # System logs
 └── recordings/        # Captured audio files
@@ -241,11 +244,34 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage:
 
 ## Testing & Quality Assurance
 
+### Configuration Backup & Recovery System
+
+**Issue Addressed:** Documented cases of the `ow-config.json` file spontaneously disappearing or becoming corrupted on the AGS USB drive, even after successful operation for multiple days.
+
+**Solution Implemented:**
+- **Automatic Backup Creation:** Every time the primary config is successfully loaded, a backup file (`ow-config-backup.json`) is created with timestamp metadata
+- **Validation:** All config files are validated for required fields before use
+- **Recovery Mechanism:** If the primary config is missing or corrupted, the system automatically restores from the backup
+- **Multi-location Search:** System searches all USB mount points for backup configs if primary is completely missing
+- **User Feedback:** LCD displays specific error messages to help users understand config issues
+
+**Files Created:**
+- `ow-config-backup.json` - Automatic backup with timestamp metadata
+- `configPath.json` - Tracks the last known config location
+
+**Recovery Process:**
+1. Attempt to load primary config (`ow-config.json`)
+2. If corrupted, try to restore from backup in same directory
+3. If primary missing entirely, search all USB devices for any backup config
+4. Restore backup to primary config location
+5. Continue normal operation
+
 ### Known Issues & Limitations
 - **Reboot scheduling:** System reboots at 3:00 AM may conflict with long satellite passes
 - **USB detection:** Occasional issues with USB mount detection on some Pi models
 - **Network resilience:** Limited offline operation capabilities
 - **Antenna optimization:** Performance varies significantly with antenna setup
+- **Config persistence:** Resolved via backup system - no longer causes system failures
 
 ## Dependencies & External Services
 

@@ -33,10 +33,23 @@ async function main() {
         configPath = getConfigPath();
         console.log(`Config file path: ${configPath}`);
         config = loadConfig();
-        if (!config) throw new Error('Failed to load configuration');
+        if (!config) {
+            console.error('Failed to load configuration: No config file found and no backup available');
+            printLCD('config missing!', 'check USB drive');
+            throw new Error('No configuration available - please ensure ow-config.json exists on USB drive');
+        }
+        console.log('Configuration loaded successfully' + (config._backup_created ? ' (restored from backup)' : ''));
     } catch (error) {
         console.error(`Error loading configuration: ${error.message}`);
-        printLCD('config error', 'check log');
+        printLCD('config error', 'check USB/log');
+        
+        // Give more specific error messages on LCD
+        if (error.message.includes('No configuration available')) {
+            setTimeout(() => {
+                printLCD('USB drive may', 'need config file');
+            }, 3000);
+        }
+        
         process.exit(1);
     }
 
