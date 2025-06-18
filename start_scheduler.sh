@@ -6,9 +6,8 @@ export NVM_DIR="/home/openweather/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 nvm use 22.3.0
 
-REPO="https://github.com/prismspecs/open_weather-ags"
 LOCAL_DIR="/home/openweather/open_weather-ags"
-RELEASE_API_URL="https://api.github.com/repos/prismspecs/open_weather-ags/releases/latest"
+RELEASE_API_URL="https://api.github.com/repos/open-weather-community/open_weather-ags/releases/latest"
 LOG_FILE="/home/openweather/cronlog.txt"
 LOG_MAX_LINES=1000
 LOG_LINES_TO_DELETE=800
