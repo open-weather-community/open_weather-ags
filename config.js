@@ -17,6 +17,56 @@ function validateConfig(config) {
     return true;
 }
 
+// Function to perform atomic file write (safer against power loss)
+function atomicWriteFile(filePath, data) {
+    const tempPath = filePath + '.tmp';
+    const backupPath = filePath + '.backup';
+    
+    try {
+        // Create backup of existing file
+        if (fs.existsSync(filePath)) {
+            fs.copyFileSync(filePath, backupPath);
+        }
+        
+        // Write to temporary file first
+        fs.writeFileSync(tempPath, data, 'utf8');
+        
+        // Atomically rename temp file to target (this is atomic on most filesystems)
+        fs.renameSync(tempPath, filePath);
+        
+        // Clean up backup if write succeeded
+        if (fs.existsSync(backupPath)) {
+            fs.unlinkSync(backupPath);
+        }
+        
+        return true;
+    } catch (err) {
+        console.log(`Atomic write failed: ${err}`);
+        
+        // Restore from backup if available
+        if (fs.existsSync(backupPath)) {
+            try {
+                fs.copyFileSync(backupPath, filePath);
+                fs.unlinkSync(backupPath);
+                console.log('Restored file from backup after failed write');
+            } catch (restoreErr) {
+                console.log(`Failed to restore backup: ${restoreErr}`);
+            }
+        }
+        
+        // Clean up temp file
+        if (fs.existsSync(tempPath)) {
+            try {
+                fs.unlinkSync(tempPath);
+            } catch (cleanupErr) {
+                // Ignore cleanup errors
+            }
+        }
+        
+        return false;
+    }
+}
+
 // Function to create a backup of the config file
 function createBackupConfig(configPath, config) {
     try {
@@ -30,9 +80,14 @@ function createBackupConfig(configPath, config) {
             _backup_source: configPath
         };
         
-        fs.writeFileSync(backupPath, JSON.stringify(backupConfig, null, 2), 'utf8');
-        console.log(`Backup config created at: ${backupPath}`);
-        return backupPath;
+        const success = atomicWriteFile(backupPath, JSON.stringify(backupConfig, null, 2));
+        if (success) {
+            console.log(`Backup config created at: ${backupPath}`);
+            return backupPath;
+        } else {
+            console.log('Failed to create backup config');
+            return null;
+        }
     } catch (err) {
         console.log(`Error creating backup config: ${err}`);
         return null;
@@ -63,15 +118,33 @@ function restoreFromBackup(configDir) {
         delete backupConfig._backup_created;
         delete backupConfig._backup_source;
         
-        // Restore the primary config
-        fs.writeFileSync(configPath, JSON.stringify(backupConfig, null, 2), 'utf8');
-        console.log(`Config restored from backup: ${configPath}`);
-        
-        return backupConfig;
+        // Restore the primary config using atomic write
+        const success = atomicWriteFile(configPath, JSON.stringify(backupConfig, null, 2));
+        if (success) {
+            console.log(`Config restored from backup: ${configPath}`);
+            return backupConfig;
+        } else {
+            console.log('Failed to restore config from backup');
+            return null;
+        }
     } catch (err) {
         console.log(`Error restoring from backup: ${err}`);
         return null;
     }
+}
+
+// Function to check if config needs updating (avoid unnecessary writes)
+function configNeedsUpdate(existingConfig, newConfig) {
+    // Compare key fields to see if update is needed
+    const keyFields = ['myID', 'locLat', 'locLon', 'gain', 'noaaFrequencies', 'saveDir'];
+    
+    for (const field of keyFields) {
+        if (JSON.stringify(existingConfig[field]) !== JSON.stringify(newConfig[field])) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 // Function to recursively find the config file in a directory and its subdirectories
@@ -163,8 +236,28 @@ function loadConfig() {
                 // Create/update backup config
                 createBackupConfig(configPath, configJson);
 
-                // Write the updated configData back to the configPath
-                fs.writeFileSync(configPath, JSON.stringify(configJson, null, 2), 'utf8');
+                // Only rewrite config if it needs updating (avoid unnecessary writes)
+                const originalConfig = { ...configJson };
+                delete originalConfig.saveDir; // saveDir is added dynamically, don't compare
+                
+                let needsUpdate = false;
+                try {
+                    const currentFileData = fs.readFileSync(configPath, 'utf8');
+                    const currentConfig = JSON.parse(currentFileData);
+                    needsUpdate = configNeedsUpdate(currentConfig, originalConfig);
+                } catch (err) {
+                    needsUpdate = true; // If we can't read it, assume it needs updating
+                }
+
+                if (needsUpdate) {
+                    console.log('Config file needs updating, writing changes...');
+                    const success = atomicWriteFile(configPath, JSON.stringify(originalConfig, null, 2));
+                    if (!success) {
+                        console.log('Warning: Failed to update config file, continuing with loaded config');
+                    }
+                } else {
+                    console.log('Config file is current, skipping unnecessary rewrite');
+                }
 
                 return configJson;
             } catch (err) {
@@ -218,7 +311,12 @@ function saveConfig(config) {
             return false;
         }
         
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+        // Use atomic write for safety
+        const success = atomicWriteFile(configPath, JSON.stringify(config, null, 2));
+        if (!success) {
+            console.log('Failed to save config file');
+            return false;
+        }
         
         // Update backup when saving
         createBackupConfig(configPath, config);
@@ -245,5 +343,6 @@ module.exports = {
     getConfigPath,
     validateConfig,
     createBackupConfig,
-    restoreFromBackup
+    restoreFromBackup,
+    atomicWriteFile
 };

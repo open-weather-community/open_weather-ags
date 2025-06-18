@@ -248,8 +248,16 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 
 **Issue Addressed:** Documented cases of the `ow-config.json` file spontaneously disappearing or becoming corrupted on the AGS USB drive, even after successful operation for multiple days.
 
+**Root Causes Identified:**
+- **Power Interruptions:** Daily 3 AM reboots and power outages during file writes
+- **FAT32 Vulnerabilities:** No journaling, cached writes, cheap USB drive firmware
+- **Unnecessary Writes:** Config file was rewritten on every startup, creating corruption opportunities
+- **Non-atomic Operations:** Simple file writes vulnerable to power loss mid-operation
+
 **Solution Implemented:**
 - **Automatic Backup Creation:** Every time the primary config is successfully loaded, a backup file (`ow-config-backup.json`) is created with timestamp metadata
+- **Atomic File Operations:** All config writes use atomic write-to-temp-then-rename operations to prevent corruption
+- **Smart Write Detection:** Config files are only rewritten when changes are actually needed
 - **Validation:** All config files are validated for required fields before use
 - **Recovery Mechanism:** If the primary config is missing or corrupted, the system automatically restores from the backup
 - **Multi-location Search:** System searches all USB mount points for backup configs if primary is completely missing
