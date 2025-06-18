@@ -281,6 +281,44 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 - **Antenna optimization:** Performance varies significantly with antenna setup
 - **Config persistence:** Resolved via backup system - no longer causes system failures
 
+## Recent Bug Fixes & Improvements
+
+### Elevation Filtering Bug Fix (2024)
+
+**Issue Identified:** The `minElevation` configuration parameter was not being applied during satellite pass calculation, causing all passes to be processed regardless of elevation angle. This could lead to poor-quality recordings from low-elevation passes while potentially missing excellent high-elevation passes (including optimal 90-degree passes).
+
+**Root Cause:** The `tle.js` module was calculating satellite elevations correctly but never comparing them against the configured `minElevation` threshold. The filtering logic was completely missing from the `findSatellitePasses` function.
+
+**Solution Implemented:**
+- **Enhanced Pass Detection:** Modified the elevation checking logic to only track satellite positions when elevation is above the configured minimum
+- **Proper Pass Boundaries:** Passes now start and end based on elevation thresholds, not just distance constraints
+- **Multiple Filtering Points:** Added elevation filtering at three critical points:
+  1. During real-time elevation calculation
+  2. When ending passes due to elevation drop
+  3. When ending passes due to distance constraints
+- **Improved Logging:** Added detailed logging to track how many passes are found and their elevation angles
+
+**Code Changes:**
+- `tle.js` - Added `minElevation` filtering in `findSatellitePasses()` function
+- `tle.js` - Enhanced logging to show pass count and elevation details
+- `tle.js` - Added elevation checking for all three pass-ending conditions
+
+**Impact:** 
+- **Quality Improvement:** Only records satellite passes that meet minimum elevation requirements
+- **90-Degree Passes:** Excellent high-elevation passes (including 90-degree overhead passes) are now properly captured and prioritized
+- **Resource Efficiency:** Eliminates processing of poor-quality low-elevation passes
+- **User Confidence:** Clear logging shows exactly which passes are being considered and why
+
+**Configuration Usage:**
+```json
+{
+  "minElevation": 30,  // Only record passes above 30 degrees elevation
+  // ... other config options
+}
+```
+
+The system now properly respects the `minElevation` setting, ensuring that only viable passes are recorded while preserving the highest-quality passes for optimal weather satellite imagery capture.
+
 ## Dependencies & External Services
 
 ### Critical Dependencies

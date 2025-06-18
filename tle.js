@@ -71,6 +71,9 @@ async function findSatellitePasses(tleLine1, tleLine2) {
     const passes = [];
     let elevations = [];
     let distances = [];
+    
+    // Get minimum elevation from config, default to 0 if not specified
+    const minElevation = config.minElevation || 0;
 
     // Loop through each minute in the propagation period
     while (currentTime < endTime) {
@@ -98,29 +101,54 @@ async function findSatellitePasses(tleLine1, tleLine2) {
                 const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
                 const elevation = satellite.radiansToDegrees(lookAngles.elevation);
 
-                if (!passStart) {
-                    passStart = currentTime; // Mark the start of the pass
-                    elevations = [];
-                    distances = [];
-                }
+                // Only process points that meet minimum elevation requirement
+                if (elevation >= minElevation) {
+                    if (!passStart) {
+                        passStart = currentTime; // Mark the start of the pass
+                        elevations = [];
+                        distances = [];
+                    }
 
-                elevations.push(elevation);
-                distances.push(distance);
+                    elevations.push(elevation);
+                    distances.push(distance);
+                } else if (passStart) {
+                    // End of pass - satellite dropped below minimum elevation
+                    const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
+                    const maxElevation = Math.max(...elevations);
+                    const avgDistance = distances.reduce((sum, el) => sum + el, 0) / distances.length;
+                    const minDistance = Math.min(...distances);
+
+                    // Only add passes that meet the minimum elevation requirement
+                    if (maxElevation >= minElevation) {
+                        passes.push({
+                            start: passStart,
+                            end: currentTime,
+                            maxElevation: maxElevation.toFixed(2),
+                            avgElevation: avgElevation.toFixed(2),
+                            avgDistance: avgDistance.toFixed(2),
+                            minDistance: minDistance.toFixed(2)
+                        });
+                    }
+                    passStart = null; // Reset pass start
+                }
             } else if (passStart) {
-                // Calculate average and maximum elevations and distances when the pass ends
+                // End of pass - satellite moved too far away
                 const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
                 const maxElevation = Math.max(...elevations);
                 const avgDistance = distances.reduce((sum, el) => sum + el, 0) / distances.length;
                 const minDistance = Math.min(...distances);
 
-                passes.push({
-                    start: passStart,
-                    end: currentTime,
-                    maxElevation: maxElevation.toFixed(2),
-                    avgElevation: avgElevation.toFixed(2),
-                    avgDistance: avgDistance.toFixed(2),
-                    minDistance: minDistance.toFixed(2)
-                });
+                // Only add passes that meet the minimum elevation requirement
+                if (maxElevation >= minElevation) {
+                    passes.push({
+                        start: passStart,
+                        end: currentTime,
+                        maxElevation: maxElevation.toFixed(2),
+                        avgElevation: avgElevation.toFixed(2),
+                        avgDistance: avgDistance.toFixed(2),
+                        minDistance: minDistance.toFixed(2)
+                    });
+                }
                 passStart = null; // Reset pass start
             }
         }
@@ -132,12 +160,16 @@ async function findSatellitePasses(tleLine1, tleLine2) {
     if (passStart) {
         const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
         const maxElevation = Math.max(...elevations);
-        passes.push({
-            start: passStart,
-            end: currentTime,
-            maxElevation: maxElevation.toFixed(2),
-            avgElevation: avgElevation.toFixed(2)
-        });
+        
+        // Only add passes that meet the minimum elevation requirement
+        if (maxElevation >= minElevation) {
+            passes.push({
+                start: passStart,
+                end: currentTime,
+                maxElevation: maxElevation.toFixed(2),
+                avgElevation: avgElevation.toFixed(2)
+            });
+        }
     }
 
     return passes;
@@ -176,6 +208,8 @@ async function processPasses(configParam, loggerParam) {
 
             logger.info(`Processing satellite: ${satName}`);
             const passes = await findSatellitePasses(tleLine1, tleLine2);
+            
+            logger.info(`Found ${passes.length} passes for ${satName} above ${config.minElevation || 0}° elevation`);
 
             // Format and add new passes
             passes.forEach(pass => {
@@ -219,6 +253,7 @@ async function processPasses(configParam, loggerParam) {
 
                 if (!duplicate) {
                     existingPasses.push(newPass);
+                    logger.info(`Added pass: ${satName} on ${newPass.date} at ${newPass.time}, max elevation: ${maxElevation}°`);
                 }
             });
         }
