@@ -11,3 +11,4 @@ rtl-sdr-blog/
 log.txt
 passes.json
 passes.json.bak
+*.code-workspace

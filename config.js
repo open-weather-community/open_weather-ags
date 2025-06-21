@@ -21,28 +21,28 @@ function validateConfig(config) {
 function atomicWriteFile(filePath, data) {
     const tempPath = filePath + '.tmp';
     const backupPath = filePath + '.backup';
-    
+
     try {
         // Create backup of existing file
         if (fs.existsSync(filePath)) {
             fs.copyFileSync(filePath, backupPath);
         }
-        
+
         // Write to temporary file first
         fs.writeFileSync(tempPath, data, 'utf8');
-        
+
         // Atomically rename temp file to target (this is atomic on most filesystems)
         fs.renameSync(tempPath, filePath);
-        
+
         // Clean up backup if write succeeded
         if (fs.existsSync(backupPath)) {
             fs.unlinkSync(backupPath);
         }
-        
+
         return true;
     } catch (err) {
         console.log(`Atomic write failed: ${err}`);
-        
+
         // Restore from backup if available
         if (fs.existsSync(backupPath)) {
             try {
@@ -53,7 +53,7 @@ function atomicWriteFile(filePath, data) {
                 console.log(`Failed to restore backup: ${restoreErr}`);
             }
         }
-        
+
         // Clean up temp file
         if (fs.existsSync(tempPath)) {
             try {
@@ -62,7 +62,7 @@ function atomicWriteFile(filePath, data) {
                 // Ignore cleanup errors
             }
         }
-        
+
         return false;
     }
 }
@@ -72,14 +72,14 @@ function createBackupConfig(configPath, config) {
     try {
         const configDir = path.dirname(configPath);
         const backupPath = path.join(configDir, backupConfigName);
-        
+
         // Add timestamp to backup for debugging
         const backupConfig = {
             ...config,
             _backup_created: new Date().toISOString(),
             _backup_source: configPath
         };
-        
+
         const success = atomicWriteFile(backupPath, JSON.stringify(backupConfig, null, 2));
         if (success) {
             console.log(`Backup config created at: ${backupPath}`);
@@ -99,25 +99,25 @@ function restoreFromBackup(configDir) {
     try {
         const backupPath = path.join(configDir, backupConfigName);
         const configPath = path.join(configDir, configName);
-        
+
         if (!fs.existsSync(backupPath)) {
             console.log('No backup config found to restore from');
             return null;
         }
-        
+
         const backupData = fs.readFileSync(backupPath, 'utf8');
         const backupConfig = JSON.parse(backupData);
-        
+
         // Validate backup config
         if (!validateConfig(backupConfig)) {
             console.log('Backup config is invalid, cannot restore');
             return null;
         }
-        
+
         // Remove backup metadata before restoring
         delete backupConfig._backup_created;
         delete backupConfig._backup_source;
-        
+
         // Restore the primary config using atomic write
         const success = atomicWriteFile(configPath, JSON.stringify(backupConfig, null, 2));
         if (success) {
@@ -137,13 +137,13 @@ function restoreFromBackup(configDir) {
 function configNeedsUpdate(existingConfig, newConfig) {
     // Compare key fields to see if update is needed
     const keyFields = ['myID', 'locLat', 'locLon', 'gain', 'noaaFrequencies', 'saveDir'];
-    
+
     for (const field of keyFields) {
         if (JSON.stringify(existingConfig[field]) !== JSON.stringify(newConfig[field])) {
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -158,23 +158,36 @@ function findConfigFile(dir) {
     try {
         files = fs.readdirSync(dir);
     } catch (err) {
-        console.log(`Permission denied accessing directory: ${dir}`);
+        console.log(`Permission denied accessing directory: ${dir} - Error: ${err.message}`);
         return null;
     }
 
+    // Check for config file in current directory first
+    const configPath = path.join(dir, configName);
+    if (fs.existsSync(configPath)) {
+        console.log(`Found config file: ${configPath}`);
+        return configPath;
+    }
+
+    // Then search subdirectories
     for (const file of files) {
         const fullPath = path.join(dir, file);
 
-        // Skip hidden directories like .Trashes or .Trash-* and other files/folders starting with '.'
-        if (fs.statSync(fullPath).isDirectory()) {
-            const baseName = path.basename(fullPath);
-            if (baseName.startsWith('.')) {
-                continue; // Skip hidden folders
+        try {
+            const stats = fs.statSync(fullPath);
+            // Skip hidden directories like .Trashes or .Trash-* and other files/folders starting with '.'
+            if (stats.isDirectory()) {
+                const baseName = path.basename(fullPath);
+                if (baseName.startsWith('.')) {
+                    continue; // Skip hidden folders
+                }
+                console.log(`Searching subdirectory: ${fullPath}`);
+                const result = findConfigFile(fullPath);
+                if (result) return result;
             }
-            const result = findConfigFile(fullPath);
-            if (result) return result;
-        } else if (file === configName) {
-            return fullPath;
+        } catch (err) {
+            console.log(`Cannot access ${fullPath}: ${err.message}`);
+            continue;
         }
     }
     return null;
@@ -185,7 +198,7 @@ function findConfigDirectory() {
     const searchDirs = ['/media', '/mnt'];
     for (const dir of searchDirs) {
         if (!fs.existsSync(dir)) continue;
-        
+
         try {
             const subdirs = fs.readdirSync(dir);
             for (const subdir of subdirs) {
@@ -208,15 +221,56 @@ function findConfigDirectory() {
 // Function to load the configuration with backup recovery
 function loadConfig() {
     const searchDirs = ['/media', '/mnt'];
-    
-    // First, try to find the primary config
+
+    // Add specific known USB mount paths first
+    const knownUsbPaths = ['/media/openweather/O-W', '/media/openweather'];
+
+    // First, try known USB paths directly (to handle permission issues)
+    for (const usbPath of knownUsbPaths) {
+        if (fs.existsSync(usbPath)) {
+            const configPath = path.join(usbPath, configName);
+            if (fs.existsSync(configPath)) {
+                try {
+                    console.log(`Trying direct USB path: ${configPath}`);
+                    const configData = fs.readFileSync(configPath, 'utf8');
+                    const configJson = JSON.parse(configData);
+
+                    // Validate the config
+                    if (!validateConfig(configJson)) {
+                        console.log(`Config validation failed for: ${configPath}`);
+                        continue;
+                    }
+
+                    // Save configPath to configPathFile
+                    fs.writeFileSync(configPathFile, JSON.stringify({ path: configPath }, null, 2), 'utf8');
+
+                    // Get the directory of the config file
+                    const configDir = path.dirname(configPath);
+                    console.log(`Config directory: ${configDir}`);
+                    configJson.saveDir = configDir;
+
+                    console.log(`Config file found at: ${configPath}`);
+
+                    // Create/update backup config
+                    createBackupConfig(configPath, configJson);
+
+                    return configJson;
+                } catch (err) {
+                    console.log(`Error reading USB config file: ${err}`);
+                    continue;
+                }
+            }
+        }
+    }
+
+    // Then try to find the primary config in general search directories
     for (const dir of searchDirs) {
         const configPath = findConfigFile(dir);
         if (configPath) {
             try {
                 const configData = fs.readFileSync(configPath, 'utf8');
                 const configJson = JSON.parse(configData);
-                
+
                 // Validate the config
                 if (!validateConfig(configJson)) {
                     console.log(`Config validation failed for: ${configPath}`);
@@ -239,7 +293,7 @@ function loadConfig() {
                 // Only rewrite config if it needs updating (avoid unnecessary writes)
                 const originalConfig = { ...configJson };
                 delete originalConfig.saveDir; // saveDir is added dynamically, don't compare
-                
+
                 let needsUpdate = false;
                 try {
                     const currentFileData = fs.readFileSync(configPath, 'utf8');
@@ -262,7 +316,7 @@ function loadConfig() {
                 return configJson;
             } catch (err) {
                 console.log(`Error reading config file: ${err}`);
-                
+
                 // Try to restore from backup in the same directory
                 const configDir = path.dirname(configPath);
                 const restoredConfig = restoreFromBackup(configDir);
@@ -274,7 +328,7 @@ function loadConfig() {
             }
         }
     }
-    
+
     // If no primary config found, try to find and restore from any backup
     console.log('Primary config not found, searching for backup configs...');
     const configDir = findConfigDirectory();
@@ -283,15 +337,15 @@ function loadConfig() {
         if (restoredConfig) {
             console.log(`Config restored from backup in directory: ${configDir}`);
             restoredConfig.saveDir = configDir;
-            
+
             // Save the restored config path
             const restoredConfigPath = path.join(configDir, configName);
             fs.writeFileSync(configPathFile, JSON.stringify({ path: restoredConfigPath }, null, 2), 'utf8');
-            
+
             return restoredConfig;
         }
     }
-    
+
     console.log('Config file not found and no backup available');
     return null;
 }
@@ -310,17 +364,17 @@ function saveConfig(config) {
             console.log('Config validation failed, not saving');
             return false;
         }
-        
+
         // Use atomic write for safety
         const success = atomicWriteFile(configPath, JSON.stringify(config, null, 2));
         if (!success) {
             console.log('Failed to save config file');
             return false;
         }
-        
+
         // Update backup when saving
         createBackupConfig(configPath, config);
-        
+
         return true;
     } catch (err) {
         console.log(`Error writing config file: ${err}`);
