@@ -50,6 +50,53 @@ if ! check_network; then
     echo "Network check failed, continuing anyway..." >> "$LOG_FILE"
 fi
 
+# Wait for USB drives to mount (critical for config file access)
+wait_for_usb_drives() {
+    echo "Waiting for USB drives to mount..." >> "$LOG_FILE"
+    for i in {1..30}; do  # 30 attempts * 3s = 90s total
+        # Check if any USB drives are mounted in /media or /mnt
+        if [ -d "/media" ] && [ "$(ls -A /media 2>/dev/null)" ]; then
+            echo "USB drives detected in /media after $((i*3)) seconds" >> "$LOG_FILE"
+            return 0
+        fi
+        if [ -d "/mnt" ] && [ "$(ls -A /mnt 2>/dev/null)" ]; then
+            echo "USB drives detected in /mnt after $((i*3)) seconds" >> "$LOG_FILE"
+            return 0
+        fi
+        echo "Waiting for USB drives... attempt $i/30" >> "$LOG_FILE"
+        sleep 3
+    done
+    echo "No USB drives detected after 90 seconds, continuing anyway..." >> "$LOG_FILE"
+    return 1
+}
+
+wait_for_usb_drives
+
+# Additional wait specifically for config file locations
+wait_for_config_locations() {
+    echo "Checking for config file locations..." >> "$LOG_FILE"
+    for i in {1..20}; do  # 20 attempts * 2s = 40s total
+        # Check the specific paths the config.js looks for
+        if [ -d "/media/openweather/O-W" ] || [ -d "/media/openweather" ]; then
+            echo "Config location found after $((i*2)) seconds" >> "$LOG_FILE"
+            return 0
+        fi
+        # Also check for any mounted drives that might contain config
+        for mount_point in /media/* /mnt/*; do
+            if [ -d "$mount_point" ] && [ -f "$mount_point/ow-config.json" ]; then
+                echo "Config file found at $mount_point after $((i*2)) seconds" >> "$LOG_FILE"
+                return 0
+            fi
+        done
+        echo "Waiting for config locations... attempt $i/20" >> "$LOG_FILE"
+        sleep 2
+    done
+    echo "Config locations not found after 40 seconds, continuing anyway..." >> "$LOG_FILE"
+    return 1
+}
+
+wait_for_config_locations
+
 # Smart crontab management (add only if doesn't exist)
 CRON_ENTRY="0 3 * * * sudo sync && sudo shutdown -r now"
 echo "Checking crontab entry..." >> "$LOG_FILE"
@@ -241,7 +288,41 @@ fi
 
 # Continue to launch the Node.js process regardless of update success
 echo "Launching Node.js application..." >> "$LOG_FILE"
-/home/openweather/.nvm/versions/node/v22.3.0/bin/node "$LOCAL_DIR/scheduler.js" >> "$LOG_FILE" 2>&1
+
+# Final check that USB drives are still accessible before launching app
+echo "Final check for USB accessibility before launching app..." >> "$LOG_FILE"
+for i in {1..10}; do
+    # Check if the config file is actually accessible
+    if [ -f "/media/openweather/O-W/ow-config.json" ]; then
+        echo "Config file verified accessible at /media/openweather/O-W/ow-config.json" >> "$LOG_FILE"
+        break
+    elif [ -f "/media/openweather/ow-config.json" ]; then
+        echo "Config file verified accessible at /media/openweather/ow-config.json" >> "$LOG_FILE"
+        break
+    else
+        echo "Config file not yet accessible, waiting... attempt $i/10" >> "$LOG_FILE"
+        # List what's actually in the media directory for debugging
+        echo "Contents of /media:" >> "$LOG_FILE"
+        ls -la /media >> "$LOG_FILE" 2>&1
+        if [ -d "/media/openweather" ]; then
+            echo "Contents of /media/openweather:" >> "$LOG_FILE"
+            ls -la /media/openweather >> "$LOG_FILE" 2>&1
+        fi
+        if [ -d "/media/openweather/O-W" ]; then
+            echo "Contents of /media/openweather/O-W:" >> "$LOG_FILE"
+            ls -la /media/openweather/O-W >> "$LOG_FILE" 2>&1
+        fi
+        sleep 2
+    fi
+done
+
+# Remove any stale configPath.json that might point to wrong location
+if [ -f "$LOCAL_DIR/configPath.json" ]; then
+    echo "Removing potentially stale configPath.json" >> "$LOG_FILE"
+    rm -f "$LOCAL_DIR/configPath.json"
+fi
+
+cd "$LOCAL_DIR" && /home/openweather/.nvm/versions/node/v22.3.0/bin/node scheduler.js >> "$LOG_FILE" 2>&1
 
 # Log the completion of the script
 echo "Script completed at $(date)" >> "$LOG_FILE"
