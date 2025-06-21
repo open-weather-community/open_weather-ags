@@ -12,3 +12,4 @@ log.txt
 passes.json
 passes.json.bak
 *.code-workspace
+version.txt

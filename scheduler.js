@@ -42,14 +42,14 @@ async function main() {
     } catch (error) {
         console.error(`Error loading configuration: ${error.message}`);
         printLCD('config error', 'check USB/log');
-        
+
         // Give more specific error messages on LCD
         if (error.message.includes('No configuration available')) {
             setTimeout(() => {
                 printLCD('USB drive may', 'need config file');
             }, 3000);
         }
-        
+
         process.exit(1);
     }
 
@@ -69,16 +69,55 @@ async function main() {
     logger.info(`as group: ${process.getgid()}`); // Log the group ID of the process
     logger.info(`current working directory: ${process.cwd()}`); // Log the current working directory
 
-    // check Wi-Fi connection
+    // Allow system to settle after config load
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // check Wi-Fi connection with retry logic
     printLCD('checking', 'Wi-Fi...');
-    try {
-        await checkWifiConnection(config);
-        printLCD('Wi-Fi', 'connected');
-    } catch (error) {
-        console.error(`Error checking Wi-Fi connection: ${error.message}`);
-        logger.error(`Error checking Wi-Fi connection: ${error.message}`);
-        printLCD('Wi-Fi error', 'try restart');
-        process.exit(1);
+    let wifiConnected = false;
+    let wifiRetryCount = 0;
+    const maxWifiRetries = 3;
+
+    while (!wifiConnected && wifiRetryCount < maxWifiRetries) {
+        try {
+            wifiRetryCount++;
+            console.log(`Wi-Fi connection attempt ${wifiRetryCount}/${maxWifiRetries}`);
+            await checkWifiConnection(config);
+            wifiConnected = true;
+            printLCD('Wi-Fi', 'connected');
+            console.log('Wi-Fi connection successful');
+        } catch (error) {
+            console.error(`Wi-Fi connection attempt ${wifiRetryCount} failed: ${error.message}`);
+            if (logger) logger.error(`Wi-Fi connection attempt ${wifiRetryCount} failed: ${error.message}`);
+
+            if (wifiRetryCount < maxWifiRetries) {
+                console.log(`Retrying Wi-Fi connection in 10 seconds...`);
+                printLCD('Wi-Fi retry', `attempt ${wifiRetryCount + 1}/${maxWifiRetries}`);
+                await new Promise(resolve => setTimeout(resolve, 10000));
+            } else {
+                console.error('All Wi-Fi connection attempts failed');
+                printLCD('Wi-Fi failed', 'check config');
+                // Don't exit immediately, log the error and continue
+                if (logger) logger.error('All Wi-Fi connection attempts failed - system will continue without network');
+
+                // Wait a bit more and try one last time
+                console.log('Final Wi-Fi attempt in 15 seconds...');
+                printLCD('Final Wi-Fi', 'attempt...');
+                await new Promise(resolve => setTimeout(resolve, 15000));
+
+                try {
+                    await checkWifiConnection(config);
+                    wifiConnected = true;
+                    printLCD('Wi-Fi', 'connected');
+                    console.log('Final Wi-Fi attempt successful');
+                } catch (finalError) {
+                    console.error(`Final Wi-Fi attempt failed: ${finalError.message}`);
+                    printLCD('Wi-Fi failed', 'continuing...');
+                    // Continue without network - system may recover later
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+            }
+        }
     }
 
     // Check disk space and delete oldest recordings if necessary
