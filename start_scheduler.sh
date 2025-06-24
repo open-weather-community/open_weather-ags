@@ -110,31 +110,44 @@ fi
 
 UPDATE_FAILED=false
 
-# Step 1: Fetch the latest release information from the GitHub API with retries
-echo "Fetching release info from GitHub..." >> "$LOG_FILE"
-for i in {1..5}; do
-    RELEASE_INFO=$(/usr/bin/curl -s "$RELEASE_API_URL")
-    if [ $? -eq 0 ]; then
-        break
-    else
-        echo "GitHub API request failed (attempt $i/5)" >> "$LOG_FILE"
-        sleep 10
+# Check for bypass version check file
+BYPASS_FILE="/home/openweather/bypass-version-check"
+if [ -f "$BYPASS_FILE" ]; then
+    echo "Version check bypass file found at $BYPASS_FILE. Skipping update process." >> "$LOG_FILE"
+    UPDATE_FAILED=true  # Skip the update but continue with the rest of the script
+else
+    echo "No bypass file found. Proceeding with version check." >> "$LOG_FILE"
+fi
+
+# Step 1: Fetch the latest release information from the GitHub API with retries (skip if bypass is active)
+if [ "$UPDATE_FAILED" = false ]; then
+    echo "Fetching release info from GitHub..." >> "$LOG_FILE"
+    for i in {1..5}; do
+        RELEASE_INFO=$(/usr/bin/curl -s "$RELEASE_API_URL")
+        if [ $? -eq 0 ]; then
+            break
+        else
+            echo "GitHub API request failed (attempt $i/5)" >> "$LOG_FILE"
+            sleep 10
+        fi
+    done
+
+    echo "Release Info: $RELEASE_INFO" >> "$LOG_FILE"
+
+    # Parse the release info
+    LATEST_RELEASE=$(echo "$RELEASE_INFO" | grep -oP '"tag_name":\s*"\K[^"]+')
+    DOWNLOAD_URL=$(echo "$RELEASE_INFO" | grep -oP '"tarball_url":\s*"\K[^"]+')
+
+    echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> "$LOG_FILE"
+
+    # Check if LATEST_RELEASE or DOWNLOAD_URL are empty
+    if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
+        echo "Failed to retrieve latest release or tarball URL from GitHub." >> "$LOG_FILE"
+        echo "Continuing without updating." >> "$LOG_FILE"
+        UPDATE_FAILED=true
     fi
-done
-
-echo "Release Info: $RELEASE_INFO" >> "$LOG_FILE"
-
-# Parse the release info
-LATEST_RELEASE=$(echo "$RELEASE_INFO" | grep -oP '"tag_name":\s*"\K[^"]+')
-DOWNLOAD_URL=$(echo "$RELEASE_INFO" | grep -oP '"tarball_url":\s*"\K[^"]+')
-
-echo "Latest release: $LATEST_RELEASE, Download URL: $DOWNLOAD_URL" >> "$LOG_FILE"
-
-# Check if LATEST_RELEASE or DOWNLOAD_URL are empty
-if [ -z "$LATEST_RELEASE" ] || [ -z "$DOWNLOAD_URL" ]; then
-    echo "Failed to retrieve latest release or tarball URL from GitHub." >> "$LOG_FILE"
-    echo "Continuing without updating." >> "$LOG_FILE"
-    UPDATE_FAILED=true
+else
+    echo "Skipping GitHub API request due to bypass file." >> "$LOG_FILE"
 fi
 
 # Handle version.txt with backup/restore
