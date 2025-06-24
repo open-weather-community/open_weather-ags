@@ -11,7 +11,7 @@ const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { printLCD, clearLCD, startMarquee } = require('./lcd');
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config');
-const { initializeNetwork, startNetworkMonitoring, displayNetworkStatus } = require('./network');
+const { initializeNetwork, startNetworkMonitoring, displayNetworkStatus, getNetworkStatus } = require('./network');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
 const {
     updatePasses,
@@ -82,8 +82,8 @@ async function main() {
         console.log(`Network initialized: ${networkResult.connection} connection active`);
         logger.info(`Network connected via ${networkResult.connection} with IP ${networkResult.ip}`);
 
-        // Start network monitoring to keep LCD updated
-        const networkMonitor = startNetworkMonitoring(5); // Update every 5 minutes
+        // Start network monitoring (reduced frequency since status is now in ready message)
+        const networkMonitor = startNetworkMonitoring(10); // Update every 10 minutes for monitoring
 
         // Store monitor reference for cleanup if needed
         process.networkMonitor = networkMonitor;
@@ -118,7 +118,23 @@ async function main() {
     logger.info(`Top ${numberOfPassesToRecord} max elevation passes of the day:`);
     logger.info(JSON.stringify(topMaxElevationPasses, null, 2));
 
-    printLCD('ground station', `ready! :D v${VERSION}`);
+    // Get network status and display ready message with connection type
+    try {
+        const networkStatus = await getNetworkStatus();
+        let connectionType = 'no net';
+
+        if (networkStatus.primary === 'ethernet') {
+            connectionType = 'eth';
+        } else if (networkStatus.primary === 'wifi') {
+            connectionType = 'wifi';
+        }
+
+        printLCD(`AGS READY - ${connectionType}`, `v${VERSION}`);
+        console.log(`Ground station ready with ${connectionType} connection`);
+    } catch (error) {
+        console.log('Could not determine network status for ready message');
+        printLCD('AGS READY', `v${VERSION}`);
+    }
 
     if (topMaxElevationPasses && topMaxElevationPasses.length > 0) {
         for (const pass of topMaxElevationPasses) {
