@@ -337,3 +337,44 @@ map <C-n> :Ntree<CR>
 + ~~[10-day predictions for NOAA-18](https://www.n2yo.com/passes/?s=28654&a=1)~~ *(NOAA-18 end-of-life)*
 + [open-weather DIY satellite ground station: workshop resource](https://docs.google.com/document/d/19wAhLYBdl_qCb4kBRlUFztdgenivi1wQb9GiZbTc7fY/edit)
 + [SDR++ manual](https://www.sdrpp.org/manual.pdf)
+
+## Network Management
+
+The AGS includes comprehensive network management that prioritizes ethernet connections over WiFi and displays connection status on the LCD.
+
+### Features
+
+- **Automatic Interface Detection**: Detects ethernet (eth0, enp*, enx*) and WiFi (wlan0, wlp*) interfaces across different Linux distributions
+- **Connection Priority**: Ethernet (highest priority) → WiFi (fallback) → Automatic failover
+- **LCD Status Display**: Shows connection type and full IP address, updates every 5 minutes
+- **Internet Connectivity Verification**: Tests actual internet access using ping to Google DNS (8.8.8.8)
+
+### Network Status Messages
+
+**LCD Display Messages:**
+- `ETHERNET ACTIVE` / `IP: 192.168.1.100` - Ethernet connected with internet
+- `WIFI ACTIVE` / `IP: 192.168.1.101` - WiFi connected with internet  
+- `ETHERNET: Local only` - Ethernet connected but no internet
+- `WIFI: Local only` - WiFi connected but no internet
+- `NO NETWORK` / `CHECK CABLES` - No active connections
+
+### Configuration
+
+**WiFi Configuration** (in `ow-config.json`):
+```json
+{
+  "wifiName": "YourNetworkName",
+  "wifiPassword": "YourPassword"
+}
+```
+
+**Ethernet Configuration**: Uses DHCP by default, no configuration needed. The system automatically detects interfaces and sets routing priority.
+
+### Network Monitoring
+
+The system automatically:
+1. Checks ethernet connection first (highest priority)
+2. Falls back to WiFi if ethernet unavailable
+3. Displays status on LCD with full IP address
+4. Monitors connections every 5 minutes
+5. Handles connection failures gracefully

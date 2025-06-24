@@ -9,7 +9,7 @@ class Logger {
     // console.log("config: " + config);
     this.config = config;
     this.originalLogPath = path.join(config.saveDir, config.logFile);
-    
+
     // Try to use the configured log path, but fall back to a writable location if the USB is read-only
     this.logFilePath = this.getWritableLogPath(config);
 
@@ -39,7 +39,7 @@ class Logger {
 
   getWritableLogPath(config) {
     const preferredPath = path.join(config.saveDir, config.logFile);
-    
+
     // Test if we can write to the preferred location
     try {
       const testFile = preferredPath + '.test';
@@ -48,15 +48,15 @@ class Logger {
       return preferredPath; // Success, use the configured path
     } catch (err) {
       console.log(`USB log path ${preferredPath} is not writable (${err.code}), using fallback location`);
-      
+
       // Fallback to a writable location in the home directory
       const fallbackDir = '/home/openweather/logs';
-      
+
       // Ensure fallback directory exists
       if (!fs.existsSync(fallbackDir)) {
         fs.mkdirSync(fallbackDir, { recursive: true });
       }
-      
+
       return path.join(fallbackDir, config.logFile);
     }
   }

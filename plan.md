@@ -352,6 +352,100 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 
 The system now properly respects the `minElevation` setting, ensuring that only viable passes are recorded while preserving the highest-quality passes for optimal weather satellite imagery capture.
 
+## Recent Updates & Improvements (June 2025)
+
+### Version Check Bypass System
+
+**Feature Added:** Development bypass mechanism for version checking to enable proper testing of local changes without automatic GitHub updates overwriting modifications.
+
+**Implementation:**
+- **Bypass File:** Create `/home/openweather/bypass-version-check` to skip version checking
+- **Smart Integration:** Bypass only affects GitHub API calls and updates, all other startup processes continue normally
+- **Clear Logging:** System logs when bypass is active for transparency
+- **Easy Toggle:** Simple file creation/deletion to enable/disable bypass
+
+**Usage:**
+```bash
+# Enable bypass (for testing)
+touch /home/openweather/bypass-version-check
+
+# Disable bypass (return to normal operation)
+rm /home/openweather/bypass-version-check
+```
+
+**Benefits:**
+- Enables safe local development and testing
+- Prevents accidental overwriting of work-in-progress changes
+- Maintains all other system functionality (USB mounting, dependency checks, etc.)
+- Provides clear feedback in logs about bypass status
+
+### Logger Resilience for Read-Only USB Drives
+
+**Issue Addressed:** Application crashes when USB drives are mounted as read-only (EROFS errors) because the logger cannot write to the configured log path on the USB drive.
+
+**Root Cause:** The logger was attempting to write directly to `config.saveDir/config.logFile` (typically `/media/openweather/O-W/log.txt`) without handling read-only file system scenarios.
+
+**Solution Implemented:**
+- **Intelligent Fallback:** Logger automatically detects when the configured log path is not writable
+- **Graceful Degradation:** Falls back to a local writable directory (`/home/openweather/logs/`) when USB is read-only
+- **Clear User Feedback:** Logs indicate when fallback location is being used and why
+- **Test-Then-Use:** Performs write test before committing to a log location
+- **Directory Creation:** Automatically creates fallback directories as needed
+
+**Technical Implementation:**
+- Added `getWritableLogPath()` method to test write permissions before use
+- Fallback path: `/home/openweather/logs/log.txt` when USB is not writable
+- Enhanced error handling and user messaging
+- Preserves all logging functionality regardless of USB drive state
+
+**Files Modified:**
+- `logger.js` - Enhanced with fallback logic and write testing
+
+**Impact:**
+- **System Reliability:** Application no longer crashes due to read-only USB drives
+- **Continuous Operation:** Logging continues even when USB storage has issues
+- **Better Debugging:** Clear indication of log location changes helps troubleshooting
+- **User Experience:** System continues operating smoothly regardless of USB drive state
+
+### Enhanced Error Handling & Robustness
+
+**Improvements Made:**
+- **USB Mount Resilience:** Better handling of USB drives that mount read-only
+- **Startup Script Cleanup:** Removed duplicate code sections that caused confusion
+- **Configuration Recovery:** Enhanced backup and recovery mechanisms
+- **Network Tolerance:** Improved handling of network connectivity issues during startup
+
+**System Reliability Enhancements:**
+- More graceful handling of hardware failures
+- Better error messages and user feedback
+- Improved log file management and rotation
+- Enhanced debugging capabilities for remote troubleshooting
+
+## Development Testing Features
+
+### Bypass Version Check System
+The bypass version check feature is specifically designed for development and testing scenarios:
+
+**When to Use:**
+- Testing local code changes
+- Debugging specific issues
+- Validating new features before release
+- Preventing automatic updates during development work
+
+**How It Works:**
+1. System checks for `/home/openweather/bypass-version-check` file on startup
+2. If file exists, skips GitHub API calls and update process
+3. Continues with all other startup procedures (USB mounting, dependency checks, app launch)
+4. Logs bypass status for transparency
+
+**Safety Features:**
+- Only affects version checking, not core functionality
+- Easy to enable/disable with simple file operations
+- Clear logging indicates when bypass is active
+- No configuration changes required
+
+This feature ensures developers can work safely without worrying about their changes being overwritten by automatic updates, while maintaining all the normal system startup and operation procedures.
+
 ## Dependencies & External Services
 
 ### Critical Dependencies
@@ -365,3 +459,88 @@ The system now properly respects the `minElevation` setting, ensuring that only 
 - **Raspberry Pi** - Official distributors
 - **LCD displays** - Generic I2C 16x2 displays
 - **3D printing** - PLA filament, standard FDM printers
+
+## Troubleshooting Guide
+
+### Common Issues & Solutions
+
+#### Read-Only USB Drive Issues
+**Symptoms:** Application logs show "EROFS: read-only file system" errors
+**Cause:** USB drive mounted as read-only due to corruption or hardware issues
+**Solution:** 
+- System automatically falls back to local log storage in `/home/openweather/logs/`
+- Check USB drive health and reformat if necessary
+- Monitor system logs to confirm fallback logging is working
+
+#### Configuration File Problems  
+**Symptoms:** "Config missing!" or "config error" displayed on LCD
+**Solutions:**
+1. Check for backup config file (`ow-config-backup.json`) on USB drive
+2. System automatically attempts restoration from backup
+3. If no backup available, create new `ow-config.json` file on USB drive
+4. Verify USB drive is properly mounted and accessible
+
+#### Version Update Issues During Development
+**Symptoms:** Local changes being overwritten by automatic updates
+**Solution:** Use development bypass feature:
+```bash
+# Create bypass file to prevent updates
+touch /home/openweather/bypass-version-check
+
+# Remove bypass file to resume normal updates  
+rm /home/openweather/bypass-version-check
+```
+
+#### Network Connectivity Problems
+**Symptoms:** "No Network" displayed, uploads failing
+**Solutions:**
+1. Check WiFi configuration in `ow-config.json`
+2. Verify network credentials and connectivity
+3. System continues operation without network (local recording)
+4. Network monitoring provides automatic reconnection
+
+#### Hardware Detection Issues
+**Symptoms:** LCD shows garbled text, RTL-SDR not found
+**Solutions:**
+1. Check I2C connections for LCD (address 0x27)
+2. Verify RTL-SDR dongle is connected and recognized (`lsusb`)
+3. Ensure proper permissions for hardware access
+4. Check system logs for specific hardware error messages
+
+### Log File Locations
+
+**Primary Log Locations:**
+- USB Drive: `/media/openweather/O-W/log.txt` (when writable)
+- Fallback: `/home/openweather/logs/log.txt` (when USB read-only)
+- System Log: `/home/openweather/cronlog.txt` (startup and system events)
+
+**Checking Log Status:**
+```bash
+# Check current log file being used
+tail -f /home/openweather/cronlog.txt
+
+# Check application logs (may be on USB or local)
+tail -f /home/openweather/logs/log.txt
+tail -f /media/openweather/O-W/log.txt
+```
+
+### Development & Testing
+
+#### Testing Local Changes
+1. Create bypass file: `touch /home/openweather/bypass-version-check`
+2. Make your code changes
+3. Restart the system or run scheduler manually
+4. Monitor logs to ensure bypass is active
+5. Remove bypass file when testing complete
+
+#### Debugging Hardware Issues
+1. Check hardware connections and power
+2. Review system logs for specific error messages
+3. Test individual components (LCD, RTL-SDR, USB) separately
+4. Use fallback logging to maintain debugging capability
+
+#### Configuration Testing
+1. Backup current config before making changes
+2. Test configuration validation with invalid settings
+3. Verify backup restoration functionality
+4. Check USB mount points and accessibility

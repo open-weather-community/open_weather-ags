@@ -18,7 +18,7 @@ The Open Weather Ground Station now includes comprehensive network management th
 
 ### LCD Status Display
 - Shows current connection type (ETHERNET/WIFI)
-- Displays IP address (last two octets for space)
+- Displays full IP address
 - Updates status every 5 minutes by default
 - Shows "NO NETWORK" when no connections are available
 
@@ -30,8 +30,8 @@ The Open Weather Ground Station now includes comprehensive network management th
 ## Network Status Messages
 
 ### LCD Display Messages
-- `ETHERNET ACTIVE` / `IP: xxx.xxx` - Ethernet connected with internet
-- `WIFI ACTIVE` / `IP: xxx.xxx` - WiFi connected with internet  
+- `ETHERNET ACTIVE` / `IP: 192.168.1.100` - Ethernet connected with internet
+- `WIFI ACTIVE` / `IP: 192.168.1.101` - WiFi connected with internet  
 - `ETHERNET: Local only` - Ethernet connected but no internet
 - `WIFI: Local only` - WiFi connected but no internet
 - `NO NETWORK` / `CHECK CABLES` - No active connections

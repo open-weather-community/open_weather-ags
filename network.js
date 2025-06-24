@@ -436,8 +436,8 @@ async function displayNetworkStatus() {
 
     if (status.primary) {
         const connectionType = status.primary.toUpperCase();
-        const ipShort = status.ip ? status.ip.split('.').slice(-2).join('.') : 'NO IP';
-        printLCD(`${connectionType} ACTIVE`, `IP: ${ipShort}`);
+        const ipAddress = status.ip ? status.ip : 'NO IP';
+        printLCD(`${connectionType} ACTIVE`, `IP: ${ipAddress}`);
         console.log(`Network status: ${connectionType} connection active with IP ${status.ip}`);
     } else {
         printLCD('NO NETWORK', 'CHECK CABLES');
@@ -466,7 +466,7 @@ async function initializeNetwork(config) {
         if (ethernetStatus.connected) {
             if (ethernetStatus.internet) {
                 console.log('Ethernet connection established with internet access');
-                printLCD('Ethernet OK', `IP: ${ethernetStatus.ip.split('.').slice(-2).join('.')}`);
+                printLCD('Ethernet OK', `IP: ${ethernetStatus.ip}`);
                 networkEstablished = true;
             } else {
                 console.log('Ethernet connected but no internet access');

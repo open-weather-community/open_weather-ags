@@ -124,7 +124,7 @@ async function main() {
         let connectionType = 'no net';
 
         if (networkStatus.primary === 'ethernet') {
-            connectionType = 'eth';
+            connectionType = 'ethernet';
         } else if (networkStatus.primary === 'wifi') {
             connectionType = 'wifi';
         }
