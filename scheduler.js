@@ -129,11 +129,17 @@ async function main() {
             connectionType = 'wifi';
         }
 
-        printLCD(`AGS READY - ${connectionType}`, `v${VERSION}`);
+        // Format line 2: version left-aligned, network type right-aligned (16 chars total)
+        const versionText = `v${VERSION}`;
+        const line2 = (versionText + ' '.repeat(16 - versionText.length - connectionType.length) + connectionType).slice(0, 16);
+
+        printLCD('AGS Ready!', line2);
         console.log(`Ground station ready with ${connectionType} connection`);
     } catch (error) {
         console.log('Could not determine network status for ready message');
-        printLCD('AGS READY', `v${VERSION}`);
+        const versionText = `v${VERSION}`;
+        const line2 = (versionText + ' '.repeat(16 - versionText.length - 6) + 'no net').slice(0, 16);
+        printLCD('AGS Ready!', line2);
     }
 
     if (topMaxElevationPasses && topMaxElevationPasses.length > 0) {
