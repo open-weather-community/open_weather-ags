@@ -1,7 +1,20 @@
-const LCD = require('raspberrypi-liquid-crystal');
+// Use a try-catch to handle the missing module gracefully
+let LCD, lcd;
 
-const lcd = new LCD(1, 0x27, 16, 2); // Adjust the parameters according to your LCD setup
-lcd.beginSync();
+try {
+    LCD = require('raspberrypi-liquid-crystal');
+    lcd = new LCD(1, 0x27, 16, 2); // Adjust the parameters according to your LCD setup
+    lcd.beginSync();
+    console.log('LCD hardware initialized successfully');
+} catch (error) {
+    console.log('LCD hardware not available, using console output instead');
+    // Create a mock LCD object for development/testing
+    lcd = {
+        clearSync: () => console.log('[LCD] Screen cleared'),
+        printSync: (text) => console.log(`[LCD] ${text}`),
+        setCursorSync: (col, row) => console.log(`[LCD] Cursor set to ${col},${row}`)
+    };
+}
 
 // Function to clear the LCD screen
 function clearLCD() {

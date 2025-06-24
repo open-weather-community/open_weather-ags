@@ -43,7 +43,40 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
   - `geolib` - Geographic calculations
   - `luxon` - Date/time handling
 
-### Core Modules
+### Development Environment
+
+### Cross-Platform Development Considerations
+
+This project is developed on a separate computer than it is intended to run on. The target deployment platform is a **Raspberry Pi**, which creates several important development considerations:
+
+- **Hardware Dependencies:** The development machine does not have the physical hardware components that the AGS requires:
+  - No LCD module connected (I2C display at address 0x27)
+  - No RTL-SDR dongle for satellite reception
+  - No GPIO pins for hardware interfaces
+  - Different CPU architecture (likely x86/x64 vs ARM)
+
+- **Testing Limitations:** Direct testing on the development machine is not practical since:
+  - LCD display functions will fail without the actual I2C hardware
+  - RTL-SDR recording functions cannot be tested without the radio hardware
+  - Satellite pass calculations work but recording simulation is not possible
+  - GPIO-dependent features cannot be validated
+
+- **Development Strategy:**
+  - **Modular Design:** Code is structured to allow individual module testing where possible
+  - **Hardware Abstraction:** Functions that depend on Pi-specific hardware are isolated
+  - **Configuration Validation:** Config loading and validation can be tested independently
+  - **Logic Testing:** Satellite calculations, scheduling, and data processing can be verified
+  - **Remote Deployment:** Code is deployed to actual Raspberry Pi hardware for integration testing
+
+- **Deployment Workflow:**
+  - Development and coding done on development machine
+  - Version control (git) used for code synchronization
+  - Testing deployment to actual Raspberry Pi for hardware validation
+  - Remote debugging and logging for troubleshooting hardware-specific issues
+
+This cross-platform development approach requires careful consideration of hardware dependencies and thorough testing on the target Raspberry Pi platform before considering any release ready for production use.
+
+## Core Modules
 
 #### 1. Scheduler (`scheduler.js`)
 - **Purpose:** Main application orchestrator

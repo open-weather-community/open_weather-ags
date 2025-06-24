@@ -11,7 +11,7 @@ const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { printLCD, clearLCD, startMarquee } = require('./lcd');
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config');
-const { checkWifiConnection } = require('./wifi');
+const { initializeNetwork, startNetworkMonitoring, displayNetworkStatus } = require('./network');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
 const {
     updatePasses,
@@ -72,52 +72,26 @@ async function main() {
     // Allow system to settle after config load
     await new Promise(resolve => setTimeout(resolve, 5000));
 
-    // check Wi-Fi connection with retry logic
-    printLCD('checking', 'Wi-Fi...');
-    let wifiConnected = false;
-    let wifiRetryCount = 0;
-    const maxWifiRetries = 3;
+    // Initialize network connections with ethernet priority
+    console.log('Initializing network connections...');
+    logger.info('Starting network initialization with ethernet priority');
 
-    while (!wifiConnected && wifiRetryCount < maxWifiRetries) {
-        try {
-            wifiRetryCount++;
-            console.log(`Wi-Fi connection attempt ${wifiRetryCount}/${maxWifiRetries}`);
-            await checkWifiConnection(config);
-            wifiConnected = true;
-            printLCD('Wi-Fi', 'connected');
-            console.log('Wi-Fi connection successful');
-        } catch (error) {
-            console.error(`Wi-Fi connection attempt ${wifiRetryCount} failed: ${error.message}`);
-            if (logger) logger.error(`Wi-Fi connection attempt ${wifiRetryCount} failed: ${error.message}`);
+    const networkResult = await initializeNetwork(config);
 
-            if (wifiRetryCount < maxWifiRetries) {
-                console.log(`Retrying Wi-Fi connection in 10 seconds...`);
-                printLCD('Wi-Fi retry', `attempt ${wifiRetryCount + 1}/${maxWifiRetries}`);
-                await new Promise(resolve => setTimeout(resolve, 10000));
-            } else {
-                console.error('All Wi-Fi connection attempts failed');
-                printLCD('Wi-Fi failed', 'check config');
-                // Don't exit immediately, log the error and continue
-                if (logger) logger.error('All Wi-Fi connection attempts failed - system will continue without network');
+    if (networkResult.success) {
+        console.log(`Network initialized: ${networkResult.connection} connection active`);
+        logger.info(`Network connected via ${networkResult.connection} with IP ${networkResult.ip}`);
 
-                // Wait a bit more and try one last time
-                console.log('Final Wi-Fi attempt in 15 seconds...');
-                printLCD('Final Wi-Fi', 'attempt...');
-                await new Promise(resolve => setTimeout(resolve, 15000));
+        // Start network monitoring to keep LCD updated
+        const networkMonitor = startNetworkMonitoring(5); // Update every 5 minutes
 
-                try {
-                    await checkWifiConnection(config);
-                    wifiConnected = true;
-                    printLCD('Wi-Fi', 'connected');
-                    console.log('Final Wi-Fi attempt successful');
-                } catch (finalError) {
-                    console.error(`Final Wi-Fi attempt failed: ${finalError.message}`);
-                    printLCD('Wi-Fi failed', 'continuing...');
-                    // Continue without network - system may recover later
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                }
-            }
-        }
+        // Store monitor reference for cleanup if needed
+        process.networkMonitor = networkMonitor;
+    } else {
+        console.error(`Network initialization failed: ${networkResult.error}`);
+        logger.error(`Network initialization failed: ${networkResult.error} - system will continue without network`);
+        printLCD('No Network', 'Continuing...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
     // Check disk space and delete oldest recordings if necessary
