@@ -429,18 +429,16 @@ async function getNetworkStatus() {
 }
 
 /**
- * Display network status on LCD
+ * Get network status (no longer displays on LCD)
+ * LCD display is handled by AGS READY message in scheduler
  */
 async function displayNetworkStatus() {
     const status = await getNetworkStatus();
 
     if (status.primary) {
         const connectionType = status.primary.toUpperCase();
-        const ipAddress = status.ip ? status.ip : 'NO IP';
-        printLCD(`${connectionType} ACTIVE`, `IP: ${ipAddress}`);
         console.log(`Network status: ${connectionType} connection active with IP ${status.ip}`);
     } else {
-        printLCD('NO NETWORK', 'CHECK CABLES');
         console.log('Network status: No active network connections');
     }
 

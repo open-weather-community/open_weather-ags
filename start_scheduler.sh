@@ -218,9 +218,29 @@ if [ "$UPDATE_FAILED" = false ] && [ "$CURRENT_VERSION" != "$LATEST_RELEASE" ]; 
                     echo "$LATEST_RELEASE" > version.txt
                     echo "Update to $LATEST_RELEASE successful" >> "$LOG_FILE"
                     
-                    # Step 9: Reboot the device
-                    echo "Rebooting system..." >> "$LOG_FILE"
-                    sudo reboot
+                    # Step 8: Notify user and restart gracefully
+                    echo "GitHub update complete, preparing to restart..." >> "$LOG_FILE"
+                    
+                    # Start Node.js briefly to display restart message on LCD
+                    cd "$LOCAL_DIR" || exit 1
+                    timeout 10s node -e "
+                    try {
+                        const { printLCD } = require('./lcd');
+                        printLCD('Update complete!', 'Restarting...');
+                        setTimeout(() => {
+                            printLCD('Restart in 5s', 'Please wait...');
+                        }, 2000);
+                    } catch (e) {
+                        console.log('LCD not available for restart message');
+                    }
+                    " >> "$LOG_FILE" 2>&1
+                    
+                    # Give user time to see the message
+                    sleep 6
+                    
+                    # Step 9: Reboot the device gracefully
+                    echo "Rebooting system after update..." >> "$LOG_FILE"
+                    sudo shutdown -r +0 "System restarting after GitHub update"
                 fi
             fi
         fi

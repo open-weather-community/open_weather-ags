@@ -421,6 +421,32 @@ rm /home/openweather/bypass-version-check
 - Improved log file management and rotation
 - Enhanced debugging capabilities for remote troubleshooting
 
+### LCD Display Management Improvement
+
+**Issue Addressed:** The "WIFI ACTIVE" message with full IP address was taking over the LCD display, interfering with normal AGS operation and status messages.
+
+**Root Cause:** The `displayNetworkStatus()` function in `network.js` was displaying network status with IP address both during initialization and every 5 minutes during network monitoring, overriding the main AGS status display.
+
+**Solution Implemented:**
+- **Removed LCD Output:** Modified `displayNetworkStatus()` to only log network status to console, not display on LCD
+- **Simplified Display Logic:** AGS READY message already indicates network connection type (wifi/ethernet)
+- **Preserved Monitoring:** Network monitoring continues but no longer interferes with LCD display
+- **Better User Experience:** LCD now shows appropriate AGS status messages instead of being hijacked by network details
+
+**Technical Changes:**
+- `network.js` - Removed `printLCD()` calls from `displayNetworkStatus()` function
+- Network status still logged to console for debugging
+- Network monitoring continues to function normally without LCD interference
+
+**Impact:**
+- **Cleaner Display:** LCD shows relevant AGS status instead of network details
+- **Improved Operation:** Users can see recording schedules and system status properly
+- **Simplified Design:** Follows "more is less" philosophy - network status shown in AGS READY message
+- **Better UX:** No more LCD takeover interrupting normal system status display
+
+**Files Modified:**
+- `network.js` - Updated `displayNetworkStatus()` function to remove LCD output
+
 ## Development Testing Features
 
 ### Bypass Version Check System

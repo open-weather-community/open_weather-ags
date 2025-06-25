@@ -346,7 +346,27 @@ function loadConfig() {
         }
     }
 
-    console.log('Config file not found and no backup available');
+    // Last resort: try to load default config as fallback (with warnings)
+    console.log('Config file not found and no backup available, checking for default config...');
+    const defaultConfigPath = path.join(__dirname, 'default.config.json');
+    if (fs.existsSync(defaultConfigPath)) {
+        try {
+            console.log('WARNING: Using default configuration - WiFi and other settings may not work!');
+            const defaultConfigData = fs.readFileSync(defaultConfigPath, 'utf8');
+            const defaultConfig = JSON.parse(defaultConfigData);
+
+            // Mark as using default config
+            defaultConfig._using_default = true;
+            defaultConfig.saveDir = '/tmp'; // Fallback save directory
+
+            console.log('WARNING: Please create ow-config.json with your actual settings!');
+            return defaultConfig;
+        } catch (err) {
+            console.log(`Error reading default config: ${err}`);
+        }
+    }
+
+    console.log('Config file not found, no backup available, and no default config found');
     return null;
 }
 

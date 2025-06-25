@@ -20,6 +20,7 @@ const {
     readPassesFile,
 } = require('./passes');
 const axios = require('axios');
+const { spawn } = require('child_process');
 
 let logger;
 let config;
@@ -36,21 +37,70 @@ async function main() {
         if (!config) {
             console.error('Failed to load configuration: No config file found and no backup available');
             printLCD('config missing!', 'check USB drive');
-            throw new Error('No configuration available - please ensure ow-config.json exists on USB drive');
+
+            // Try to provide more helpful information
+            setTimeout(() => {
+                printLCD('need ow-config', 'json on USB');
+            }, 3000);
+
+            setTimeout(async () => {
+                printLCD('will restart', 'automatically');
+                // Wait a bit more then restart automatically
+                setTimeout(async () => {
+                    await gracefulRestart('missing config file', 15);
+                }, 3000);
+            }, 6000);
+
+            // Keep the process alive long enough for the restart sequence
+            await new Promise(() => { }); // Wait indefinitely
         }
-        console.log('Configuration loaded successfully' + (config._backup_created ? ' (restored from backup)' : ''));
+        console.log('Configuration loaded successfully' + (config._backup_created ? ' (restored from backup)' : '') + (config._using_default ? ' (using default settings - WiFi may not work!)' : ''));
+
+        // Show warning if using default config
+        if (config._using_default) {
+            printLCD('default config!', 'create ow-config');
+            setTimeout(() => {
+                printLCD('WiFi may not', 'work properly');
+            }, 3000);
+            await new Promise(resolve => setTimeout(resolve, 6000));
+        }
     } catch (error) {
         console.error(`Error loading configuration: ${error.message}`);
-        printLCD('config error', 'check USB/log');
+
+        // More specific error handling
+        if (error.message.includes('No configuration available') ||
+            error.message.includes('ow-config.json')) {
+            printLCD('config missing!', 'check USB drive');
+            setTimeout(() => {
+                printLCD('need ow-config', 'json file');
+            }, 3000);
+            setTimeout(async () => {
+                await gracefulRestart('config file missing', 12);
+            }, 6000);
+        } else if (error.message.includes('JSON') || error.message.includes('parse')) {
+            printLCD('config error', 'invalid JSON');
+            setTimeout(() => {
+                printLCD('check syntax', 'in config file');
+            }, 3000);
+            setTimeout(async () => {
+                await gracefulRestart('config JSON syntax error', 12);
+            }, 6000);
+        } else {
+            printLCD('config error', 'check USB/log');
+            setTimeout(async () => {
+                await gracefulRestart('config loading error', 10);
+            }, 3000);
+        }
 
         // Give more specific error messages on LCD
         if (error.message.includes('No configuration available')) {
             setTimeout(() => {
                 printLCD('USB drive may', 'need config file');
-            }, 3000);
+            }, 6000);
         }
 
-        process.exit(1);
+        // Keep the process alive long enough for the restart sequence
+        await new Promise(() => { }); // Wait indefinitely
     }
 
     // print config without password and auth_token
@@ -228,6 +278,46 @@ function willOverlapReboot(passStart, durationMinutes) {
 
     // Overlap if passStart < bufferEnd and passEnd > bufferStart
     return passStartMs < bufferEnd && passEndMs > bufferStart;
+}
+
+// Function to perform graceful restart with user notification
+async function gracefulRestart(reason, delay = 10) {
+    try {
+        console.log(`Initiating graceful restart: ${reason}`);
+        printLCD('System restart', 'required...');
+
+        // Give user time to see first message
+        setTimeout(() => {
+            printLCD('Restarting in', `${delay} seconds...`);
+        }, 2000);
+
+        // Countdown
+        let countdown = delay - 5;
+        const countdownInterval = setInterval(() => {
+            if (countdown > 0) {
+                printLCD('Restarting in', `${countdown} seconds...`);
+                countdown--;
+            } else {
+                clearInterval(countdownInterval);
+                printLCD('Restarting now', 'Please wait...');
+            }
+        }, 1000);
+
+        // Wait for the delay, then restart
+        setTimeout(() => {
+            console.log(`Restarting system: ${reason}`);
+            const shutdown = spawn('sudo', ['shutdown', '-r', '+0', `AGS restart: ${reason}`], {
+                detached: true,
+                stdio: 'ignore'
+            });
+            shutdown.unref();
+        }, delay * 1000);
+
+    } catch (error) {
+        console.error(`Error during graceful restart: ${error.message}`);
+        // Fallback to immediate restart
+        spawn('sudo', ['reboot'], { detached: true, stdio: 'ignore' }).unref();
+    }
 }
 
 main().catch((err) => {
