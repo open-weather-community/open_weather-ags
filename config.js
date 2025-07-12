@@ -247,12 +247,13 @@ function loadConfig() {
                     // Get the directory of the config file
                     const configDir = path.dirname(configPath);
                     console.log(`Config directory: ${configDir}`);
-                    configJson.saveDir = configDir;
-
-                    console.log(`Config file found at: ${configPath}`);
+                    configJson.saveDir = configDir; console.log(`Config file found at: ${configPath}`);
 
                     // Create/update backup config
                     createBackupConfig(configPath, configJson);
+
+                    // Ensure this is NOT marked as using default since we found real config
+                    configJson._using_default = false;
 
                     return configJson;
                 } catch (err) {
@@ -293,6 +294,9 @@ function loadConfig() {
                 // Only rewrite config if it needs updating (avoid unnecessary writes)
                 const originalConfig = { ...configJson };
                 delete originalConfig.saveDir; // saveDir is added dynamically, don't compare
+
+                // Ensure this is NOT marked as using default since we found real config
+                configJson._using_default = false;
 
                 let needsUpdate = false;
                 try {
@@ -337,6 +341,9 @@ function loadConfig() {
         if (restoredConfig) {
             console.log(`Config restored from backup in directory: ${configDir}`);
             restoredConfig.saveDir = configDir;
+
+            // Ensure this is NOT marked as using default since we restored from backup
+            restoredConfig._using_default = false;
 
             // Save the restored config path
             const restoredConfigPath = path.join(configDir, configName);

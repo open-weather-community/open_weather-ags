@@ -63,6 +63,40 @@ wait_for_usb_drives() {
             echo "USB drives detected in /mnt after $((i*3)) seconds" >> "$LOG_FILE"
             return 0
         fi
+        
+        # If no mounted drives found, try to detect and mount USB devices
+        if [ $i -eq 10 ]; then  # After 30 seconds, try manual mounting
+            echo "No auto-mounted USB drives found, attempting manual mounting..." >> "$LOG_FILE"
+            
+            # Look for USB devices that aren't mounted
+            for device in /dev/sd[a-z][0-9]*; do
+                if [ -b "$device" ]; then
+                    # Check if this device is already mounted
+                    if ! mount | grep -q "$device"; then
+                        echo "Found unmounted USB device: $device" >> "$LOG_FILE"
+                        
+                        # Create mount point if it doesn't exist
+                        MOUNT_POINT="/media/openweather/O-W"
+                        if [ ! -d "$MOUNT_POINT" ]; then
+                            sudo mkdir -p "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
+                        fi
+                        
+                        # Try to mount the device
+                        if sudo mount "$device" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1; then
+                            echo "Successfully mounted $device to $MOUNT_POINT" >> "$LOG_FILE"
+                            # Check if config file exists
+                            if [ -f "$MOUNT_POINT/ow-config.json" ]; then
+                                echo "Config file found at $MOUNT_POINT" >> "$LOG_FILE"
+                                return 0
+                            fi
+                        else
+                            echo "Failed to mount $device" >> "$LOG_FILE"
+                        fi
+                    fi
+                fi
+            done
+        fi
+        
         echo "Waiting for USB drives... attempt $i/30" >> "$LOG_FILE"
         sleep 3
     done
@@ -71,6 +105,16 @@ wait_for_usb_drives() {
 }
 
 wait_for_usb_drives
+
+# Debug: Show current USB device status
+echo "=== USB Device Debug Info ===" >> "$LOG_FILE"
+echo "Block devices:" >> "$LOG_FILE"
+lsblk >> "$LOG_FILE" 2>&1
+echo "Mount points:" >> "$LOG_FILE"
+mount | grep -E "(sd|usb)" >> "$LOG_FILE" 2>&1
+echo "Media directory contents:" >> "$LOG_FILE"
+ls -la /media/ >> "$LOG_FILE" 2>&1
+echo "===========================" >> "$LOG_FILE"
 
 # Additional wait specifically for config file locations
 wait_for_config_locations() {
