@@ -151,12 +151,34 @@ async function main() {
     if (networkResult.success) {
         printLCD('updating', 'passes...');
         try {
-            await updatePasses(config, logger);
+            // Add timeout protection for pass update
+            const passUpdateTimeout = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Pass update timeout after 3 minutes')), 180000);
+            });
+
+            const passUpdatePromise = updatePasses(config, logger);
+
+            await Promise.race([passUpdatePromise, passUpdateTimeout]);
+
             printLCD('passes', 'updated');
+            logger.info('Satellite passes updated successfully');
         } catch (error) {
             logger.error('Failed to update passes: ' + error.message);
-            printLCD('pass update', 'failed');
+
+            if (error.message.includes('timeout')) {
+                printLCD('pass update', 'timed out');
+                logger.error('Pass update timed out - this may indicate network or system issues');
+            } else if (error.message.includes('EAI_AGAIN') || error.message.includes('ENOTFOUND')) {
+                printLCD('DNS failed', 'using cache');
+                logger.error('DNS resolution failed during pass update - will use cached data');
+            } else {
+                printLCD('pass update', 'failed');
+                logger.error('Pass update failed with error: ' + error.message);
+            }
+
             // Continue with existing passes if update fails
+            logger.info('Continuing with existing satellite pass data');
+            await new Promise(resolve => setTimeout(resolve, 3000));
         }
     } else {
         logger.info('Network not available, skipping pass update - will use existing passes');
@@ -243,7 +265,7 @@ async function main() {
         }
     } else {
         logger.info('No valid passes found to record.');
-        
+
         // Provide helpful information based on network status
         if (!networkResult.success) {
             logger.info('Network is unavailable and no cached passes found. The system will retry at the next daily reboot.');
@@ -345,7 +367,44 @@ async function gracefulRestart(reason, delay = 10) {
     }
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
     console.error(`Error in main execution: ${err.message}`);
     if (logger) logger.error(`Error in main execution: ${err.message}`);
+
+    // Handle specific error patterns from production data
+    if (err.message.includes('EAI_AGAIN') || err.message.includes('ENOTFOUND')) {
+        console.error('DNS resolution failure detected - likely network configuration issue');
+        printLCD('DNS Error', 'Check network');
+        if (logger) logger.error('DNS resolution failure - this often indicates network interface or configuration issues');
+
+        // Try to restart with network reset after delay
+        setTimeout(async () => {
+            await gracefulRestart('DNS resolution failure', 30);
+        }, 5000);
+    } else if (err.message.includes('timeout')) {
+        console.error('Timeout error detected during startup');
+        printLCD('Startup timeout', 'Restarting...');
+        if (logger) logger.error('Startup timeout - system may be overloaded or have hardware issues');
+
+        setTimeout(async () => {
+            await gracefulRestart('startup timeout', 20);
+        }, 3000);
+    } else if (err.message.includes('Network unavailable')) {
+        console.error('Network unavailable during startup');
+        printLCD('No Network', 'Will retry...');
+        if (logger) logger.error('Network unavailable during startup - will attempt restart');
+
+        setTimeout(async () => {
+            await gracefulRestart('network unavailable', 60);
+        }, 5000);
+    } else {
+        // Generic error handling
+        console.error('Unexpected error during startup');
+        printLCD('Startup Error', 'Check logs');
+        if (logger) logger.error('Unexpected startup error: ' + err.stack);
+
+        setTimeout(async () => {
+            await gracefulRestart('unexpected startup error', 30);
+        }, 5000);
+    }
 });

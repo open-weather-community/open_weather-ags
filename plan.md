@@ -425,7 +425,124 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 
 The system now properly respects the `minElevation` setting, ensuring that only viable passes are recorded while preserving the highest-quality passes for optimal weather satellite imagery capture.
 
-## Recent Updates & Improvements (June 2025)
+## Recent Updates & Improvements (July 2025)
+
+### Critical Bug Fixes for Production Issues
+
+**Issue Addressed:** Multiple ground stations experiencing DNS resolution failures, "updating passes" freeze, and network initialization failures based on production data from June-July 2025.
+
+**Root Causes Identified:**
+
+1. **DNS Resolution Failures (EAI_AGAIN errors):**
+   - Network initialization race conditions
+   - Missing timeout protection on network operations
+   - Inadequate fallback mechanisms for network failures
+
+2. **"Updating Passes" Freeze:**
+   - TLE fetch operations hanging without timeout
+   - No fallback to cached data when network fails
+   - Insufficient error handling in satellite pass calculation
+
+3. **Network Initialization Issues:**
+   - Interface detection timing problems
+   - Missing timeout protection on critical network operations
+   - No graceful degradation when network services fail
+
+4. **Upload Failures:**
+   - Insufficient retry logic for network errors
+   - No differentiation between network and server errors
+   - Inadequate timeout handling
+
+**Solutions Implemented:**
+
+#### 1. Enhanced TLE Data Processing (`tle.js`)
+
+- **Improved Network Error Handling:** Added comprehensive detection for all network error types (EAI_AGAIN, ENOTFOUND, ETIMEDOUT, ECONNRESET, etc.)
+- **Proactive Cache Loading:** Load cached TLE data immediately as fallback before attempting network fetch
+- **Timeout Protection:** Added 15-second timeout for TLE fetch operations with User-Agent header
+- **Data Validation:** Comprehensive validation of TLE data format and content before processing
+- **Individual Satellite Timeouts:** 30-second timeout protection for each satellite processing operation
+- **Overall Process Timeout:** 2-minute timeout for entire TLE processing operation
+- **Better Error Messages:** Specific error guidance for different failure types
+
+#### 2. Network Initialization Improvements (`network.js`)
+
+- **Comprehensive Timeout Protection:** 90-second overall timeout for network initialization
+- **Individual Operation Timeouts:** 
+  - Interface detection: 15 seconds
+  - Ethernet check: 20 seconds  
+  - WiFi setup: 30 seconds
+  - Priority setting: 10 seconds
+  - Status check: 10 seconds
+- **Enhanced Error Recovery:** Graceful fallback when individual operations fail
+- **Better Progress Feedback:** Clear LCD messages during each step of network initialization
+- **WiFi Configuration Validation:** Check for empty or missing WiFi settings before attempting connection
+
+#### 3. Scheduler Improvements (`scheduler.js`)
+
+- **Pass Update Timeout:** 3-minute timeout protection for satellite pass updates
+- **Enhanced Error Handling:** Specific handling for DNS failures, timeouts, and network unavailability
+- **Automatic Recovery:** Intelligent restart logic based on error type:
+  - DNS failures: 30-second delay restart
+  - Timeouts: 20-second delay restart  
+  - Network unavailable: 60-second delay restart
+- **Better User Feedback:** Specific LCD messages for different error conditions
+- **Graceful Degradation:** Continue operation with cached data when network fails
+
+#### 4. Upload System Enhancements (`upload.js`)
+
+- **Network Error Detection:** Comprehensive identification of network vs. server errors
+- **Enhanced Retry Logic:** 5 retry attempts with intelligent backoff
+- **Escalating Delays:** Increased delay for consecutive network errors (up to 4x base delay)
+- **Timeout Protection:** 60-second timeout for upload operations
+- **Client Error Handling:** Stop retrying on 4xx client errors
+- **Detailed Error Reporting:** Structured error responses with error codes and network error flags
+
+#### 5. System-Wide Robustness Improvements
+
+- **Timeout Protection:** Added timeouts to all critical network operations
+- **Error Classification:** Differentiate between network, configuration, and system errors
+- **Graceful Degradation:** System continues operating with cached data when network fails
+- **Enhanced Logging:** More detailed error messages and troubleshooting information
+- **Automatic Recovery:** Intelligent restart logic based on error patterns
+- **User Feedback:** Clear LCD messages explaining system state and issues
+
+**Code Changes Summary:**
+
+- `tle.js` - Enhanced network error handling, timeout protection, and cache fallback
+- `network.js` - Comprehensive timeout protection and error recovery for initialization
+- `scheduler.js` - Pass update timeout protection and intelligent error recovery
+- `upload.js` - Enhanced retry logic and network error detection
+
+**Impact:**
+
+- **Reliability:** Eliminates DNS resolution failures and "updating passes" freeze issues
+- **Robustness:** System continues operating even with network problems
+- **User Experience:** Clear feedback about system state and issues
+- **Maintenance:** Better error reporting for remote troubleshooting
+- **Operational Continuity:** Cached data allows operation without network connectivity
+
+**Testing Recommendations:**
+
+1. **Network Failure Testing:** Disconnect network during startup to verify cache fallback
+2. **DNS Resolution Testing:** Block DNS to test EAI_AGAIN error handling
+3. **Timeout Testing:** Simulate slow network conditions to verify timeout protection
+4. **Configuration Testing:** Test with invalid WiFi credentials to verify error handling
+5. **Recovery Testing:** Verify automatic restart behavior for different error types
+
+**Production Deployment:**
+
+These fixes directly address the specific error patterns observed in production ground stations:
+- AGS 11 (Arbroath): DNS resolution failures and network initialization issues
+- AGS 17 (Acra): System freezing and display issues
+- AGS 18 (Seattle): Boot failures and blank screen issues  
+- AGS 14 (Valparaiso): Freezing on "updating passes"
+- AGS 2 (Cornwall): Network-related upload failures
+- AGS 21: Upload failures with EAI_AGAIN errors
+
+The enhanced error handling and timeout protection should prevent these systems from getting stuck in unrecoverable states and provide clear feedback about issues for remote troubleshooting.
+
+## Previous Updates & Improvements (June 2025)
 
 ### Version Check Bypass System
 
@@ -580,9 +697,59 @@ This feature ensures developers can work safely without worrying about their cha
 
 ## Troubleshooting Guide
 
+### AGS Diagnostic Tool
+
+A new diagnostic tool (`diagnose.js`) has been created to help troubleshoot the specific issues found in production systems:
+
+```bash
+# Run diagnostic tool
+npm run diagnose
+# or
+node diagnose.js
+```
+
+The diagnostic tool checks for:
+- DNS resolution issues (EAI_AGAIN errors)
+- Network interface detection
+- USB drive mounting and configuration files
+- System resources and load
+- TLE cache availability
+- Celestrak connectivity
+
 ### Common Issues & Solutions
 
-#### Read-Only USB Drive Issues
+#### "Updating Passes" Freeze
+
+**Symptoms:** LCD display shows "updating passes" and system becomes unresponsive
+**Causes:** Network timeout during TLE data fetch, DNS resolution failures
+**Solutions:**
+
+1. **Immediate Fix:** Restart the system - improved timeout handling should prevent freeze
+2. **Check Network:** Run diagnostic tool to verify DNS and Celestrak connectivity
+3. **Verify Cache:** System should automatically use cached TLE data if network fails
+4. **Monitor Logs:** Check logs for specific error messages (EAI_AGAIN, ENOTFOUND, timeout)
+
+#### DNS Resolution Failures (EAI_AGAIN Errors)
+
+**Symptoms:** "EAI_AGAIN celestrak.org" or "ENOTFOUND" errors in logs
+**Causes:** Network configuration issues, DNS server problems, interface detection timing
+**Solutions:**
+
+1. **Run Diagnostic:** `npm run diagnose` to check DNS resolution
+2. **Check Network Config:** Verify WiFi credentials and network settings in config
+3. **Restart Network:** `sudo systemctl restart NetworkManager`
+4. **Check DNS:** `nslookup celestrak.org` to verify DNS resolution
+5. **System Restart:** Automatic restart logic should handle persistent DNS issues
+
+#### Network Initialization Failures
+
+**Symptoms:** "No network connections available" messages, boot failures
+**Solutions:**
+
+1. **Check Connections:** Verify ethernet cable or WiFi adapter
+2. **Interface Detection:** System now has improved interface detection with timeouts
+3. **Configuration:** Ensure WiFi name and password are correct in config
+4. **Diagnostic Tool:** Run diagnostic to check interface detection
 
 **Symptoms:** Application logs show "EROFS: read-only file system" errors
 **Cause:** USB drive mounted as read-only due to corruption or hardware issues

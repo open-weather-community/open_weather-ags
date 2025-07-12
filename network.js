@@ -471,72 +471,138 @@ async function displayNetworkStatus() {
 }
 
 /**
- * Initialize network connections with proper priority
+ * Initialize network connections with proper priority and timeout protection
  */
 async function initializeNetwork(config) {
     console.log('Initializing network connections...');
     printLCD('Network Setup', 'Starting...');
 
-    let networkEstablished = false;
+    // Add overall timeout for network initialization
+    const initTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Network initialization timeout after 90 seconds')), 90000);
+    });
+
+    const initProcess = (async () => {
+        let networkEstablished = false;
+
+        try {
+            // Ensure interfaces are detected first with timeout
+            console.log('Detecting network interfaces...');
+            await Promise.race([
+                ensureInterfacesDetected(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Interface detection timeout')), 15000))
+            ]);
+
+            // Step 1: Check ethernet first (highest priority) with timeout
+            console.log('Step 1: Checking ethernet connection...');
+            printLCD('Checking', 'Ethernet...');
+
+            const ethernetPromise = checkEthernetConnection();
+            const ethernetTimeout = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Ethernet check timeout')), 20000);
+            });
+
+            let ethernetStatus;
+            try {
+                ethernetStatus = await Promise.race([ethernetPromise, ethernetTimeout]);
+            } catch (ethError) {
+                console.log(`Ethernet check failed: ${ethError.message}`);
+                ethernetStatus = { connected: false, reason: 'check_failed' };
+            }
+
+            if (ethernetStatus.connected) {
+                if (ethernetStatus.internet) {
+                    console.log('Ethernet connection established with internet access');
+                    printLCD('Ethernet OK', `IP: ${ethernetStatus.ip}`);
+                    networkEstablished = true;
+                } else {
+                    console.log('Ethernet connected but no internet access');
+                    printLCD('Ethernet: Local', 'only');
+                    // Continue to try WiFi for internet
+                }
+            } else {
+                console.log('Ethernet not available, trying WiFi...');
+                printLCD('Ethernet: None', 'Trying WiFi...');
+            }
+
+            // Step 2: Try WiFi if ethernet doesn't provide internet and WiFi is configured
+            if (!networkEstablished && config.wifiName && config.wifiName.trim() !== '') {
+                console.log('Step 2: Setting up WiFi connection...');
+
+                const wifiPromise = checkWifiConnection(config);
+                const wifiTimeout = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('WiFi setup timeout')), 30000);
+                });
+
+                let wifiResult;
+                try {
+                    wifiResult = await Promise.race([wifiPromise, wifiTimeout]);
+                } catch (wifiError) {
+                    console.log(`WiFi setup failed: ${wifiError.message}`);
+                    wifiResult = { connected: false, reason: 'setup_failed', error: wifiError.message };
+                }
+
+                if (wifiResult.connected && wifiResult.internet) {
+                    console.log('WiFi connection established with internet access');
+                    networkEstablished = true;
+                } else if (wifiResult.reason === 'ethernet_available') {
+                    console.log('Skipped WiFi setup due to working ethernet connection');
+                    networkEstablished = ethernetStatus.internet;
+                } else {
+                    console.log(`WiFi connection failed: ${wifiResult.reason}`);
+                }
+            } else if (!config.wifiName || config.wifiName.trim() === '') {
+                console.log('No WiFi configuration provided, skipping WiFi setup');
+            }
+
+            // Step 3: Set routing priority and display final status
+            try {
+                await Promise.race([
+                    setNetworkPriority(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Priority setting timeout')), 10000))
+                ]);
+            } catch (priorityError) {
+                console.log(`Warning: Could not set network priority: ${priorityError.message}`);
+                // Not critical, continue
+            }
+
+            // Wait a moment for routes to settle
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Get final status with timeout
+            let finalStatus;
+            try {
+                const statusPromise = displayNetworkStatus();
+                const statusTimeout = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Status check timeout')), 10000);
+                });
+                finalStatus = await Promise.race([statusPromise, statusTimeout]);
+            } catch (statusError) {
+                console.log(`Warning: Could not get network status: ${statusError.message}`);
+                // Try to determine if we have any connection
+                finalStatus = { primary: networkEstablished ? 'unknown' : null };
+            }
+
+            if (finalStatus.primary) {
+                console.log(`Network initialization complete: ${finalStatus.primary} connection active`);
+                return { success: true, connection: finalStatus.primary, ip: finalStatus.ip };
+            } else {
+                console.log('Network initialization failed: No working connections');
+                return { success: false, error: 'No network connections available' };
+            }
+
+        } catch (error) {
+            console.error(`Network initialization error: ${error.message}`);
+            printLCD('Network Error', 'Check config');
+            return { success: false, error: error.message };
+        }
+    })();
 
     try {
-        // Step 1: Check ethernet first (highest priority)
-        console.log('Step 1: Checking ethernet connection...');
-        printLCD('Checking', 'Ethernet...');
-
-        const ethernetStatus = await checkEthernetConnection();
-
-        if (ethernetStatus.connected) {
-            if (ethernetStatus.internet) {
-                console.log('Ethernet connection established with internet access');
-                printLCD('Ethernet OK', `IP: ${ethernetStatus.ip}`);
-                networkEstablished = true;
-            } else {
-                console.log('Ethernet connected but no internet access');
-                printLCD('Ethernet: Local', 'only');
-                // Continue to try WiFi for internet
-            }
-        } else {
-            console.log('Ethernet not available, trying WiFi...');
-            printLCD('Ethernet: None', 'Trying WiFi...');
-        }
-
-        // Step 2: Try WiFi if ethernet doesn't provide internet
-        if (!networkEstablished && config.wifiName) {
-            console.log('Step 2: Setting up WiFi connection...');
-
-            const wifiResult = await checkWifiConnection(config);
-
-            if (wifiResult.connected && wifiResult.internet) {
-                console.log('WiFi connection established with internet access');
-                networkEstablished = true;
-            } else if (wifiResult.reason === 'ethernet_available') {
-                console.log('Skipped WiFi setup due to working ethernet connection');
-                networkEstablished = ethernetStatus.internet;
-            } else {
-                console.log(`WiFi connection failed: ${wifiResult.reason}`);
-            }
-        }
-
-        // Step 3: Set routing priority and display final status
-        await setNetworkPriority();
-
-        // Wait a moment for routes to settle
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const finalStatus = await displayNetworkStatus();
-
-        if (finalStatus.primary) {
-            console.log(`Network initialization complete: ${finalStatus.primary} connection active`);
-            return { success: true, connection: finalStatus.primary, ip: finalStatus.ip };
-        } else {
-            console.log('Network initialization failed: No working connections');
-            return { success: false, error: 'No network connections available' };
-        }
-
+        return await Promise.race([initProcess, initTimeout]);
     } catch (error) {
-        console.error(`Network initialization error: ${error.message}`);
-        printLCD('Network Error', 'Check config');
+        console.error(`Network initialization failed: ${error.message}`);
+        printLCD('Network Timeout', 'Continuing...');
         return { success: false, error: error.message };
     }
 }
@@ -547,7 +613,7 @@ async function initializeNetwork(config) {
 async function getMyIP() {
     // Ensure interfaces are detected
     await ensureInterfacesDetected();
-    
+
     // First try ethernet
     const ethernetIP = await getInterfaceIP(ETHERNET_INTERFACE);
     if (ethernetIP) {

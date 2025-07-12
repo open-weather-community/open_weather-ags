@@ -1,10 +1,11 @@
 {
   "name": "open-weather_ags",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "open-weather automated ground station",
   "main": "scheduler.js",
   "scripts": {
-    "start": "node scheduler.js"
+    "start": "node scheduler.js",
+    "diagnose": "node diagnose.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

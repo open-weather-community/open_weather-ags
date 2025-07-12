@@ -13,44 +13,76 @@ const path = require('path'); // Add this line to import the path module
 // Fetch TLE (Two-Line Element) data from Celestrak with fallback to cache
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
-    
+
+    // First try to load cached data as immediate fallback
+    let cachedData = null;
     try {
-        const response = await axios.get(url, { timeout: 10000 }); // 10 second timeout
-        
-        // Save successful fetch to cache
-        if (response.data && config && config.saveDir) {
-            await saveTLECache(response.data);
+        cachedData = await loadTLECache();
+        if (cachedData) {
+            logger.info('Cached TLE data available as fallback');
         }
-        
+    } catch (cacheError) {
+        logger.warn('No cached TLE data available: ' + cacheError.message);
+    }
+
+    try {
+        logger.info('Attempting to fetch fresh TLE data from Celestrak...');
+
+        // Use more aggressive timeout and retry logic
+        const response = await axios.get(url, {
+            timeout: 15000, // 15 second timeout
+            headers: {
+                'User-Agent': 'OpenWeather-AGS/1.0'
+            }
+        });
+
+        // Validate response data
+        if (!response.data || typeof response.data !== 'string' || response.data.trim() === '') {
+            throw new Error('Empty or invalid TLE data received from Celestrak');
+        }
+
+        // Save successful fetch to cache
+        if (config && config.saveDir) {
+            await saveTLECache(response.data);
+            logger.info('Fresh TLE data fetched and cached successfully');
+        }
+
         return response.data;
+
     } catch (error) {
         logger.error('Error fetching TLE data: ' + error.message);
-        
-        // If network error (EAI_AGAIN, ENOTFOUND, etc.), try to use cached data
-        if (error.message.includes('EAI_AGAIN') || 
-            error.message.includes('ENOTFOUND') || 
+
+        // Check if this is a network-related error
+        const isNetworkError = error.message.includes('EAI_AGAIN') ||
+            error.message.includes('ENOTFOUND') ||
             error.message.includes('ECONNREFUSED') ||
             error.message.includes('timeout') ||
-            error.code === 'ENOTFOUND' || 
+            error.message.includes('ETIMEDOUT') ||
+            error.message.includes('ECONNRESET') ||
+            error.code === 'ENOTFOUND' ||
             error.code === 'EAI_AGAIN' ||
-            error.code === 'ECONNREFUSED') {
-            
-            logger.info('Network unavailable, attempting to use cached TLE data...');
-            
-            try {
-                const cachedData = await loadTLECache();
-                if (cachedData) {
-                    logger.info('Using cached TLE data for satellite pass calculation');
-                    return cachedData;
-                }
-            } catch (cacheError) {
-                logger.error('Failed to load cached TLE data: ' + cacheError.message);
+            error.code === 'ECONNREFUSED' ||
+            error.code === 'ETIMEDOUT' ||
+            error.code === 'ECONNRESET';
+
+        if (isNetworkError) {
+            logger.warn('Network error detected, attempting to use cached TLE data...');
+
+            if (cachedData) {
+                logger.info('Using cached TLE data due to network failure');
+                return cachedData;
+            } else {
+                logger.error('No cached TLE data available and network is unavailable');
+                throw new Error('Cannot fetch TLE data: Network unavailable and no cached data found. Please check internet connection.');
             }
-            
-            logger.error('No cached TLE data available and network is unavailable');
-            throw new Error('Cannot fetch TLE data: Network unavailable and no cached data found');
         }
-        
+
+        // For non-network errors, still try cache if available
+        if (cachedData) {
+            logger.warn('Using cached TLE data due to fetch error: ' + error.message);
+            return cachedData;
+        }
+
         throw error;
     }
 }
@@ -60,14 +92,14 @@ async function saveTLECache(tleData) {
     if (!config || !config.saveDir) {
         return;
     }
-    
+
     try {
         const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
         const cacheData = {
             timestamp: new Date().toISOString(),
             data: tleData
         };
-        
+
         fs.writeFileSync(cacheFile, JSON.stringify(cacheData, null, 2));
         logger.info('TLE data cached successfully');
     } catch (error) {
@@ -80,60 +112,60 @@ async function loadTLECache() {
     if (!config || !config.saveDir) {
         return null;
     }
-    
+
     try {
         const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
-        
+
         if (!fs.existsSync(cacheFile)) {
             logger.info('No TLE cache file found');
             return null;
         }
-        
+
         const cacheContent = fs.readFileSync(cacheFile, 'utf8');
-        
+
         // Validate cache content before parsing
         if (!cacheContent || cacheContent.trim() === '') {
             logger.info('TLE cache file is empty');
             return null;
         }
-        
+
         const cacheData = JSON.parse(cacheContent);
-        
+
         // Validate cache data structure
         if (!cacheData || !cacheData.timestamp || !cacheData.data) {
             logger.error('TLE cache file has invalid structure');
             return null;
         }
-        
+
         // Validate timestamp
         const cacheTimestamp = new Date(cacheData.timestamp);
         if (isNaN(cacheTimestamp.getTime())) {
             logger.error('TLE cache has invalid timestamp');
             return null;
         }
-        
+
         // Check if cache is not too old (max 7 days)
         const cacheAge = Date.now() - cacheTimestamp.getTime();
         const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-        
+
         if (cacheAge > maxAge) {
             logger.info('Cached TLE data is too old (>7 days), will not use it');
             return null;
         }
-        
+
         // Validate TLE data content
         if (!cacheData.data || typeof cacheData.data !== 'string' || cacheData.data.trim() === '') {
             logger.error('TLE cache contains invalid data');
             return null;
         }
-        
+
         const ageDays = Math.floor(cacheAge / (24 * 60 * 60 * 1000));
         logger.info(`Using cached TLE data (${ageDays} days old)`);
         return cacheData.data;
-        
+
     } catch (error) {
         logger.error('Failed to load TLE cache: ' + error.message);
-        
+
         // Try to remove corrupted cache file
         try {
             const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
@@ -144,7 +176,7 @@ async function loadTLECache() {
         } catch (removeError) {
             logger.error('Failed to remove corrupted cache file: ' + removeError.message);
         }
-        
+
         return null;
     }
 }
@@ -198,7 +230,7 @@ async function findSatellitePasses(tleLine1, tleLine2) {
     const passes = [];
     let elevations = [];
     let distances = [];
-    
+
     // Get minimum elevation from config, default to 0 if not specified
     const minElevation = config.minElevation || 0;
 
@@ -287,7 +319,7 @@ async function findSatellitePasses(tleLine1, tleLine2) {
     if (passStart) {
         const avgElevation = elevations.reduce((sum, el) => sum + el, 0) / elevations.length;
         const maxElevation = Math.max(...elevations);
-        
+
         // Only add passes that meet the minimum elevation requirement
         if (maxElevation >= minElevation) {
             passes.push({
@@ -310,86 +342,133 @@ async function processPasses(configParam, loggerParam) {
     try {
         logger.info('Starting TLE data processing...');
 
-        // Fetch TLE data
-        const tleData = await fetchTLEData();
-        const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
-        logger.info(`Found TLE data for ${tleLines.length / 3} satellites.`);
+        // Add timeout wrapper for the entire process
+        const processTimeout = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('TLE processing timeout after 2 minutes')), 120000);
+        });
 
-        const existingPasses = readExistingPasses(config, logger);
+        const processPromise = (async () => {
+            // Fetch TLE data with timeout protection
+            const tleData = await fetchTLEData();
 
-        // Process each satellite specified in the config
-        for (const satName in config.noaaFrequencies) {
-            let tleLine1, tleLine2;
-            for (let i = 0; i < tleLines.length; i++) {
-                if (tleLines[i].startsWith(satName)) {
-                    tleLine1 = tleLines[i + 1];
-                    tleLine2 = tleLines[i + 2];
-                    break;
+            // Validate TLE data format
+            if (!tleData || typeof tleData !== 'string') {
+                throw new Error('Invalid TLE data format received');
+            }
+
+            const tleLines = tleData.split('\n').filter(line => line.trim() !== '');
+
+            if (tleLines.length < 3) {
+                throw new Error('Insufficient TLE data - less than 3 lines received');
+            }
+
+            logger.info(`Found TLE data for ${Math.floor(tleLines.length / 3)} satellites.`);
+
+            const existingPasses = readExistingPasses(config, logger);
+
+            // Process each satellite specified in the config
+            for (const satName in config.noaaFrequencies) {
+                logger.info(`Looking for satellite: ${satName}`);
+
+                let tleLine1, tleLine2;
+                for (let i = 0; i < tleLines.length; i++) {
+                    if (tleLines[i].trim().startsWith(satName)) {
+                        tleLine1 = tleLines[i + 1];
+                        tleLine2 = tleLines[i + 2];
+                        break;
+                    }
+                }
+
+                if (!tleLine1 || !tleLine2) {
+                    logger.error(`TLE data for ${satName} not found.`);
+                    continue;
+                }
+
+                logger.info(`Processing satellite: ${satName}`);
+
+                // Add timeout for individual satellite processing
+                const satTimeout = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error(`Satellite processing timeout for ${satName}`)), 30000);
+                });
+
+                const satPromise = findSatellitePasses(tleLine1, tleLine2);
+
+                try {
+                    const passes = await Promise.race([satPromise, satTimeout]);
+
+                    logger.info(`Found ${passes.length} passes for ${satName} above ${config.minElevation || 0}° elevation`);
+
+                    // Format and add new passes
+                    passes.forEach(pass => {
+                        const formattedStart = DateTime.fromISO(pass.start.toISO());
+                        const formattedEnd = DateTime.fromISO(pass.end.toISO());
+                        const maxElevation = pass.maxElevation || 'N/A';
+                        const avgElevation = pass.avgElevation || 'N/A';
+                        const avgDistance = pass.avgDistance || 'N/A';
+                        const minDistance = pass.minDistance || 'N/A';
+
+                        let bufferStart = formattedStart.minus({ minutes: config.bufferMinutes });
+                        let bufferEnd = formattedEnd.plus({ minutes: config.bufferMinutes });
+                        let bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
+
+                        // Ensure the bufferDuration is at least 2 minutes
+                        if (bufferDuration < 2) {
+                            bufferDuration = 2;
+                            bufferEnd = bufferStart.plus({ minutes: 2 });
+                        }
+
+                        const newPass = {
+                            frequency: config.noaaFrequencies[satName],
+                            satellite: satName,
+                            date: bufferStart.toFormat('dd LLL yyyy'),
+                            time: bufferStart.toFormat('HH:mm'),
+                            duration: bufferDuration,
+                            avgElevation: avgElevation,
+                            maxElevation: maxElevation,
+                            avgDistance: avgDistance,
+                            minDistance: minDistance,
+                            recorded: false
+                        };
+
+                        // Avoid adding duplicate passes
+                        const duplicate = existingPasses.some(
+                            existingPass =>
+                                existingPass.satellite === newPass.satellite &&
+                                existingPass.date === newPass.date &&
+                                existingPass.time === newPass.time
+                        );
+
+                        if (!duplicate) {
+                            existingPasses.push(newPass);
+                            logger.info(`Added pass: ${satName} on ${newPass.date} at ${newPass.time}, max elevation: ${maxElevation}°`);
+                        }
+                    });
+                } catch (satError) {
+                    logger.error(`Error processing ${satName}: ${satError.message}`);
+                    // Continue with other satellites even if one fails
                 }
             }
 
-            if (!tleLine1 || !tleLine2) {
-                logger.error(`TLE data for ${satName} not found.`);
-                continue;
-            }
+            // Save updated passes
+            savePasses(existingPasses);
+            logger.info('Satellite passes have been updated and saved.');
+        })();
 
-            logger.info(`Processing satellite: ${satName}`);
-            const passes = await findSatellitePasses(tleLine1, tleLine2);
-            
-            logger.info(`Found ${passes.length} passes for ${satName} above ${config.minElevation || 0}° elevation`);
+        // Race between processing and timeout
+        await Promise.race([processPromise, processTimeout]);
 
-            // Format and add new passes
-            passes.forEach(pass => {
-                const formattedStart = DateTime.fromISO(pass.start.toISO());
-                const formattedEnd = DateTime.fromISO(pass.end.toISO());
-                const maxElevation = pass.maxElevation || 'N/A';
-                const avgElevation = pass.avgElevation || 'N/A';
-                const avgDistance = pass.avgDistance || 'N/A';
-                const minDistance = pass.minDistance || 'N/A';
-
-                let bufferStart = formattedStart.minus({ minutes: config.bufferMinutes });
-                let bufferEnd = formattedEnd.plus({ minutes: config.bufferMinutes });
-                let bufferDuration = Math.round((bufferEnd - bufferStart) / (1000 * 60));
-
-                // Ensure the bufferDuration is at least 2 minutes
-                if (bufferDuration < 2) {
-                    bufferDuration = 2;
-                    bufferEnd = bufferStart.plus({ minutes: 2 });
-                }
-
-                const newPass = {
-                    frequency: config.noaaFrequencies[satName],
-                    satellite: satName,
-                    date: bufferStart.toFormat('dd LLL yyyy'),
-                    time: bufferStart.toFormat('HH:mm'),
-                    duration: bufferDuration,
-                    avgElevation: avgElevation,
-                    maxElevation: maxElevation,
-                    avgDistance: avgDistance,
-                    minDistance: minDistance,
-                    recorded: false
-                };
-
-                // Avoid adding duplicate passes
-                const duplicate = existingPasses.some(
-                    existingPass =>
-                        existingPass.satellite === newPass.satellite &&
-                        existingPass.date === newPass.date &&
-                        existingPass.time === newPass.time
-                );
-
-                if (!duplicate) {
-                    existingPasses.push(newPass);
-                    logger.info(`Added pass: ${satName} on ${newPass.date} at ${newPass.time}, max elevation: ${maxElevation}°`);
-                }
-            });
-        }
-
-        // Save updated passes
-        savePasses(existingPasses);
-        logger.info('Satellite passes have been updated and saved.');
     } catch (err) {
         logger.error('Error processing TLE data: ' + err.message);
+
+        // Provide more specific error guidance
+        if (err.message.includes('timeout')) {
+            logger.error('TLE processing timed out - this may indicate network issues or system overload');
+        } else if (err.message.includes('Network unavailable')) {
+            logger.warn('Network unavailable for TLE update - system will use existing passes');
+        } else if (err.message.includes('EAI_AGAIN')) {
+            logger.error('DNS resolution failed - check network configuration and connectivity');
+        }
+
         throw err;
     }
 }
