@@ -10,15 +10,142 @@ const { DateTime } = require('luxon');
 const fs = require('fs');
 const path = require('path'); // Add this line to import the path module
 
-// Fetch TLE (Two-Line Element) data from Celestrak
+// Fetch TLE (Two-Line Element) data from Celestrak with fallback to cache
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
+    
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(url, { timeout: 10000 }); // 10 second timeout
+        
+        // Save successful fetch to cache
+        if (response.data && config && config.saveDir) {
+            await saveTLECache(response.data);
+        }
+        
         return response.data;
     } catch (error) {
         logger.error('Error fetching TLE data: ' + error.message);
+        
+        // If network error (EAI_AGAIN, ENOTFOUND, etc.), try to use cached data
+        if (error.message.includes('EAI_AGAIN') || 
+            error.message.includes('ENOTFOUND') || 
+            error.message.includes('ECONNREFUSED') ||
+            error.message.includes('timeout') ||
+            error.code === 'ENOTFOUND' || 
+            error.code === 'EAI_AGAIN' ||
+            error.code === 'ECONNREFUSED') {
+            
+            logger.info('Network unavailable, attempting to use cached TLE data...');
+            
+            try {
+                const cachedData = await loadTLECache();
+                if (cachedData) {
+                    logger.info('Using cached TLE data for satellite pass calculation');
+                    return cachedData;
+                }
+            } catch (cacheError) {
+                logger.error('Failed to load cached TLE data: ' + cacheError.message);
+            }
+            
+            logger.error('No cached TLE data available and network is unavailable');
+            throw new Error('Cannot fetch TLE data: Network unavailable and no cached data found');
+        }
+        
         throw error;
+    }
+}
+
+// Save TLE data to cache file
+async function saveTLECache(tleData) {
+    if (!config || !config.saveDir) {
+        return;
+    }
+    
+    try {
+        const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
+        const cacheData = {
+            timestamp: new Date().toISOString(),
+            data: tleData
+        };
+        
+        fs.writeFileSync(cacheFile, JSON.stringify(cacheData, null, 2));
+        logger.info('TLE data cached successfully');
+    } catch (error) {
+        logger.error('Failed to save TLE cache: ' + error.message);
+    }
+}
+
+// Load TLE data from cache file
+async function loadTLECache() {
+    if (!config || !config.saveDir) {
+        return null;
+    }
+    
+    try {
+        const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
+        
+        if (!fs.existsSync(cacheFile)) {
+            logger.info('No TLE cache file found');
+            return null;
+        }
+        
+        const cacheContent = fs.readFileSync(cacheFile, 'utf8');
+        
+        // Validate cache content before parsing
+        if (!cacheContent || cacheContent.trim() === '') {
+            logger.info('TLE cache file is empty');
+            return null;
+        }
+        
+        const cacheData = JSON.parse(cacheContent);
+        
+        // Validate cache data structure
+        if (!cacheData || !cacheData.timestamp || !cacheData.data) {
+            logger.error('TLE cache file has invalid structure');
+            return null;
+        }
+        
+        // Validate timestamp
+        const cacheTimestamp = new Date(cacheData.timestamp);
+        if (isNaN(cacheTimestamp.getTime())) {
+            logger.error('TLE cache has invalid timestamp');
+            return null;
+        }
+        
+        // Check if cache is not too old (max 7 days)
+        const cacheAge = Date.now() - cacheTimestamp.getTime();
+        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+        
+        if (cacheAge > maxAge) {
+            logger.info('Cached TLE data is too old (>7 days), will not use it');
+            return null;
+        }
+        
+        // Validate TLE data content
+        if (!cacheData.data || typeof cacheData.data !== 'string' || cacheData.data.trim() === '') {
+            logger.error('TLE cache contains invalid data');
+            return null;
+        }
+        
+        const ageDays = Math.floor(cacheAge / (24 * 60 * 60 * 1000));
+        logger.info(`Using cached TLE data (${ageDays} days old)`);
+        return cacheData.data;
+        
+    } catch (error) {
+        logger.error('Failed to load TLE cache: ' + error.message);
+        
+        // Try to remove corrupted cache file
+        try {
+            const cacheFile = path.join(config.saveDir, 'tle_cache.txt');
+            if (fs.existsSync(cacheFile)) {
+                fs.unlinkSync(cacheFile);
+                logger.info('Removed corrupted TLE cache file');
+            }
+        } catch (removeError) {
+            logger.error('Failed to remove corrupted cache file: ' + removeError.message);
+        }
+        
+        return null;
     }
 }
 

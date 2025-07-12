@@ -147,9 +147,22 @@ async function main() {
     // Check disk space and delete oldest recordings if necessary
     checkDisk(logger, config.saveDir, deleteOldestRecordings);
 
-    printLCD('updating', 'passes...');
-    await updatePasses(config, logger);
-    printLCD('passes', 'updated');
+    // Only attempt to update passes if network is available
+    if (networkResult.success) {
+        printLCD('updating', 'passes...');
+        try {
+            await updatePasses(config, logger);
+            printLCD('passes', 'updated');
+        } catch (error) {
+            logger.error('Failed to update passes: ' + error.message);
+            printLCD('pass update', 'failed');
+            // Continue with existing passes if update fails
+        }
+    } else {
+        logger.info('Network not available, skipping pass update - will use existing passes');
+        printLCD('no network', 'using cached data');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    }
 
     const passesFilePath = path.resolve(config.saveDir, config.passesFile);
 
@@ -230,6 +243,18 @@ async function main() {
         }
     } else {
         logger.info('No valid passes found to record.');
+        
+        // Provide helpful information based on network status
+        if (!networkResult.success) {
+            logger.info('Network is unavailable and no cached passes found. The system will retry at the next daily reboot.');
+            printLCD('No passes found', 'Network needed');
+            setTimeout(() => {
+                printLCD('Will retry at', 'next reboot');
+            }, 5000);
+        } else {
+            logger.info('Network is available but no passes found for today. Check satellite schedule.');
+            printLCD('No passes found', 'Check schedule');
+        }
     }
 }
 

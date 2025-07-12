@@ -9,6 +9,7 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 ## Project Goals
 
 ### Primary Objectives
+
 - Create easy-to-assemble, intuitive ground stations for weather satellite reception
 - Enable distributed, automated collection of weather satellite imagery
 - Provide educational entry point into radio, satellites, weather, and microcontrollers
@@ -16,6 +17,7 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 - Build resilient network of ground stations globally
 
 ### Design Philosophy
+
 - **"More is less" approach** - Simplicity in operation and maintenance
 - **Local computation** - Calculate satellite orbits on-device rather than relying on third-party services
 - **Educational accessibility** - Serve as entry point for learning about radio, satellites, and coding
@@ -25,6 +27,7 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 ## Technical Architecture
 
 ### Hardware Components
+
 - **Raspberry Pi 4** - Main computing platform
 - **RTL-SDR dongle** - Software Defined Radio for satellite reception
 - **LCD display (I2C)** - Status information and error messages
@@ -33,6 +36,7 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 - **External antenna** - V-dipole or other for satellite reception
 
 ### Software Stack
+
 - **Runtime:** Node.js (JavaScript/ES modules)
 - **Operating System:** Raspberry Pi OS (Bookworm v12)
 - **Main Dependencies:**
@@ -50,18 +54,21 @@ The Open-weather Automatic Ground Station (AGS) is an open-source hardware and s
 This project is developed on a separate computer than it is intended to run on. The target deployment platform is a **Raspberry Pi**, which creates several important development considerations:
 
 - **Hardware Dependencies:** The development machine does not have the physical hardware components that the AGS requires:
+
   - No LCD module connected (I2C display at address 0x27)
   - No RTL-SDR dongle for satellite reception
   - No GPIO pins for hardware interfaces
   - Different CPU architecture (likely x86/x64 vs ARM)
 
 - **Testing Limitations:** Direct testing on the development machine is not practical since:
+
   - LCD display functions will fail without the actual I2C hardware
   - RTL-SDR recording functions cannot be tested without the radio hardware
   - Satellite pass calculations work but recording simulation is not possible
   - GPIO-dependent features cannot be validated
 
 - **Development Strategy:**
+
   - **Modular Design:** Code is structured to allow individual module testing where possible
   - **Hardware Abstraction:** Functions that depend on Pi-specific hardware are isolated
   - **Configuration Validation:** Config loading and validation can be tested independently
@@ -79,6 +86,7 @@ This cross-platform development approach requires careful consideration of hardw
 ## Core Modules
 
 #### 1. Scheduler (`scheduler.js`)
+
 - **Purpose:** Main application orchestrator
 - **Functions:**
   - System initialization and configuration loading
@@ -88,6 +96,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Reboot overlap detection (2:50-3:10 AM buffer)
 
 #### 2. Configuration System (`config.js`)
+
 - **Purpose:** Dynamic configuration management with backup recovery
 - **Functions:**
   - USB-based config file discovery
@@ -97,6 +106,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Config validation and error recovery
 
 #### 3. Satellite Pass Prediction (`passes.js`, `tle.js`)
+
 - **Purpose:** Calculate and manage satellite passes
 - **Functions:**
   - Download Two-Line Element (TLE) data
@@ -105,6 +115,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Select optimal passes for recording
 
 #### 4. Recording System (`recorder.js`)
+
 - **Purpose:** Automated satellite signal recording
 - **Functions:**
   - RTL-SDR control via `rtl_fm`
@@ -113,6 +124,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Signal quality optimization
 
 #### 5. Upload System (`upload.js`)
+
 - **Purpose:** Data transmission to public archive
 - **Functions:**
   - Retry logic for failed uploads
@@ -120,6 +132,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Progress monitoring and logging
 
 #### 6. Display Interface (`lcd.js`)
+
 - **Purpose:** User feedback and status display
 - **Functions:**
   - Real-time status updates
@@ -128,6 +141,7 @@ This cross-platform development approach requires careful consideration of hardw
   - Next recording time display
 
 #### 7. System Management (`disk.js`, `wifi.js`, `logger.js`)
+
 - **Purpose:** System health and maintenance
 - **Functions:**
   - Disk space monitoring and cleanup
@@ -140,18 +154,19 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 
 ```json
 {
-  "myID": 1,                    // Unique station identifier
-  "locLat": 52.49548,          // Latitude (decimal degrees)
-  "locLon": 13.46843,          // Longitude (decimal degrees)  
-  "gain": 38,                  // RTL-SDR gain setting
-  "maxDistance": 2200000,      // Maximum satellite distance (meters)
-  "daysToPropagate": 1,        // Days ahead to calculate passes
-  "minElevation": 30,          // Minimum pass elevation (degrees)
-  "bufferMinutes": 0,          // Recording buffer time
-  "numberOfPassesPerDay": 1,   // Max recordings per day
-  "sampleRate": "48k",         // Recording sample rate
-  "downsample": true,          // Enable audio downsampling
-  "noaaFrequencies": {         // Satellite frequencies
+  "myID": 1, // Unique station identifier
+  "locLat": 52.49548, // Latitude (decimal degrees)
+  "locLon": 13.46843, // Longitude (decimal degrees)
+  "gain": 38, // RTL-SDR gain setting
+  "maxDistance": 2200000, // Maximum satellite distance (meters)
+  "daysToPropagate": 1, // Days ahead to calculate passes
+  "minElevation": 30, // Minimum pass elevation (degrees)
+  "bufferMinutes": 0, // Recording buffer time
+  "numberOfPassesPerDay": 1, // Max recordings per day
+  "sampleRate": "48k", // Recording sample rate
+  "downsample": true, // Enable audio downsampling
+  "noaaFrequencies": {
+    // Satellite frequencies
     "NOAA 19": "137.1M",
     "NOAA 15": "137.62M"
   },
@@ -168,23 +183,27 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 ## Data Flow Architecture
 
 1. **Initialization**
+
    - Load configuration from USB storage
    - Initialize LCD display and logging
    - Verify WiFi connectivity
 
 2. **Pass Calculation**
+
    - Download TLE data for NOAA satellites
    - Calculate passes for current location
    - Filter by elevation, distance, and timing constraints
    - Select best passes for recording
 
 3. **Recording Pipeline**
+
    - Schedule recordings using precise timing
    - Execute RTL-SDR capture at correct frequency
    - Process audio (demodulation, filtering, downsampling)
    - Save to local storage with metadata
 
 4. **Upload Process**
+
    - Package recording with metadata (location, time, satellite)
    - Upload to open-weather Public Archive API
    - Implement retry logic for network failures
@@ -199,6 +218,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 ## Technical Specifications
 
 ### Minimum Hardware Requirements
+
 - **Raspberry Pi 4** (2GB+ RAM recommended)
 - **RTL-SDR v3 dongle** or compatible
 - **16GB+ USB storage** (FAT32 formatted)
@@ -206,18 +226,21 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 - **Antenna** (V-dipole or Yagi, tuned for 137MHz)
 
 ### Software Dependencies
-- **Raspberry Pi OS** Bookworm (v12) 
+
+- **Raspberry Pi OS** Bookworm (v12)
 - **RTL-SDR tools** (`rtl_fm`)
 - **SoX audio processing**
 - **Node.js** (latest LTS)
 - **I2C tools** for LCD communication
 
 ### Network Requirements
+
 - **WiFi connectivity** for uploads
 - **Open-weather API access** with authentication token
 - **NTP synchronization** for accurate timing
 
 ### Performance Characteristics
+
 - **Recording frequency:** 137.1-137.9 MHz
 - **Sample rate:** 48 kHz (downsampled to 11.025 kHz)
 - **Recording duration:** 10-15 minutes per pass
@@ -230,7 +253,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 /home/openweather/open_weather-ags/
 ├── scheduler.js          # Main application entry point
 ├── config.js            # Configuration management
-├── passes.js            # Satellite pass calculations  
+├── passes.js            # Satellite pass calculations
 ├── tle.js              # TLE data processing
 ├── recorder.js         # Recording system
 ├── upload.js           # Upload functionality
@@ -256,6 +279,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 ## System Integration
 
 ### Cron Jobs
+
 ```bash
 # Daily reboot for system refresh
 0 3 * * * /sbin/shutdown -r now
@@ -265,11 +289,13 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 ```
 
 ### System Services
+
 - **NetworkManager** - WiFi configuration management
 - **NTP** - Time synchronization (UTC)
 - **I2C** - Hardware communication for LCD
 
 ### Security Considerations
+
 - User permissions for network configuration
 - Secure API token storage
 - Local file system access controls
@@ -282,12 +308,14 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 **Issue Addressed:** Documented cases of the `ow-config.json` file spontaneously disappearing or becoming corrupted on the AGS USB drive, even after successful operation for multiple days.
 
 **Root Causes Identified:**
+
 - **Power Interruptions:** Daily 3 AM reboots and power outages during file writes
 - **FAT32 Vulnerabilities:** No journaling, cached writes, cheap USB drive firmware
 - **Unnecessary Writes:** Config file was rewritten on every startup, creating corruption opportunities
 - **Non-atomic Operations:** Simple file writes vulnerable to power loss mid-operation
 
 **Solution Implemented:**
+
 - **Automatic Backup Creation:** Every time the primary config is successfully loaded, a backup file (`ow-config-backup.json`) is created with timestamp metadata
 - **Atomic File Operations:** All config writes use atomic write-to-temp-then-rename operations to prevent corruption
 - **Smart Write Detection:** Config files are only rewritten when changes are actually needed
@@ -297,10 +325,12 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 - **User Feedback:** LCD displays specific error messages to help users understand config issues
 
 **Files Created:**
+
 - `ow-config-backup.json` - Automatic backup with timestamp metadata
 - `configPath.json` - Tracks the last known config location
 
 **Recovery Process:**
+
 1. Attempt to load primary config (`ow-config.json`)
 2. If corrupted, try to restore from backup in same directory
 3. If primary missing entirely, search all USB devices for any backup config
@@ -308,6 +338,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 5. Continue normal operation
 
 ### Known Issues & Limitations
+
 - **Reboot scheduling:** System reboots at 3:00 AM may conflict with long satellite passes
 - **USB detection:** Occasional issues with USB mount detection on some Pi models
 - **Network resilience:** Limited offline operation capabilities
@@ -323,6 +354,7 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 **Root Cause:** The `tle.js` module was calculating satellite elevations correctly but never comparing them against the configured `minElevation` threshold. The filtering logic was completely missing from the `findSatellitePasses` function.
 
 **Solution Implemented:**
+
 - **Enhanced Pass Detection:** Modified the elevation checking logic to only track satellite positions when elevation is above the configured minimum
 - **Proper Pass Boundaries:** Passes now start and end based on elevation thresholds, not just distance constraints
 - **Multiple Filtering Points:** Added elevation filtering at three critical points:
@@ -332,20 +364,61 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 - **Improved Logging:** Added detailed logging to track how many passes are found and their elevation angles
 
 **Code Changes:**
+
 - `tle.js` - Added `minElevation` filtering in `findSatellitePasses()` function
 - `tle.js` - Enhanced logging to show pass count and elevation details
 - `tle.js` - Added elevation checking for all three pass-ending conditions
 
-**Impact:** 
+**Impact:**
+
 - **Quality Improvement:** Only records satellite passes that meet minimum elevation requirements
 - **90-Degree Passes:** Excellent high-elevation passes (including 90-degree overhead passes) are now properly captured and prioritized
 - **Resource Efficiency:** Eliminates processing of poor-quality low-elevation passes
+
+### Network Initialization Race Condition Fix (2025)
+
+**Issue Identified:** Multiple ground stations in production were experiencing DNS resolution failures (`EAI_AGAIN` errors) when attempting to fetch TLE data from Celestrak. This was caused by a race condition in the network interface detection system introduced during the Ethernet/WiFi priority implementation.
+
+**Root Cause:** The network interface detection was happening asynchronously at module load time, causing timing issues where network functions would use default interface names ('eth0', 'wlan0') before the actual interface names were detected. This led to network initialization failures, and when the system tried to fetch TLE data without proper network connectivity, DNS resolution would fail.
+
+**Solution Implemented:**
+
+1. **Fixed Race Condition:**
+
+   - Replaced immediate async interface detection with on-demand detection
+   - Added `ensureInterfacesDetected()` function to guarantee interface detection before use
+   - Updated all network functions to properly wait for interface detection
+
+2. **Added Network Fallback:**
+
+   - Implemented TLE data caching system with 7-day expiration
+   - Added automatic fallback to cached TLE data when network is unavailable
+   - Modified scheduler to skip TLE updates when network is not available
+
+3. **Enhanced Error Handling:**
+   - Added comprehensive error handling for network failures
+   - Improved cache validation to prevent corrupted cache files from causing crashes
+   - Added helpful user feedback based on network status
+
+**Code Changes:**
+
+- `network.js` - Fixed interface detection race condition and added `ensureInterfacesDetected()`
+- `tle.js` - Added TLE caching system with fallback mechanism
+- `scheduler.js` - Added network-aware pass update logic with better error handling
+
+**Impact:**
+
+- **Reliability:** Eliminates DNS resolution failures in production deployments
+- **Offline Operation:** Systems can continue operating using cached data when network is unavailable
+- **User Experience:** Better error messages and status information for network issues
+- **Robustness:** Improved error handling prevents system crashes from network failures
 - **User Confidence:** Clear logging shows exactly which passes are being considered and why
 
 **Configuration Usage:**
+
 ```json
 {
-  "minElevation": 30,  // Only record passes above 30 degrees elevation
+  "minElevation": 30 // Only record passes above 30 degrees elevation
   // ... other config options
 }
 ```
@@ -359,12 +432,14 @@ The system now properly respects the `minElevation` setting, ensuring that only 
 **Feature Added:** Development bypass mechanism for version checking to enable proper testing of local changes without automatic GitHub updates overwriting modifications.
 
 **Implementation:**
+
 - **Bypass File:** Create `/home/openweather/bypass-version-check` to skip version checking
 - **Smart Integration:** Bypass only affects GitHub API calls and updates, all other startup processes continue normally
 - **Clear Logging:** System logs when bypass is active for transparency
 - **Easy Toggle:** Simple file creation/deletion to enable/disable bypass
 
 **Usage:**
+
 ```bash
 # Enable bypass (for testing)
 touch /home/openweather/bypass-version-check
@@ -374,6 +449,7 @@ rm /home/openweather/bypass-version-check
 ```
 
 **Benefits:**
+
 - Enables safe local development and testing
 - Prevents accidental overwriting of work-in-progress changes
 - Maintains all other system functionality (USB mounting, dependency checks, etc.)
@@ -386,6 +462,7 @@ rm /home/openweather/bypass-version-check
 **Root Cause:** The logger was attempting to write directly to `config.saveDir/config.logFile` (typically `/media/openweather/O-W/log.txt`) without handling read-only file system scenarios.
 
 **Solution Implemented:**
+
 - **Intelligent Fallback:** Logger automatically detects when the configured log path is not writable
 - **Graceful Degradation:** Falls back to a local writable directory (`/home/openweather/logs/`) when USB is read-only
 - **Clear User Feedback:** Logs indicate when fallback location is being used and why
@@ -393,15 +470,18 @@ rm /home/openweather/bypass-version-check
 - **Directory Creation:** Automatically creates fallback directories as needed
 
 **Technical Implementation:**
+
 - Added `getWritableLogPath()` method to test write permissions before use
 - Fallback path: `/home/openweather/logs/log.txt` when USB is not writable
 - Enhanced error handling and user messaging
 - Preserves all logging functionality regardless of USB drive state
 
 **Files Modified:**
+
 - `logger.js` - Enhanced with fallback logic and write testing
 
 **Impact:**
+
 - **System Reliability:** Application no longer crashes due to read-only USB drives
 - **Continuous Operation:** Logging continues even when USB storage has issues
 - **Better Debugging:** Clear indication of log location changes helps troubleshooting
@@ -410,12 +490,14 @@ rm /home/openweather/bypass-version-check
 ### Enhanced Error Handling & Robustness
 
 **Improvements Made:**
+
 - **USB Mount Resilience:** Better handling of USB drives that mount read-only
 - **Startup Script Cleanup:** Removed duplicate code sections that caused confusion
 - **Configuration Recovery:** Enhanced backup and recovery mechanisms
 - **Network Tolerance:** Improved handling of network connectivity issues during startup
 
 **System Reliability Enhancements:**
+
 - More graceful handling of hardware failures
 - Better error messages and user feedback
 - Improved log file management and rotation
@@ -428,43 +510,51 @@ rm /home/openweather/bypass-version-check
 **Root Cause:** The `displayNetworkStatus()` function in `network.js` was displaying network status with IP address both during initialization and every 5 minutes during network monitoring, overriding the main AGS status display.
 
 **Solution Implemented:**
+
 - **Removed LCD Output:** Modified `displayNetworkStatus()` to only log network status to console, not display on LCD
 - **Simplified Display Logic:** AGS READY message already indicates network connection type (wifi/ethernet)
 - **Preserved Monitoring:** Network monitoring continues but no longer interferes with LCD display
 - **Better User Experience:** LCD now shows appropriate AGS status messages instead of being hijacked by network details
 
 **Technical Changes:**
+
 - `network.js` - Removed `printLCD()` calls from `displayNetworkStatus()` function
 - Network status still logged to console for debugging
 - Network monitoring continues to function normally without LCD interference
 
 **Impact:**
+
 - **Cleaner Display:** LCD shows relevant AGS status instead of network details
 - **Improved Operation:** Users can see recording schedules and system status properly
 - **Simplified Design:** Follows "more is less" philosophy - network status shown in AGS READY message
 - **Better UX:** No more LCD takeover interrupting normal system status display
 
 **Files Modified:**
+
 - `network.js` - Updated `displayNetworkStatus()` function to remove LCD output
 
 ## Development Testing Features
 
 ### Bypass Version Check System
+
 The bypass version check feature is specifically designed for development and testing scenarios:
 
 **When to Use:**
+
 - Testing local code changes
 - Debugging specific issues
 - Validating new features before release
 - Preventing automatic updates during development work
 
 **How It Works:**
+
 1. System checks for `/home/openweather/bypass-version-check` file on startup
 2. If file exists, skips GitHub API calls and update process
 3. Continues with all other startup procedures (USB mounting, dependency checks, app launch)
 4. Logs bypass status for transparency
 
 **Safety Features:**
+
 - Only affects version checking, not core functionality
 - Easy to enable/disable with simple file operations
 - Clear logging indicates when bypass is active
@@ -475,12 +565,14 @@ This feature ensures developers can work safely without worrying about their cha
 ## Dependencies & External Services
 
 ### Critical Dependencies
+
 - **open-weather Public Archive API** - `https://open-weather.community/wp-json/ow/v1/ground-stations`
 - **TLE data sources** - Satellite orbital element updates
 - **NPM registry** - JavaScript package dependencies
 - **Raspberry Pi OS repositories** - System package updates
 
 ### Hardware Suppliers
+
 - **RTL-SDR dongles** - Various suppliers (RTL-SDR.com, NooElec, etc.)
 - **Raspberry Pi** - Official distributors
 - **LCD displays** - Generic I2C 16x2 displays
@@ -491,43 +583,53 @@ This feature ensures developers can work safely without worrying about their cha
 ### Common Issues & Solutions
 
 #### Read-Only USB Drive Issues
+
 **Symptoms:** Application logs show "EROFS: read-only file system" errors
 **Cause:** USB drive mounted as read-only due to corruption or hardware issues
-**Solution:** 
+**Solution:**
+
 - System automatically falls back to local log storage in `/home/openweather/logs/`
 - Check USB drive health and reformat if necessary
 - Monitor system logs to confirm fallback logging is working
 
-#### Configuration File Problems  
+#### Configuration File Problems
+
 **Symptoms:** "Config missing!" or "config error" displayed on LCD
 **Solutions:**
+
 1. Check for backup config file (`ow-config-backup.json`) on USB drive
 2. System automatically attempts restoration from backup
 3. If no backup available, create new `ow-config.json` file on USB drive
 4. Verify USB drive is properly mounted and accessible
 
 #### Version Update Issues During Development
+
 **Symptoms:** Local changes being overwritten by automatic updates
 **Solution:** Use development bypass feature:
+
 ```bash
 # Create bypass file to prevent updates
 touch /home/openweather/bypass-version-check
 
-# Remove bypass file to resume normal updates  
+# Remove bypass file to resume normal updates
 rm /home/openweather/bypass-version-check
 ```
 
 #### Network Connectivity Problems
+
 **Symptoms:** "No Network" displayed, uploads failing
 **Solutions:**
+
 1. Check WiFi configuration in `ow-config.json`
 2. Verify network credentials and connectivity
 3. System continues operation without network (local recording)
 4. Network monitoring provides automatic reconnection
 
 #### Hardware Detection Issues
+
 **Symptoms:** LCD shows garbled text, RTL-SDR not found
 **Solutions:**
+
 1. Check I2C connections for LCD (address 0x27)
 2. Verify RTL-SDR dongle is connected and recognized (`lsusb`)
 3. Ensure proper permissions for hardware access
@@ -536,11 +638,13 @@ rm /home/openweather/bypass-version-check
 ### Log File Locations
 
 **Primary Log Locations:**
+
 - USB Drive: `/media/openweather/O-W/log.txt` (when writable)
 - Fallback: `/home/openweather/logs/log.txt` (when USB read-only)
 - System Log: `/home/openweather/cronlog.txt` (startup and system events)
 
 **Checking Log Status:**
+
 ```bash
 # Check current log file being used
 tail -f /home/openweather/cronlog.txt
@@ -553,6 +657,7 @@ tail -f /media/openweather/O-W/log.txt
 ### Development & Testing
 
 #### Testing Local Changes
+
 1. Create bypass file: `touch /home/openweather/bypass-version-check`
 2. Make your code changes
 3. Restart the system or run scheduler manually
@@ -560,12 +665,14 @@ tail -f /media/openweather/O-W/log.txt
 5. Remove bypass file when testing complete
 
 #### Debugging Hardware Issues
+
 1. Check hardware connections and power
 2. Review system logs for specific error messages
 3. Test individual components (LCD, RTL-SDR, USB) separately
 4. Use fallback logging to maintain debugging capability
 
 #### Configuration Testing
+
 1. Backup current config before making changes
 2. Test configuration validation with invalid settings
 3. Verify backup restoration functionality

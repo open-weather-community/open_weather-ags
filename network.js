@@ -79,27 +79,46 @@ async function detectWifiInterface() {
     }
 }
 
-// Initialize interface names
-let ETHERNET_INTERFACE = 'eth0';
-let WIFI_INTERFACE = 'wlan0';
+// Initialize interface names - will be detected when needed
+let ETHERNET_INTERFACE = null;
+let WIFI_INTERFACE = null;
 
-// Detect actual interface names at startup
-(async () => {
-    ETHERNET_INTERFACE = await detectEthernetInterface();
-    WIFI_INTERFACE = await detectWifiInterface();
-    console.log(`Detected interfaces - Ethernet: ${ETHERNET_INTERFACE}, WiFi: ${WIFI_INTERFACE}`);
-})();
+// Cached interface detection to avoid repeated detection
+let interfaceDetectionPromise = null;
+
+/**
+ * Ensure interfaces are detected and cached
+ */
+async function ensureInterfacesDetected() {
+    if (interfaceDetectionPromise) {
+        return interfaceDetectionPromise;
+    }
+
+    interfaceDetectionPromise = (async () => {
+        if (!ETHERNET_INTERFACE) {
+            ETHERNET_INTERFACE = await detectEthernetInterface();
+        }
+        if (!WIFI_INTERFACE) {
+            WIFI_INTERFACE = await detectWifiInterface();
+        }
+        console.log(`Detected interfaces - Ethernet: ${ETHERNET_INTERFACE}, WiFi: ${WIFI_INTERFACE}`);
+        return { ethernet: ETHERNET_INTERFACE, wifi: WIFI_INTERFACE };
+    })();
+
+    return interfaceDetectionPromise;
+}
 
 /**
  * Check if a network interface exists and is up
  */
 async function isInterfaceUp(interfaceName) {
-    // Ensure we have the latest interface names
-    if (interfaceName === 'eth0' || interfaceName === 'wlan0') {
-        if (interfaceName === 'eth0') {
-            interfaceName = await detectEthernetInterface();
-        } else {
-            interfaceName = await detectWifiInterface();
+    // Ensure interfaces are detected if using generic names
+    if (!interfaceName || interfaceName === 'eth0' || interfaceName === 'wlan0') {
+        await ensureInterfacesDetected();
+        if (!interfaceName || interfaceName === 'eth0') {
+            interfaceName = ETHERNET_INTERFACE;
+        } else if (interfaceName === 'wlan0') {
+            interfaceName = WIFI_INTERFACE;
         }
     }
 
@@ -116,12 +135,13 @@ async function isInterfaceUp(interfaceName) {
  * Check if an interface has an IP address assigned
  */
 async function hasIPAddress(interfaceName) {
-    // Ensure we have the latest interface names
-    if (interfaceName === 'eth0' || interfaceName === 'wlan0') {
-        if (interfaceName === 'eth0') {
-            interfaceName = await detectEthernetInterface();
-        } else {
-            interfaceName = await detectWifiInterface();
+    // Ensure interfaces are detected if using generic names
+    if (!interfaceName || interfaceName === 'eth0' || interfaceName === 'wlan0') {
+        await ensureInterfacesDetected();
+        if (!interfaceName || interfaceName === 'eth0') {
+            interfaceName = ETHERNET_INTERFACE;
+        } else if (interfaceName === 'wlan0') {
+            interfaceName = WIFI_INTERFACE;
         }
     }
 
@@ -140,12 +160,13 @@ async function hasIPAddress(interfaceName) {
  * Get the IP address of a specific interface
  */
 async function getInterfaceIP(interfaceName) {
-    // Ensure we have the latest interface names
-    if (interfaceName === 'eth0' || interfaceName === 'wlan0') {
-        if (interfaceName === 'eth0') {
-            interfaceName = await detectEthernetInterface();
-        } else {
-            interfaceName = await detectWifiInterface();
+    // Ensure interfaces are detected if using generic names
+    if (!interfaceName || interfaceName === 'eth0' || interfaceName === 'wlan0') {
+        await ensureInterfacesDetected();
+        if (!interfaceName || interfaceName === 'eth0') {
+            interfaceName = ETHERNET_INTERFACE;
+        } else if (interfaceName === 'wlan0') {
+            interfaceName = WIFI_INTERFACE;
         }
     }
 
@@ -162,12 +183,13 @@ async function getInterfaceIP(interfaceName) {
  * Test internet connectivity through a specific interface
  */
 async function testConnectivity(interfaceName) {
-    // Ensure we have the latest interface names
-    if (interfaceName === 'eth0' || interfaceName === 'wlan0') {
-        if (interfaceName === 'eth0') {
-            interfaceName = await detectEthernetInterface();
-        } else {
-            interfaceName = await detectWifiInterface();
+    // Ensure interfaces are detected if using generic names
+    if (!interfaceName || interfaceName === 'eth0' || interfaceName === 'wlan0') {
+        await ensureInterfacesDetected();
+        if (!interfaceName || interfaceName === 'eth0') {
+            interfaceName = ETHERNET_INTERFACE;
+        } else if (interfaceName === 'wlan0') {
+            interfaceName = WIFI_INTERFACE;
         }
     }
 
@@ -193,7 +215,9 @@ async function testConnectivity(interfaceName) {
 async function checkEthernetConnection() {
     console.log('Checking ethernet connection...');
 
-    const ethernetInterface = await detectEthernetInterface();
+    // Ensure interfaces are detected
+    await ensureInterfacesDetected();
+    const ethernetInterface = ETHERNET_INTERFACE;
 
     const isUp = await isInterfaceUp(ethernetInterface);
     if (!isUp) {
@@ -394,7 +418,8 @@ async function getNetworkStatus() {
     status.ethernet = ethernetResult;
 
     // Check wifi
-    const wifiInterface = await detectWifiInterface();
+    await ensureInterfacesDetected();
+    const wifiInterface = WIFI_INTERFACE;
     const wifiUp = await isInterfaceUp(wifiInterface);
     if (wifiUp) {
         const wifiHasIP = await hasIPAddress(wifiInterface);
@@ -520,16 +545,17 @@ async function initializeNetwork(config) {
  * Get the current system's IP address (from any active interface)
  */
 async function getMyIP() {
+    // Ensure interfaces are detected
+    await ensureInterfacesDetected();
+    
     // First try ethernet
-    const ethernetInterface = await detectEthernetInterface();
-    const ethernetIP = await getInterfaceIP(ethernetInterface);
+    const ethernetIP = await getInterfaceIP(ETHERNET_INTERFACE);
     if (ethernetIP) {
         return ethernetIP;
     }
 
     // Then try wifi
-    const wifiInterface = await detectWifiInterface();
-    const wifiIP = await getInterfaceIP(wifiInterface);
+    const wifiIP = await getInterfaceIP(WIFI_INTERFACE);
     if (wifiIP) {
         return wifiIP;
     }
@@ -574,5 +600,6 @@ module.exports = {
     getMyIP,
     startNetworkMonitoring,
     setNetworkPriority,
-    setRoutingPriority
+    setRoutingPriority,
+    ensureInterfacesDetected
 };
