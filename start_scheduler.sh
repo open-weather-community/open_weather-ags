@@ -20,6 +20,32 @@ trap "flock -u 200" EXIT
 # Log to cronlog.txt that it is booting up
 echo "Booting up at $(date)" >> "$LOG_FILE"
 
+# Wait for system services that handle USB mounting to be ready
+wait_for_system_services() {
+    echo "Waiting for system services..." >> "$LOG_FILE"
+    
+    # Wait for systemd to finish basic initialization
+    for i in {1..10}; do
+        if systemctl is-system-running --quiet 2>/dev/null || systemctl is-system-running | grep -E "(running|degraded)" >/dev/null 2>&1; then
+            echo "System services ready after $((i*2)) seconds" >> "$LOG_FILE"
+            break
+        fi
+        echo "Waiting for systemd... attempt $i/10" >> "$LOG_FILE"
+        sleep 2
+    done
+    
+    # Wait specifically for udev to settle (important for USB device detection)
+    if command -v udevadm >/dev/null 2>&1; then
+        echo "Waiting for udev to settle..." >> "$LOG_FILE"
+        timeout 30 udevadm settle 2>/dev/null || echo "udev settle timeout" >> "$LOG_FILE"
+    fi
+    
+    # Give a bit more time for any auto-mounting services
+    sleep 5
+}
+
+wait_for_system_services
+
 # Ensure the log file exists
 if [ ! -f "$LOG_FILE" ]; then
     touch "$LOG_FILE"
@@ -50,61 +76,155 @@ if ! check_network; then
     echo "Network check failed, continuing anyway..." >> "$LOG_FILE"
 fi
 
+# Wait for USB block devices to appear first (kernel detection)
+wait_for_usb_hardware() {
+    echo "Waiting for USB hardware detection..." >> "$LOG_FILE"
+    for i in {1..20}; do  # 20 attempts * 2s = 40s total
+        # Check if any USB block devices exist
+        if ls /dev/sd[a-z] >/dev/null 2>&1; then
+            echo "USB block devices detected after $((i*2)) seconds" >> "$LOG_FILE"
+            lsblk | grep -E "^sd" >> "$LOG_FILE" 2>&1 || true
+            return 0
+        fi
+        echo "Waiting for USB hardware... attempt $i/20" >> "$LOG_FILE"
+        sleep 2
+    done
+    echo "No USB hardware detected after 40 seconds" >> "$LOG_FILE"
+    return 1
+}
+
 # Wait for USB drives to mount (critical for config file access)
 wait_for_usb_drives() {
     echo "Waiting for USB drives to mount..." >> "$LOG_FILE"
-    for i in {1..30}; do  # 30 attempts * 3s = 90s total
+    
+    # First wait for hardware detection
+    if ! wait_for_usb_hardware; then
+        echo "No USB hardware found, skipping USB mounting" >> "$LOG_FILE"
+        return 1
+    fi
+    
+    # Give udev/systemd time to process and auto-mount
+    echo "Giving system time for auto-mounting..." >> "$LOG_FILE"
+    sleep 10
+    
+    for i in {1..40}; do  # 40 attempts * 3s = 120s total (more time for slow USB devices)
         # Check if any USB drives are mounted in /media or /mnt
         if [ -d "/media" ] && [ "$(ls -A /media 2>/dev/null)" ]; then
-            echo "USB drives detected in /media after $((i*3)) seconds" >> "$LOG_FILE"
+            echo "USB drives detected in /media after $((i*3 + 10)) seconds" >> "$LOG_FILE"
             return 0
         fi
         if [ -d "/mnt" ] && [ "$(ls -A /mnt 2>/dev/null)" ]; then
-            echo "USB drives detected in /mnt after $((i*3)) seconds" >> "$LOG_FILE"
+            echo "USB drives detected in /mnt after $((i*3 + 10)) seconds" >> "$LOG_FILE"
             return 0
         fi
         
-        # If no mounted drives found, try to detect and mount USB devices
-        if [ $i -eq 10 ]; then  # After 30 seconds, try manual mounting
-            echo "No auto-mounted USB drives found, attempting manual mounting..." >> "$LOG_FILE"
+        # Check specifically for our expected mount point
+        if [ -d "/media/openweather/O-W" ] && [ "$(ls -A /media/openweather/O-W 2>/dev/null)" ]; then
+            echo "Found mounted O-W drive after $((i*3 + 10)) seconds" >> "$LOG_FILE"
+            return 0
+        fi
+        
+        # Try manual mounting attempts at different intervals
+        if [ $i -eq 5 ] || [ $i -eq 15 ] || [ $i -eq 25 ]; then
+            echo "Attempting manual USB mounting (attempt $((i/10 + 1)))..." >> "$LOG_FILE"
             
-            # Look for USB devices that aren't mounted
-            for device in /dev/sd[a-z][0-9]*; do
-                if [ -b "$device" ]; then
-                    # Check if this device is already mounted
-                    if ! mount | grep -q "$device"; then
-                        echo "Found unmounted USB device: $device" >> "$LOG_FILE"
-                        
+            # Look for USB devices by label first (more reliable)
+            if command -v blkid >/dev/null 2>&1; then
+                # Look for the O-W labeled partition specifically
+                OW_DEVICE=$(blkid -L "O-W" 2>/dev/null || true)
+                if [ -n "$OW_DEVICE" ] && [ -b "$OW_DEVICE" ]; then
+                    echo "Found O-W labeled device: $OW_DEVICE" >> "$LOG_FILE"
+                    MOUNT_POINT="/media/openweather/O-W"
+                    
+                    # Check if already mounted
+                    if ! mount | grep -q "$OW_DEVICE"; then
                         # Create mount point if it doesn't exist
-                        MOUNT_POINT="/media/openweather/O-W"
                         if [ ! -d "$MOUNT_POINT" ]; then
                             sudo mkdir -p "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
                         fi
                         
                         # Try to mount the device
-                        if sudo mount "$device" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1; then
-                            echo "Successfully mounted $device to $MOUNT_POINT" >> "$LOG_FILE"
+                        if sudo mount "$OW_DEVICE" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1; then
+                            echo "Successfully mounted $OW_DEVICE to $MOUNT_POINT" >> "$LOG_FILE"
                             # Check if config file exists
                             if [ -f "$MOUNT_POINT/ow-config.json" ]; then
                                 echo "Config file found at $MOUNT_POINT" >> "$LOG_FILE"
                                 return 0
                             fi
                         else
-                            echo "Failed to mount $device" >> "$LOG_FILE"
+                            echo "Failed to mount $OW_DEVICE to $MOUNT_POINT" >> "$LOG_FILE"
                         fi
+                    else
+                        echo "$OW_DEVICE already mounted" >> "$LOG_FILE"
+                    fi
+                fi
+            fi
+            
+            # Fallback: Look for USB devices that aren't mounted
+            for device in /dev/sd[a-z][0-9]*; do
+                if [ -b "$device" ]; then
+                    # Check if this device is already mounted
+                    if ! mount | grep -q "$device"; then
+                        echo "Found unmounted USB device: $device" >> "$LOG_FILE"
+                        
+                        # Check device filesystem type first
+                        FS_TYPE=$(blkid -o value -s TYPE "$device" 2>/dev/null || echo "unknown")
+                        echo "Device $device filesystem: $FS_TYPE" >> "$LOG_FILE"
+                        
+                        # Only try to mount common filesystems
+                        case "$FS_TYPE" in
+                            vfat|fat32|ntfs|ext2|ext3|ext4)
+                                MOUNT_POINT="/media/openweather/O-W"
+                                if [ ! -d "$MOUNT_POINT" ]; then
+                                    sudo mkdir -p "$MOUNT_POINT" >> "$LOG_FILE" 2>&1
+                                fi
+                                
+                                # Try to mount the device
+                                if sudo mount "$device" "$MOUNT_POINT" >> "$LOG_FILE" 2>&1; then
+                                    echo "Successfully mounted $device to $MOUNT_POINT" >> "$LOG_FILE"
+                                    # Check if config file exists
+                                    if [ -f "$MOUNT_POINT/ow-config.json" ]; then
+                                        echo "Config file found at $MOUNT_POINT" >> "$LOG_FILE"
+                                        return 0
+                                    else
+                                        # Unmount if no config found
+                                        sudo umount "$MOUNT_POINT" >> "$LOG_FILE" 2>&1 || true
+                                        echo "No config file found, unmounted $device" >> "$LOG_FILE"
+                                    fi
+                                else
+                                    echo "Failed to mount $device" >> "$LOG_FILE"
+                                fi
+                                ;;
+                            *)
+                                echo "Skipping $device with unsupported filesystem: $FS_TYPE" >> "$LOG_FILE"
+                                ;;
+                        esac
                     fi
                 fi
             done
         fi
         
-        echo "Waiting for USB drives... attempt $i/30" >> "$LOG_FILE"
+        echo "Waiting for USB drives... attempt $i/40" >> "$LOG_FILE"
         sleep 3
     done
-    echo "No USB drives detected after 90 seconds, continuing anyway..." >> "$LOG_FILE"
+    echo "No USB drives detected after 120 seconds, continuing anyway..." >> "$LOG_FILE"
     return 1
 }
 
 wait_for_usb_drives
+
+# Final verification - ensure USB device stability
+echo "Performing final USB device stability check..." >> "$LOG_FILE"
+sleep 3
+
+# Double-check that any mounted drives are actually accessible
+if [ -d "/media/openweather/O-W" ]; then
+    if [ -f "/media/openweather/O-W/ow-config.json" ]; then
+        echo "Final verification: Config file confirmed at /media/openweather/O-W/" >> "$LOG_FILE"
+    else
+        echo "Final verification: Mount point exists but no config file found" >> "$LOG_FILE"
+    fi
+fi
 
 # Debug: Show current USB device status
 echo "=== USB Device Debug Info ===" >> "$LOG_FILE"

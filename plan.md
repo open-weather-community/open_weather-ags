@@ -530,317 +530,94 @@ The system now properly respects the `minElevation` setting, ensuring that only 
 4. **Configuration Testing:** Test with invalid WiFi credentials to verify error handling
 5. **Recovery Testing:** Verify automatic restart behavior for different error types
 
-**Production Deployment:**
+This version maintains backward compatibility while significantly improving system reliability and error recovery capabilities for production deployments.
 
-These fixes directly address the specific error patterns observed in production ground stations:
-- AGS 11 (Arbroath): DNS resolution failures and network initialization issues
-- AGS 17 (Acra): System freezing and display issues
-- AGS 18 (Seattle): Boot failures and blank screen issues  
-- AGS 14 (Valparaiso): Freezing on "updating passes"
-- AGS 2 (Cornwall): Network-related upload failures
+## Version History & Critical Bug Fixes
+
+### AGS v1.5.0 - Critical Production Issue Fixes (July 2025)
+
+Based on production data from multiple ground stations, this version addresses critical issues that were causing system failures in the field:
+
+#### Issues Addressed
+
+**Production Ground Stations Affected:**
+- AGS 11 (Scotland): DNS resolution and network initialization issues
+- AGS 17 (New York): System freezing and hardware issues  
+- AGS 18 (Seattle): Boot failures and configuration problems
+- AGS 14 (Chile): "Updating passes" freeze and reboot issues
+- AGS 2 (Cornwall): Network-related failures and short recordings
 - AGS 21: Upload failures with EAI_AGAIN errors
 
-The enhanced error handling and timeout protection should prevent these systems from getting stuck in unrecoverable states and provide clear feedback about issues for remote troubleshooting.
+**Critical Issues Fixed:**
 
-## Previous Updates & Improvements (June 2025)
+1. **EAI_AGAIN DNS Resolution Failures** - Multiple stations experiencing DNS resolution failures
+2. **"Updating Passes" Freeze** - Stations getting stuck during satellite pass calculation
+3. **Network Initialization Failures** - Boot failures due to network interface detection issues
+4. **Upload Failures** - EAI_AGAIN errors during file uploads to archive
+5. **USB Configuration Issues** - Config file mounting and detection problems
 
-### Version Check Bypass System
+#### Key Improvements
 
-**Feature Added:** Development bypass mechanism for version checking to enable proper testing of local changes without automatic GitHub updates overwriting modifications.
+**1. Timeout Protection**
+- **TLE Processing:** 2-minute overall timeout, 30-second per-satellite timeout
+- **Network Initialization:** 90-second overall timeout with individual operation timeouts
+- **Pass Updates:** 3-minute timeout protection prevents indefinite freezing
+- **Uploads:** 60-second timeout with enhanced retry logic
 
-**Implementation:**
+**2. Enhanced Error Handling**
+- **Network Errors:** Comprehensive detection of DNS and connectivity issues
+- **Graceful Degradation:** System continues with cached data when network fails
+- **Intelligent Recovery:** Automatic restart logic based on error type
+- **Better User Feedback:** Clear LCD messages for different error conditions
 
-- **Bypass File:** Create `/home/openweather/bypass-version-check` to skip version checking
-- **Smart Integration:** Bypass only affects GitHub API calls and updates, all other startup processes continue normally
-- **Clear Logging:** System logs when bypass is active for transparency
-- **Easy Toggle:** Simple file creation/deletion to enable/disable bypass
+**3. Robustness Features**
+- **Cache Fallback:** Automatic use of cached TLE data when network unavailable
+- **Error Classification:** Differentiate network, configuration, and system errors
+- **Progressive Delays:** Escalating retry delays for persistent network issues
+- **Enhanced Validation:** Improved data validation throughout the system
 
-**Usage:**
+**4. USB Mounting Improvements**
+- **Better Device Detection:** Enhanced timing for USB hardware detection
+- **Label-based Mounting:** Specifically looks for "O-W" labeled partitions
+- **Multiple Mount Attempts:** Tries mounting at different intervals during startup
+- **Filesystem Validation:** Only attempts to mount supported filesystems
 
-```bash
-# Enable bypass (for testing)
-touch /home/openweather/bypass-version-check
+#### Files Modified
 
-# Disable bypass (return to normal operation)
-rm /home/openweather/bypass-version-check
-```
+**Core System Files:**
+- `tle.js` - Enhanced TLE data processing with timeout protection and cache fallback
+- `network.js` - Improved network initialization with comprehensive timeout handling  
+- `scheduler.js` - Added timeout protection for pass updates and intelligent error recovery
+- `upload.js` - Enhanced upload reliability with better error handling and retry logic
+- `config.js` - Fixed configuration flag bugs and improved backup recovery
+- `start_scheduler.sh` - Enhanced USB mounting automation with better timing
 
-**Benefits:**
+**New Files:**
+- `diagnose.js` - Diagnostic tool to identify common production issues
+- Added `npm run diagnose` script for easy system health checks
 
-- Enables safe local development and testing
-- Prevents accidental overwriting of work-in-progress changes
-- Maintains all other system functionality (USB mounting, dependency checks, etc.)
-- Provides clear feedback in logs about bypass status
+#### Diagnostic Tool
 
-### Logger Resilience for Read-Only USB Drives
-
-**Issue Addressed:** Application crashes when USB drives are mounted as read-only (EROFS errors) because the logger cannot write to the configured log path on the USB drive.
-
-**Root Cause:** The logger was attempting to write directly to `config.saveDir/config.logFile` (typically `/media/openweather/O-W/log.txt`) without handling read-only file system scenarios.
-
-**Solution Implemented:**
-
-- **Intelligent Fallback:** Logger automatically detects when the configured log path is not writable
-- **Graceful Degradation:** Falls back to a local writable directory (`/home/openweather/logs/`) when USB is read-only
-- **Clear User Feedback:** Logs indicate when fallback location is being used and why
-- **Test-Then-Use:** Performs write test before committing to a log location
-- **Directory Creation:** Automatically creates fallback directories as needed
-
-**Technical Implementation:**
-
-- Added `getWritableLogPath()` method to test write permissions before use
-- Fallback path: `/home/openweather/logs/log.txt` when USB is not writable
-- Enhanced error handling and user messaging
-- Preserves all logging functionality regardless of USB drive state
-
-**Files Modified:**
-
-- `logger.js` - Enhanced with fallback logic and write testing
-
-**Impact:**
-
-- **System Reliability:** Application no longer crashes due to read-only USB drives
-- **Continuous Operation:** Logging continues even when USB storage has issues
-- **Better Debugging:** Clear indication of log location changes helps troubleshooting
-- **User Experience:** System continues operating smoothly regardless of USB drive state
-
-### Enhanced Error Handling & Robustness
-
-**Improvements Made:**
-
-- **USB Mount Resilience:** Better handling of USB drives that mount read-only
-- **Startup Script Cleanup:** Removed duplicate code sections that caused confusion
-- **Configuration Recovery:** Enhanced backup and recovery mechanisms
-- **Network Tolerance:** Improved handling of network connectivity issues during startup
-
-**System Reliability Enhancements:**
-
-- More graceful handling of hardware failures
-- Better error messages and user feedback
-- Improved log file management and rotation
-- Enhanced debugging capabilities for remote troubleshooting
-
-### LCD Display Management Improvement
-
-**Issue Addressed:** The "WIFI ACTIVE" message with full IP address was taking over the LCD display, interfering with normal AGS operation and status messages.
-
-**Root Cause:** The `displayNetworkStatus()` function in `network.js` was displaying network status with IP address both during initialization and every 5 minutes during network monitoring, overriding the main AGS status display.
-
-**Solution Implemented:**
-
-- **Removed LCD Output:** Modified `displayNetworkStatus()` to only log network status to console, not display on LCD
-- **Simplified Display Logic:** AGS READY message already indicates network connection type (wifi/ethernet)
-- **Preserved Monitoring:** Network monitoring continues but no longer interferes with LCD display
-- **Better User Experience:** LCD now shows appropriate AGS status messages instead of being hijacked by network details
-
-**Technical Changes:**
-
-- `network.js` - Removed `printLCD()` calls from `displayNetworkStatus()` function
-- Network status still logged to console for debugging
-- Network monitoring continues to function normally without LCD interference
-
-**Impact:**
-
-- **Cleaner Display:** LCD shows relevant AGS status instead of network details
-- **Improved Operation:** Users can see recording schedules and system status properly
-- **Simplified Design:** Follows "more is less" philosophy - network status shown in AGS READY message
-- **Better UX:** No more LCD takeover interrupting normal system status display
-
-**Files Modified:**
-
-- `network.js` - Updated `displayNetworkStatus()` function to remove LCD output
-
-## Development Testing Features
-
-### Bypass Version Check System
-
-The bypass version check feature is specifically designed for development and testing scenarios:
-
-**When to Use:**
-
-- Testing local code changes
-- Debugging specific issues
-- Validating new features before release
-- Preventing automatic updates during development work
-
-**How It Works:**
-
-1. System checks for `/home/openweather/bypass-version-check` file on startup
-2. If file exists, skips GitHub API calls and update process
-3. Continues with all other startup procedures (USB mounting, dependency checks, app launch)
-4. Logs bypass status for transparency
-
-**Safety Features:**
-
-- Only affects version checking, not core functionality
-- Easy to enable/disable with simple file operations
-- Clear logging indicates when bypass is active
-- No configuration changes required
-
-This feature ensures developers can work safely without worrying about their changes being overwritten by automatic updates, while maintaining all the normal system startup and operation procedures.
-
-## Dependencies & External Services
-
-### Critical Dependencies
-
-- **open-weather Public Archive API** - `https://open-weather.community/wp-json/ow/v1/ground-stations`
-- **TLE data sources** - Satellite orbital element updates
-- **NPM registry** - JavaScript package dependencies
-- **Raspberry Pi OS repositories** - System package updates
-
-### Hardware Suppliers
-
-- **RTL-SDR dongles** - Various suppliers (RTL-SDR.com, NooElec, etc.)
-- **Raspberry Pi** - Official distributors
-- **LCD displays** - Generic I2C 16x2 displays
-- **3D printing** - PLA filament, standard FDM printers
-
-## Troubleshooting Guide
-
-### AGS Diagnostic Tool
-
-A new diagnostic tool (`diagnose.js`) has been created to help troubleshoot the specific issues found in production systems:
+Ground station operators can now run comprehensive diagnostics:
 
 ```bash
-# Run diagnostic tool
 npm run diagnose
-# or
-node diagnose.js
 ```
 
-The diagnostic tool checks for:
+This checks for:
 - DNS resolution issues (EAI_AGAIN errors)
-- Network interface detection
+- Network interface detection and connectivity
 - USB drive mounting and configuration files
 - System resources and load
-- TLE cache availability
-- Celestrak connectivity
+- TLE cache availability and validity
+- Celestrak connectivity and response times
 
-### Common Issues & Solutions
+#### Testing Recommendations
 
-#### "Updating Passes" Freeze
+1. **Network Failure Testing:** Disconnect network during startup to test timeout handling
+2. **DNS Resolution Testing:** Block DNS to test EAI_AGAIN error handling
+3. **Timeout Testing:** Simulate slow network conditions to verify timeout protection
+4. **Configuration Testing:** Test invalid WiFi credentials and USB detection
+5. **Recovery Testing:** Verify automatic restart behavior after errors
 
-**Symptoms:** LCD display shows "updating passes" and system becomes unresponsive
-**Causes:** Network timeout during TLE data fetch, DNS resolution failures
-**Solutions:**
-
-1. **Immediate Fix:** Restart the system - improved timeout handling should prevent freeze
-2. **Check Network:** Run diagnostic tool to verify DNS and Celestrak connectivity
-3. **Verify Cache:** System should automatically use cached TLE data if network fails
-4. **Monitor Logs:** Check logs for specific error messages (EAI_AGAIN, ENOTFOUND, timeout)
-
-#### DNS Resolution Failures (EAI_AGAIN Errors)
-
-**Symptoms:** "EAI_AGAIN celestrak.org" or "ENOTFOUND" errors in logs
-**Causes:** Network configuration issues, DNS server problems, interface detection timing
-**Solutions:**
-
-1. **Run Diagnostic:** `npm run diagnose` to check DNS resolution
-2. **Check Network Config:** Verify WiFi credentials and network settings in config
-3. **Restart Network:** `sudo systemctl restart NetworkManager`
-4. **Check DNS:** `nslookup celestrak.org` to verify DNS resolution
-5. **System Restart:** Automatic restart logic should handle persistent DNS issues
-
-#### Network Initialization Failures
-
-**Symptoms:** "No network connections available" messages, boot failures
-**Solutions:**
-
-1. **Check Connections:** Verify ethernet cable or WiFi adapter
-2. **Interface Detection:** System now has improved interface detection with timeouts
-3. **Configuration:** Ensure WiFi name and password are correct in config
-4. **Diagnostic Tool:** Run diagnostic to check interface detection
-
-**Symptoms:** Application logs show "EROFS: read-only file system" errors
-**Cause:** USB drive mounted as read-only due to corruption or hardware issues
-**Solution:**
-
-- System automatically falls back to local log storage in `/home/openweather/logs/`
-- Check USB drive health and reformat if necessary
-- Monitor system logs to confirm fallback logging is working
-
-#### Configuration File Problems
-
-**Symptoms:** "Config missing!" or "config error" displayed on LCD
-**Solutions:**
-
-1. Check for backup config file (`ow-config-backup.json`) on USB drive
-2. System automatically attempts restoration from backup
-3. If no backup available, create new `ow-config.json` file on USB drive
-4. Verify USB drive is properly mounted and accessible
-
-#### Version Update Issues During Development
-
-**Symptoms:** Local changes being overwritten by automatic updates
-**Solution:** Use development bypass feature:
-
-```bash
-# Create bypass file to prevent updates
-touch /home/openweather/bypass-version-check
-
-# Remove bypass file to resume normal updates
-rm /home/openweather/bypass-version-check
-```
-
-#### Network Connectivity Problems
-
-**Symptoms:** "No Network" displayed, uploads failing
-**Solutions:**
-
-1. Check WiFi configuration in `ow-config.json`
-2. Verify network credentials and connectivity
-3. System continues operation without network (local recording)
-4. Network monitoring provides automatic reconnection
-
-#### Hardware Detection Issues
-
-**Symptoms:** LCD shows garbled text, RTL-SDR not found
-**Solutions:**
-
-1. Check I2C connections for LCD (address 0x27)
-2. Verify RTL-SDR dongle is connected and recognized (`lsusb`)
-3. Ensure proper permissions for hardware access
-4. Check system logs for specific hardware error messages
-
-### Log File Locations
-
-**Primary Log Locations:**
-
-- USB Drive: `/media/openweather/O-W/log.txt` (when writable)
-- Fallback: `/home/openweather/logs/log.txt` (when USB read-only)
-- System Log: `/home/openweather/cronlog.txt` (startup and system events)
-
-**Checking Log Status:**
-
-```bash
-# Check current log file being used
-tail -f /home/openweather/cronlog.txt
-
-# Check application logs (may be on USB or local)
-tail -f /home/openweather/logs/log.txt
-tail -f /media/openweather/O-W/log.txt
-```
-
-### Development & Testing
-
-#### Testing Local Changes
-
-1. Create bypass file: `touch /home/openweather/bypass-version-check`
-2. Make your code changes
-3. Restart the system or run scheduler manually
-4. Monitor logs to ensure bypass is active
-5. Remove bypass file when testing complete
-
-#### Debugging Hardware Issues
-
-1. Check hardware connections and power
-2. Review system logs for specific error messages
-3. Test individual components (LCD, RTL-SDR, USB) separately
-4. Use fallback logging to maintain debugging capability
-
-#### Configuration Testing
-
-1. Backup current config before making changes
-2. Test configuration validation with invalid settings
-3. Verify backup restoration functionality
-4. Check USB mount points and accessibility
+This version maintains backward compatibility while significantly improving system reliability and error recovery capabilities for production deployments.

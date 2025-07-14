@@ -378,3 +378,109 @@ The system automatically:
 3. Displays status on LCD with full IP address
 4. Monitors connections every 5 minutes
 5. Handles connection failures gracefully
+
+### Troubleshooting Network Issues
+
+**Common Network Commands:**
+```bash
+# Check interface status
+ip link show                    # Show all interfaces
+ip addr show                    # Show IP addresses
+ip route show                   # Show routing table
+
+# Test connectivity
+ping -c 3 8.8.8.8              # Test internet connectivity
+ping -c 3 192.168.1.1          # Test local gateway
+
+# NetworkManager commands
+nmcli device status             # Show device status
+nmcli connection show           # Show connections
+nmcli device wifi list          # Show available WiFi networks
+```
+
+**Interface Detection Issues:**
+- Network interface names vary between systems (eth0, enp*, wlan0, wlp*)
+- The system auto-detects interfaces, but you can check available interfaces with `ip link show`
+- If ethernet isn't taking priority, NetworkManager may override routing (system attempts automatic priority setting)
+
+**WiFi Connection Problems:**
+1. Verify WiFi credentials in config file
+2. Check WiFi signal strength
+3. Ensure network is broadcasting SSID
+4. Check for "No internet despite connection" - system distinguishes between local and internet connectivity
+
+## Troubleshooting
+
+### Quick Diagnostic Tool
+
+Run the built-in diagnostic tool to check for common issues:
+
+```bash
+npm run diagnose
+```
+
+This checks for:
+- DNS resolution issues (EAI_AGAIN errors)
+- Network interface detection and connectivity
+- USB drive mounting and configuration files
+- System resources and load
+- TLE cache availability and validity
+
+### Common Issues & Solutions
+
+#### "Updating Passes" Freeze
+
+**Symptoms:** LCD displays "updating passes" and system becomes unresponsive
+
+**Solutions:**
+1. Restart the system - improved timeout handling should prevent freeze
+2. Run diagnostic tool to verify DNS and network connectivity
+3. Check logs for specific error messages (EAI_AGAIN, ENOTFOUND, timeout)
+4. System should automatically use cached TLE data if network fails
+
+#### DNS Resolution Failures
+
+**Symptoms:** "EAI_AGAIN celestrak.org" or "ENOTFOUND" errors in logs
+
+**Solutions:**
+1. Run `npm run diagnose` to check DNS resolution
+2. Verify WiFi credentials and network settings in config
+3. Try `nslookup celestrak.org` to verify DNS resolution
+4. Restart network: `sudo systemctl restart NetworkManager`
+
+#### Configuration File Problems
+
+**Symptoms:** "Config missing!" or "config error" on LCD
+
+**Solutions:**
+1. Check for backup config file (`ow-config-backup.json`) on USB drive
+2. System automatically attempts restoration from backup
+3. Create new `ow-config.json` file on USB drive if no backup available
+4. Verify USB drive is properly mounted and accessible
+
+#### USB Drive Issues
+
+**Symptoms:** USB drive detected but config not found
+
+**Solutions:**
+1. Ensure USB drive is formatted as FAT32 with label "O-W"
+2. Check that `ow-config.json` is in the root directory of the USB drive
+3. Try manually mounting: `sudo mount /dev/sda2 /media/openweather/O-W`
+4. Check USB drive health and reformat if necessary
+
+### Log File Locations
+
+**Primary Logs:**
+- USB Drive: `/media/openweather/O-W/log.txt` (when writable)
+- Fallback: `/home/openweather/logs/log.txt` (when USB read-only)
+- System Log: `/home/openweather/cronlog.txt` (startup and system events)
+
+**Checking Logs:**
+```bash
+# System startup logs
+tail -f /home/openweather/cronlog.txt
+
+# Application logs (check both locations)
+tail -f /home/openweather/logs/log.txt
+tail -f /media/openweather/O-W/log.txt
+```
