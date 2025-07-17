@@ -101,6 +101,49 @@ chmod +x install.sh
 npm install
 ```
 
+## Manual Updates
+
+If you need to manually update your AGS to a specific version or development branch, follow these steps:
+
+### 1. Bypass Automatic Version Control
+
+The AGS will automatically download the "regular" version when it boots UNLESS there is a file in your home directory named `bypass-version-check`. Create this file:
+
+```bash
+touch ~/bypass-version-check
+```
+
+This allows you to continue using the test version straight from GitHub without the system trying to correct itself. To return the AGS to normal automatic updates, simply rename or remove that file.
+
+**Note:** The file does not have an extension (like .txt).
+
+### 2. Remove Current AGS Directory
+
+Remove the existing AGS installation:
+
+```bash
+rm -rf ~/open_weather-ags/
+```
+
+### 3. Clone the Repository
+
+Clone the desired version from GitHub:
+
+```bash
+cd ~
+git clone https://github.com/open-weather-community/open_weather-ags.git
+```
+
+### 4. Reboot
+
+Restart the system to apply changes:
+
+```bash
+reboot
+```
+
+After reboot, the system will use your manually installed version instead of automatically updating.
+
 ### crontab rebooting
 
 Using sudo, schedule a reboot every morning for 3am
