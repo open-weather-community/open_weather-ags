@@ -11,22 +11,9 @@ async function resetWifiInterface() {
     try {
         console.log('Resetting wifi interface...');
 
-        // More gentle reset - don't turn radio off/on which can interfere with interface detection
+        // Simple approach - just disconnect cleanly
         await execAsync('/usr/bin/nmcli device disconnect wlan0');
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-
-        // Just restart NetworkManager instead of radio cycling
-        try {
-            await execAsync('sudo systemctl restart NetworkManager');
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait longer for NetworkManager to stabilize
-        } catch (nmError) {
-            console.log('Could not restart NetworkManager, trying radio reset as fallback');
-            // Fallback to original method only if NetworkManager restart fails
-            await execAsync('/usr/bin/nmcli radio wifi off');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            await execAsync('/usr/bin/nmcli radio wifi on');
-            await new Promise(resolve => setTimeout(resolve, 3000));
-        }
 
         console.log('Wifi interface reset completed');
         return true;

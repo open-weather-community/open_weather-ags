@@ -144,6 +144,11 @@ async function main() {
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
+    // Give network connection time to fully stabilize before disk operations
+    // (USB I/O can interfere with WiFi on some hardware)
+    console.log('Allowing network to stabilize before disk operations...');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+
     // Check disk space and delete oldest recordings if necessary
     checkDisk(logger, config.saveDir, deleteOldestRecordings);
 
