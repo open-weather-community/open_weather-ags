@@ -11,11 +11,22 @@ async function resetWifiInterface() {
     try {
         console.log('Resetting wifi interface...');
 
-        // Turn wifi off and back on to ensure clean state
-        await execAsync('/usr/bin/nmcli radio wifi off');
+        // More gentle reset - don't turn radio off/on which can interfere with interface detection
+        await execAsync('/usr/bin/nmcli device disconnect wlan0');
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-        await execAsync('/usr/bin/nmcli radio wifi on');
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds for interface to come up
+
+        // Just restart NetworkManager instead of radio cycling
+        try {
+            await execAsync('sudo systemctl restart NetworkManager');
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait longer for NetworkManager to stabilize
+        } catch (nmError) {
+            console.log('Could not restart NetworkManager, trying radio reset as fallback');
+            // Fallback to original method only if NetworkManager restart fails
+            await execAsync('/usr/bin/nmcli radio wifi off');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await execAsync('/usr/bin/nmcli radio wifi on');
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
 
         console.log('Wifi interface reset completed');
         return true;
@@ -72,13 +83,28 @@ async function scanForNetwork(targetSSID, maxRetries = 3) {
             await execAsync('/usr/bin/nmcli device wifi rescan');
             await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for scan to complete
 
-            // Check if target network is visible
+            // Check if target network is visible and also log all available networks for debugging
             const { stdout } = await execAsync('/usr/bin/nmcli -t -f ssid device wifi list');
             const networks = stdout.split('\n').filter(line => line.trim());
 
+            // Log available networks for debugging (first 10 to avoid log spam)
+            console.log(`Available networks (showing first 10): ${networks.slice(0, 10).join(', ')}`);
+
+            // Check for exact match first
             if (networks.includes(targetSSID)) {
                 console.log(`Network "${targetSSID}" found in scan`);
                 return true;
+            }
+
+            // Also check for similar networks (in case of slight name differences)
+            const similarNetworks = networks.filter(network =>
+                network.includes('Fibertel') ||
+                network.toLowerCase().includes(targetSSID.toLowerCase().substring(0, 8))
+            );
+
+            if (similarNetworks.length > 0) {
+                console.log(`Similar networks found: ${similarNetworks.join(', ')}`);
+                console.log(`Target network "${targetSSID}" not found exactly, but similar networks exist`);
             }
 
             console.log(`Network "${targetSSID}" not found, waiting before retry...`);
@@ -139,8 +165,8 @@ async function connectToWifi(wifiName, wifiPassword, maxRetries = 3) {
             const { stdout } = await execAsync(command);
             console.log(`Connection successful: ${stdout}`);
 
-            // Verify connection is actually working
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            // Give more time for connection to stabilize before verification
+            await new Promise(resolve => setTimeout(resolve, 5000));
             const isConnected = await verifyWifiConnection();
 
             if (isConnected) {
@@ -148,9 +174,11 @@ async function connectToWifi(wifiName, wifiPassword, maxRetries = 3) {
                 return true;
             } else {
                 console.log('Connection appeared successful but verification failed');
+                // Only cleanup on failed verification if we have more attempts
                 if (attempt < maxRetries) {
+                    console.log('Cleaning up failed connection before retry...');
                     await cleanupWifiConnections(wifiName);
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise(resolve => setTimeout(resolve, 3000));
                 }
             }
 
@@ -163,8 +191,8 @@ async function connectToWifi(wifiName, wifiPassword, maxRetries = 3) {
             console.error(`Connection attempt ${attempt} failed: ${message}`);
 
             if (attempt < maxRetries) {
-                console.log('Waiting before retry...');
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                console.log(`Waiting before retry attempt ${attempt + 1}...`);
+                await new Promise(resolve => setTimeout(resolve, 8000)); // Longer wait between retries
             }
         }
     }
@@ -211,13 +239,26 @@ async function checkWifiConnection(config) {
 
         printLCD('connecting to', wifiName.substring(0, 16)); // Truncate for LCD display
 
-        // Step 1: Reset wifi interface for clean state
-        console.log('Step 1: Resetting wifi interface...');
-        await resetWifiInterface();
+        // Step 1: Only reset wifi interface if we're not already connected or connection failed verification
+        console.log('Step 1: Checking if wifi interface reset is needed...');
+        const needsReset = (activeConnections.length === 0) ||
+            (activeConnections.length > 0 && activeConnections[0].split(':')[1] !== wifiName);
 
-        // Step 2: Clean up existing connections
-        console.log('Step 2: Cleaning up existing connections...');
-        await cleanupWifiConnections(wifiName);
+        if (needsReset) {
+            console.log('Resetting wifi interface for clean state...');
+            await resetWifiInterface();
+        } else {
+            console.log('WiFi interface appears to be in good state, skipping reset');
+        }
+
+        // Step 2: Clean up existing connections only if needed
+        console.log('Step 2: Checking if connection cleanup is needed...');
+        if (needsReset || activeConnections.length === 0) {
+            console.log('Cleaning up existing connections...');
+            await cleanupWifiConnections(wifiName);
+        } else {
+            console.log('Skipping connection cleanup - interface appears stable');
+        }
 
         // Step 3: Scan for target network
         console.log('Step 3: Scanning for target network...');
