@@ -212,8 +212,12 @@ async function testConnectivity(interfaceName) {
 /**
  * Check ethernet connection status
  */
-async function checkEthernetConnection() {
-    console.log('Checking ethernet connection...');
+async function checkEthernetConnection(logger = null) {
+    if (logger) {
+        logger.info('Checking ethernet connection...');
+    } else {
+        console.log('Checking ethernet connection...');
+    }
 
     // Ensure interfaces are detected
     await ensureInterfacesDetected();
@@ -221,22 +225,38 @@ async function checkEthernetConnection() {
 
     const isUp = await isInterfaceUp(ethernetInterface);
     if (!isUp) {
-        console.log(`Ethernet interface ${ethernetInterface} is down or not available`);
+        if (logger) {
+            logger.info(`Ethernet interface ${ethernetInterface} is down or not available`);
+        } else {
+            console.log(`Ethernet interface ${ethernetInterface} is down or not available`);
+        }
         return { connected: false, reason: 'interface_down' };
     }
 
     const hasIP = await hasIPAddress(ethernetInterface);
     if (!hasIP) {
-        console.log(`Ethernet interface ${ethernetInterface} has no IP address`);
+        if (logger) {
+            logger.info(`Ethernet interface ${ethernetInterface} has no IP address`);
+        } else {
+            console.log(`Ethernet interface ${ethernetInterface} has no IP address`);
+        }
         return { connected: false, reason: 'no_ip' };
     }
 
     const ip = await getInterfaceIP(ethernetInterface);
-    console.log(`Ethernet IP: ${ip}`);
+    if (logger) {
+        logger.info(`Ethernet IP: ${ip}`);
+    } else {
+        console.log(`Ethernet IP: ${ip}`);
+    }
 
     const hasInternet = await testConnectivity(ethernetInterface);
     if (!hasInternet) {
-        console.log('Ethernet has IP but no internet connectivity');
+        if (logger) {
+            logger.info('Ethernet has IP but no internet connectivity');
+        } else {
+            console.log('Ethernet has IP but no internet connectivity');
+        }
         return {
             connected: true,
             ip: ip,
@@ -245,7 +265,11 @@ async function checkEthernetConnection() {
         };
     }
 
-    console.log('Ethernet connection verified with internet access');
+    if (logger) {
+        logger.info('Ethernet connection verified with internet access');
+    } else {
+        console.log('Ethernet connection verified with internet access');
+    }
     return {
         connected: true,
         ip: ip,
@@ -407,7 +431,7 @@ async function checkWifiConnection(config) {
 /**
  * Get current network status and display on LCD
  */
-async function getNetworkStatus() {
+async function getNetworkStatus(logger = null) {
     const status = {
         ethernet: { connected: false },
         wifi: { connected: false },
@@ -416,7 +440,7 @@ async function getNetworkStatus() {
     };
 
     // Check ethernet
-    const ethernetResult = await checkEthernetConnection();
+    const ethernetResult = await checkEthernetConnection(logger);
     status.ethernet = ethernetResult;
 
     // Check wifi
@@ -459,14 +483,22 @@ async function getNetworkStatus() {
  * Get network status (no longer displays on LCD)
  * LCD display is handled by AGS READY message in scheduler
  */
-async function displayNetworkStatus() {
-    const status = await getNetworkStatus();
+async function displayNetworkStatus(logger = null) {
+    const status = await getNetworkStatus(logger);
 
     if (status.primary) {
         const connectionType = status.primary.toUpperCase();
-        console.log(`Network status: ${connectionType} connection active with IP ${status.ip}`);
+        if (logger) {
+            logger.info(`Network status: ${connectionType} connection active with IP ${status.ip}`);
+        } else {
+            console.log(`Network status: ${connectionType} connection active with IP ${status.ip}`);
+        }
     } else {
-        console.log('Network status: No active network connections');
+        if (logger) {
+            logger.info('Network status: No active network connections');
+        } else {
+            console.log('Network status: No active network connections');
+        }
     }
 
     return status;
@@ -475,8 +507,12 @@ async function displayNetworkStatus() {
 /**
  * Initialize network connections with proper priority and timeout protection
  */
-async function initializeNetwork(config) {
-    console.log('Initializing network connections...');
+async function initializeNetwork(config, logger = null) {
+    if (logger) {
+        logger.info('Initializing network connections...');
+    } else {
+        console.log('Initializing network connections...');
+    }
     printLCD('Network Setup', 'Starting...');
 
     // Add overall timeout for network initialization
@@ -496,10 +532,14 @@ async function initializeNetwork(config) {
             ]);
 
             // Step 1: Check ethernet first (highest priority) with timeout
-            console.log('Step 1: Checking ethernet connection...');
+            if (logger) {
+                logger.info('Step 1: Checking ethernet connection...');
+            } else {
+                console.log('Step 1: Checking ethernet connection...');
+            }
             printLCD('Checking', 'Ethernet...');
 
-            const ethernetPromise = checkEthernetConnection();
+            const ethernetPromise = checkEthernetConnection(logger);
             const ethernetTimeout = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Ethernet check timeout')), 20000);
             });
@@ -597,7 +637,7 @@ async function initializeNetwork(config) {
             // Get final status with timeout
             let finalStatus;
             try {
-                const statusPromise = displayNetworkStatus();
+                const statusPromise = displayNetworkStatus(logger);
                 const statusTimeout = new Promise((_, reject) => {
                     setTimeout(() => reject(new Error('Status check timeout')), 10000);
                 });
@@ -668,14 +708,22 @@ async function getMyIP() {
 /**
  * Monitor network status and update LCD periodically
  */
-function startNetworkMonitoring(intervalMinutes = 5) {
-    console.log(`Starting network monitoring (every ${intervalMinutes} minutes)`);
+function startNetworkMonitoring(intervalMinutes = 5, logger = null) {
+    if (logger) {
+        logger.info(`Starting network monitoring (every ${intervalMinutes} minutes)`);
+    } else {
+        console.log(`Starting network monitoring (every ${intervalMinutes} minutes)`);
+    }
 
     const monitor = setInterval(async () => {
         try {
-            await displayNetworkStatus();
+            await displayNetworkStatus(logger);
         } catch (error) {
-            console.error(`Network monitoring error: ${error.message}`);
+            if (logger) {
+                logger.error(`Network monitoring error: ${error.message}`);
+            } else {
+                console.error(`Network monitoring error: ${error.message}`);
+            }
         }
     }, intervalMinutes * 60 * 1000);
 

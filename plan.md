@@ -337,287 +337,49 @@ The AGS uses a JSON configuration file (`ow-config.json`) stored on USB storage.
 4. Restore backup to primary config location
 5. Continue normal operation
 
-### Known Issues & Limitations
+### Known Issues & Current Limitations
 
 - **Reboot scheduling:** System reboots at 3:00 AM may conflict with long satellite passes
-- **USB detection:** Occasional issues with USB mount detection on some Pi models
-- **Network resilience:** Limited offline operation capabilities
+- **USB/WiFi interference:** Some hardware configurations experience WiFi issues when USB storage is connected
+- **Network resilience:** Limited offline operation capabilities (improved with TLE caching)
 - **Antenna optimization:** Performance varies significantly with antenna setup
-- **Config persistence:** Resolved via backup system - no longer causes system failures
 
-## Recent Bug Fixes & Improvements
+### Troubleshooting & Diagnostics
 
-### Elevation Filtering Bug Fix (2024)
+The system includes comprehensive diagnostic tools:
 
-**Issue Identified:** The `minElevation` configuration parameter was not being applied during satellite pass calculation, causing all passes to be processed regardless of elevation angle. This could lead to poor-quality recordings from low-elevation passes while potentially missing excellent high-elevation passes (including optimal 90-degree passes).
-
-**Root Cause:** The `tle.js` module was calculating satellite elevations correctly but never comparing them against the configured `minElevation` threshold. The filtering logic was completely missing from the `findSatellitePasses` function.
-
-**Solution Implemented:**
-
-- **Enhanced Pass Detection:** Modified the elevation checking logic to only track satellite positions when elevation is above the configured minimum
-- **Proper Pass Boundaries:** Passes now start and end based on elevation thresholds, not just distance constraints
-- **Multiple Filtering Points:** Added elevation filtering at three critical points:
-  1. During real-time elevation calculation
-  2. When ending passes due to elevation drop
-  3. When ending passes due to distance constraints
-- **Improved Logging:** Added detailed logging to track how many passes are found and their elevation angles
-
-**Code Changes:**
-
-- `tle.js` - Added `minElevation` filtering in `findSatellitePasses()` function
-- `tle.js` - Enhanced logging to show pass count and elevation details
-- `tle.js` - Added elevation checking for all three pass-ending conditions
-
-**Impact:**
-
-- **Quality Improvement:** Only records satellite passes that meet minimum elevation requirements
-- **90-Degree Passes:** Excellent high-elevation passes (including 90-degree overhead passes) are now properly captured and prioritized
-- **Resource Efficiency:** Eliminates processing of poor-quality low-elevation passes
-
-### Network Initialization Race Condition Fix (2025)
-
-**Issue Identified:** Multiple ground stations in production were experiencing DNS resolution failures (`EAI_AGAIN` errors) when attempting to fetch TLE data from Celestrak. This was caused by a race condition in the network interface detection system introduced during the Ethernet/WiFi priority implementation.
-
-**Root Cause:** The network interface detection was happening asynchronously at module load time, causing timing issues where network functions would use default interface names ('eth0', 'wlan0') before the actual interface names were detected. This led to network initialization failures, and when the system tried to fetch TLE data without proper network connectivity, DNS resolution would fail.
-
-**Solution Implemented:**
-
-1. **Fixed Race Condition:**
-
-   - Replaced immediate async interface detection with on-demand detection
-   - Added `ensureInterfacesDetected()` function to guarantee interface detection before use
-   - Updated all network functions to properly wait for interface detection
-
-2. **Added Network Fallback:**
-
-   - Implemented TLE data caching system with 7-day expiration
-   - Added automatic fallback to cached TLE data when network is unavailable
-   - Modified scheduler to skip TLE updates when network is not available
-
-3. **Enhanced Error Handling:**
-   - Added comprehensive error handling for network failures
-   - Improved cache validation to prevent corrupted cache files from causing crashes
-   - Added helpful user feedback based on network status
-
-**Code Changes:**
-
-- `network.js` - Fixed interface detection race condition and added `ensureInterfacesDetected()`
-- `tle.js` - Added TLE caching system with fallback mechanism
-- `scheduler.js` - Added network-aware pass update logic with better error handling
-
-**Impact:**
-
-- **Reliability:** Eliminates DNS resolution failures in production deployments
-- **Offline Operation:** Systems can continue operating using cached data when network is unavailable
-- **User Experience:** Better error messages and status information for network issues
-- **Robustness:** Improved error handling prevents system crashes from network failures
-- **User Confidence:** Clear logging shows exactly which passes are being considered and why
-
-**Configuration Usage:**
-
-```json
-{
-  "minElevation": 30 // Only record passes above 30 degrees elevation
-  // ... other config options
-}
-```
-
-The system now properly respects the `minElevation` setting, ensuring that only viable passes are recorded while preserving the highest-quality passes for optimal weather satellite imagery capture.
-
-## Recent Updates & Improvements (July 2025)
-
-### Critical Bug Fixes for Production Issues
-
-**Issue Addressed:** Multiple ground stations experiencing DNS resolution failures, "updating passes" freeze, and network initialization failures based on production data from June-July 2025.
-
-**Root Causes Identified:**
-
-1. **DNS Resolution Failures (EAI_AGAIN errors):**
-   - Network initialization race conditions
-   - Missing timeout protection on network operations
-   - Inadequate fallback mechanisms for network failures
-
-2. **"Updating Passes" Freeze:**
-   - TLE fetch operations hanging without timeout
-   - No fallback to cached data when network fails
-   - Insufficient error handling in satellite pass calculation
-
-3. **Network Initialization Issues:**
-   - Interface detection timing problems
-   - Missing timeout protection on critical network operations
-   - No graceful degradation when network services fail
-
-4. **Upload Failures:**
-   - Insufficient retry logic for network errors
-   - No differentiation between network and server errors
-   - Inadequate timeout handling
-
-**Solutions Implemented:**
-
-#### 1. Enhanced TLE Data Processing (`tle.js`)
-
-- **Improved Network Error Handling:** Added comprehensive detection for all network error types (EAI_AGAIN, ENOTFOUND, ETIMEDOUT, ECONNRESET, etc.)
-- **Proactive Cache Loading:** Load cached TLE data immediately as fallback before attempting network fetch
-- **Timeout Protection:** Added 15-second timeout for TLE fetch operations with User-Agent header
-- **Data Validation:** Comprehensive validation of TLE data format and content before processing
-- **Individual Satellite Timeouts:** 30-second timeout protection for each satellite processing operation
-- **Overall Process Timeout:** 2-minute timeout for entire TLE processing operation
-- **Better Error Messages:** Specific error guidance for different failure types
-
-#### 2. Network Initialization Improvements (`network.js`)
-
-- **Comprehensive Timeout Protection:** 90-second overall timeout for network initialization
-- **Individual Operation Timeouts:** 
-  - Interface detection: 15 seconds
-  - Ethernet check: 20 seconds  
-  - WiFi setup: 30 seconds
-  - Priority setting: 10 seconds
-  - Status check: 10 seconds
-- **Enhanced Error Recovery:** Graceful fallback when individual operations fail
-- **Better Progress Feedback:** Clear LCD messages during each step of network initialization
-- **WiFi Configuration Validation:** Check for empty or missing WiFi settings before attempting connection
-
-#### 3. Scheduler Improvements (`scheduler.js`)
-
-- **Pass Update Timeout:** 3-minute timeout protection for satellite pass updates
-- **Enhanced Error Handling:** Specific handling for DNS failures, timeouts, and network unavailability
-- **Automatic Recovery:** Intelligent restart logic based on error type:
-  - DNS failures: 30-second delay restart
-  - Timeouts: 20-second delay restart  
-  - Network unavailable: 60-second delay restart
-- **Better User Feedback:** Specific LCD messages for different error conditions
-- **Graceful Degradation:** Continue operation with cached data when network fails
-
-#### 4. Upload System Enhancements (`upload.js`)
-
-- **Network Error Detection:** Comprehensive identification of network vs. server errors
-- **Enhanced Retry Logic:** 5 retry attempts with intelligent backoff
-- **Escalating Delays:** Increased delay for consecutive network errors (up to 4x base delay)
-- **Timeout Protection:** 60-second timeout for upload operations
-- **Client Error Handling:** Stop retrying on 4xx client errors
-- **Detailed Error Reporting:** Structured error responses with error codes and network error flags
-
-#### 5. System-Wide Robustness Improvements
-
-- **Timeout Protection:** Added timeouts to all critical network operations
-- **Error Classification:** Differentiate between network, configuration, and system errors
-- **Graceful Degradation:** System continues operating with cached data when network fails
-- **Enhanced Logging:** More detailed error messages and troubleshooting information
-- **Automatic Recovery:** Intelligent restart logic based on error patterns
-- **User Feedback:** Clear LCD messages explaining system state and issues
-
-**Code Changes Summary:**
-
-- `tle.js` - Enhanced network error handling, timeout protection, and cache fallback
-- `network.js` - Comprehensive timeout protection and error recovery for initialization
-- `scheduler.js` - Pass update timeout protection and intelligent error recovery
-- `upload.js` - Enhanced retry logic and network error detection
-
-**Impact:**
-
-- **Reliability:** Eliminates DNS resolution failures and "updating passes" freeze issues
-- **Robustness:** System continues operating even with network problems
-- **User Experience:** Clear feedback about system state and issues
-- **Maintenance:** Better error reporting for remote troubleshooting
-- **Operational Continuity:** Cached data allows operation without network connectivity
-
-**Testing Recommendations:**
-
-1. **Network Failure Testing:** Disconnect network during startup to verify cache fallback
-2. **DNS Resolution Testing:** Block DNS to test EAI_AGAIN error handling
-3. **Timeout Testing:** Simulate slow network conditions to verify timeout protection
-4. **Configuration Testing:** Test with invalid WiFi credentials to verify error handling
-5. **Recovery Testing:** Verify automatic restart behavior for different error types
-
-This version maintains backward compatibility while significantly improving system reliability and error recovery capabilities for production deployments.
-
-## Version History & Critical Bug Fixes
-
-### AGS v1.5.0 - Critical Production Issue Fixes (July 2025)
-
-Based on production data from multiple ground stations, this version addresses critical issues that were causing system failures in the field:
-
-#### Issues Addressed
-
-**Production Ground Stations Affected:**
-- AGS 11 (Scotland): DNS resolution and network initialization issues
-- AGS 17 (New York): System freezing and hardware issues  
-- AGS 18 (Seattle): Boot failures and configuration problems
-- AGS 14 (Chile): "Updating passes" freeze and reboot issues
-- AGS 2 (Cornwall): Network-related failures and short recordings
-- AGS 21: Upload failures with EAI_AGAIN errors
-
-**Critical Issues Fixed:**
-
-1. **EAI_AGAIN DNS Resolution Failures** - Multiple stations experiencing DNS resolution failures
-2. **"Updating Passes" Freeze** - Stations getting stuck during satellite pass calculation
-3. **Network Initialization Failures** - Boot failures due to network interface detection issues
-4. **Upload Failures** - EAI_AGAIN errors during file uploads to archive
-5. **USB Configuration Issues** - Config file mounting and detection problems
-
-#### Key Improvements
-
-**1. Timeout Protection**
-- **TLE Processing:** 2-minute overall timeout, 30-second per-satellite timeout
-- **Network Initialization:** 90-second overall timeout with individual operation timeouts
-- **Pass Updates:** 3-minute timeout protection prevents indefinite freezing
-- **Uploads:** 60-second timeout with enhanced retry logic
-
-**2. Enhanced Error Handling**
-- **Network Errors:** Comprehensive detection of DNS and connectivity issues
-- **Graceful Degradation:** System continues with cached data when network fails
-- **Intelligent Recovery:** Automatic restart logic based on error type
-- **Better User Feedback:** Clear LCD messages for different error conditions
-
-**3. Robustness Features**
-- **Cache Fallback:** Automatic use of cached TLE data when network unavailable
-- **Error Classification:** Differentiate network, configuration, and system errors
-- **Progressive Delays:** Escalating retry delays for persistent network issues
-- **Enhanced Validation:** Improved data validation throughout the system
-
-**4. USB Mounting Improvements**
-- **Better Device Detection:** Enhanced timing for USB hardware detection
-- **Label-based Mounting:** Specifically looks for "O-W" labeled partitions
-- **Multiple Mount Attempts:** Tries mounting at different intervals during startup
-- **Filesystem Validation:** Only attempts to mount supported filesystems
-
-#### Files Modified
-
-**Core System Files:**
-- `tle.js` - Enhanced TLE data processing with timeout protection and cache fallback
-- `network.js` - Improved network initialization with comprehensive timeout handling  
-- `scheduler.js` - Added timeout protection for pass updates and intelligent error recovery
-- `upload.js` - Enhanced upload reliability with better error handling and retry logic
-- `config.js` - Fixed configuration flag bugs and improved backup recovery
-- `start_scheduler.sh` - Enhanced USB mounting automation with better timing
-
-**New Files:**
-- `diagnose.js` - Diagnostic tool to identify common production issues
-- Added `npm run diagnose` script for easy system health checks
-
-#### Diagnostic Tool
-
-Ground station operators can now run comprehensive diagnostics:
-
+**Available Diagnostic Commands:**
 ```bash
-npm run diagnose
+npm run diagnose          # Full system health check
+npm run test-usb-wifi     # USB/WiFi interference testing
 ```
 
-This checks for:
-- DNS resolution issues (EAI_AGAIN errors)
-- Network interface detection and connectivity
-- USB drive mounting and configuration files
-- System resources and load
-- TLE cache availability and validity
-- Celestrak connectivity and response times
+**Key Diagnostic Features:**
+- DNS resolution and network connectivity testing
+- USB device enumeration and interference detection
+- WiFi scanning and connection verification
+- TLE cache validation and Celestrak connectivity
+- System resource monitoring
 
-#### Testing Recommendations
+**Enhanced WiFi Debugging:**
+- Detailed network discovery logging showing all available networks
+- USB device detection during WiFi operations
+- Specific error classification (network not found vs authentication failed)
+- Hardware status checking (rfkill, interface state)
+- Connection verification with IP assignment and internet testing
 
-1. **Network Failure Testing:** Disconnect network during startup to test timeout handling
-2. **DNS Resolution Testing:** Block DNS to test EAI_AGAIN error handling
-3. **Timeout Testing:** Simulate slow network conditions to verify timeout protection
-4. **Configuration Testing:** Test invalid WiFi credentials and USB detection
-5. **Recovery Testing:** Verify automatic restart behavior after errors
+**Common USB/WiFi Interference Solutions:**
+1. Use powered USB hub to reduce Pi power load
+2. Use USB 3.0 devices instead of USB 2.0 (different frequency)
+3. Physically separate USB devices from WiFi antenna
+4. Use shielded USB cables
+5. Use 5GHz WiFi networks to avoid 2.4GHz interference
 
-This version maintains backward compatibility while significantly improving system reliability and error recovery capabilities for production deployments.
+**System Recovery Features:**
+- Automatic configuration backup and restoration
+- TLE data caching with 7-day fallback
+- Intelligent error recovery with automatic restart
+- Timeout protection on all network operations
+- Graceful degradation when network services fail
+
+This system is designed for resilient, autonomous operation with comprehensive error handling and diagnostic capabilities.

@@ -4,6 +4,7 @@
 const path = require('path');
 const { initializeNetwork, startNetworkMonitoring } = require('./network');
 const { loadConfig } = require('./config');
+const Logger = require('./logger');
 
 async function startNetworkSystem() {
     console.log('=== Open Weather Ground Station Network Startup ===\n');
@@ -20,9 +21,13 @@ async function startNetworkSystem() {
 
         console.log('Configuration loaded successfully');
 
+        // Initialize logger
+        const logger = new Logger(config);
+        logger.info('Network monitoring script started');
+
         // Initialize network
         console.log('\nInitializing network connections...');
-        const result = await initializeNetwork(config);
+        const result = await initializeNetwork(config, logger);
 
         if (result.success) {
             console.log(`\n✅ Network initialization successful!`);
@@ -31,7 +36,7 @@ async function startNetworkSystem() {
 
             // Start monitoring
             console.log('\nStarting network monitoring...');
-            const monitor = startNetworkMonitoring(2); // Update every 2 minutes
+            const monitor = startNetworkMonitoring(2, logger); // Update every 2 minutes
 
             console.log('\n🔄 Network monitoring active. Press Ctrl+C to stop.');
 

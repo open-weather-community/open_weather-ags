@@ -126,14 +126,14 @@ async function main() {
     console.log('Initializing network connections...');
     logger.info('Starting network initialization with ethernet priority');
 
-    const networkResult = await initializeNetwork(config);
+    const networkResult = await initializeNetwork(config, logger);
 
     if (networkResult.success) {
         console.log(`Network initialized: ${networkResult.connection} connection active`);
         logger.info(`Network connected via ${networkResult.connection} with IP ${networkResult.ip}`);
 
         // Start network monitoring (reduced frequency since status is now in ready message)
-        const networkMonitor = startNetworkMonitoring(10); // Update every 10 minutes for monitoring
+        const networkMonitor = startNetworkMonitoring(10, logger); // Update every 10 minutes for monitoring
 
         // Store monitor reference for cleanup if needed
         process.networkMonitor = networkMonitor;
@@ -210,7 +210,7 @@ async function main() {
 
     // Get network status and display ready message with connection type
     try {
-        const networkStatus = await getNetworkStatus();
+        const networkStatus = await getNetworkStatus(logger);
         let connectionType = 'no net';
 
         if (networkStatus.primary === 'ethernet') {
