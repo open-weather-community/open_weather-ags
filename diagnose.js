@@ -197,6 +197,56 @@ async function testCelestrakConnection() {
     }
 }
 
+async function checkUSBWiFiInteraction() {
+    console.log('\n🔍 Checking USB/WiFi interaction...');
+    try {
+        // Check for USB storage devices
+        const { stdout: lsusbOutput } = await execAsync('lsusb');
+        const storageDevices = lsusbOutput.split('\n').filter(line =>
+            line.includes('Storage') ||
+            line.includes('Mass') ||
+            line.includes('Flash') ||
+            line.includes('Disk')
+        );
+
+        if (storageDevices.length > 0) {
+            console.log(`📱 Found ${storageDevices.length} USB storage device(s)`);
+
+            // Test WiFi scan while USB is connected
+            try {
+                console.log('   Testing WiFi scan with USB connected...');
+                await execAsync('nmcli device wifi rescan');
+                await new Promise(resolve => setTimeout(resolve, 5000));
+
+                const { stdout: scanResults } = await execAsync('nmcli -t -f ssid device wifi list');
+                const networks = scanResults.split('\n').filter(line => line.trim() && line !== '--');
+
+                if (networks.length > 0) {
+                    console.log(`✅ WiFi scan successful: ${networks.length} networks found`);
+                    console.log('   USB/WiFi interaction appears normal');
+                    return true;
+                } else {
+                    console.log('❌ WiFi scan returned no results with USB connected');
+                    console.log('   This suggests USB/WiFi interference');
+                    console.log('   Known issue: WiFi may work without USB but fail with USB');
+                    return false;
+                }
+            } catch (error) {
+                console.log(`❌ WiFi scan failed with USB connected: ${error.message}`);
+                console.log('   This confirms USB/WiFi interference issue');
+                return false;
+            }
+        } else {
+            console.log('ℹ️  No USB storage devices detected');
+            console.log('   Cannot test USB/WiFi interaction');
+            return true;
+        }
+    } catch (error) {
+        console.log(`❌ Failed to check USB/WiFi interaction: ${error.message}`);
+        return false;
+    }
+}
+
 async function main() {
     const results = {};
 
@@ -206,6 +256,7 @@ async function main() {
     results.resources = await checkSystemResources();
     results.tleCache = await checkCachedTLE();
     results.celestrak = await testCelestrakConnection();
+    results.usbWifiInteraction = await checkUSBWiFiInteraction();
 
     console.log('\n📋 Diagnostic Summary');
     console.log('====================');
@@ -239,8 +290,19 @@ async function main() {
         }
     }
 
-    if (results.dns && results.interfaces && results.usb && results.celestrak) {
-        console.log('✅ All basic checks passed - system should be operational');
+    if (!results.usbWifiInteraction) {
+        console.log('🚨 USB/WiFi Interference Detected');
+        console.log('   - WiFi fails when USB storage is connected');
+        console.log('   - Known hardware issue on some Raspberry Pi setups');
+        console.log('   - Solutions:');
+        console.log('     • Use powered USB hub');
+        console.log('     • Try different USB ports');
+        console.log('     • Use USB 3.0 devices instead of USB 2.0');
+        console.log('     • Physically separate USB from WiFi antenna');
+    }
+
+    if (results.dns && results.interfaces && results.usb && results.celestrak && results.usbWifiInteraction) {
+        console.log('✅ All checks passed - system should be operational');
     } else {
         console.log('⚠️  Issues detected - see recommendations above');
     }

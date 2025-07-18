@@ -398,6 +398,9 @@ async function processPasses(configParam, loggerParam) {
 
                     logger.info(`Found ${passes.length} passes for ${satName} above ${config.minElevation || 0}° elevation`);
 
+                    // Collect new passes for condensed logging
+                    const newPasses = [];
+
                     // Format and add new passes
                     passes.forEach(pass => {
                         const formattedStart = DateTime.fromISO(pass.start.toISO());
@@ -440,9 +443,17 @@ async function processPasses(configParam, loggerParam) {
 
                         if (!duplicate) {
                             existingPasses.push(newPass);
-                            logger.info(`Added pass: ${satName} on ${newPass.date} at ${newPass.time}, max elevation: ${maxElevation}°`);
+                            newPasses.push(newPass);
                         }
                     });
+
+                    // Log new passes in condensed format
+                    if (newPasses.length > 0) {
+                        const passStrings = newPasses.map(pass =>
+                            `${pass.time}(${pass.maxElevation}°)`
+                        );
+                        logger.info(`Added ${newPasses.length} passes for ${satName}: ${passStrings.join(', ')}`);
+                    }
                 } catch (satError) {
                     logger.error(`Error processing ${satName}: ${satError.message}`);
                     // Continue with other satellites even if one fails

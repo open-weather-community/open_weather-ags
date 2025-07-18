@@ -1,0 +1,24 @@
+{
+    "wifiName": "Fibertel WiFi754 5.8GHz",
+    "wifiPassword": "01431851884",
+    "myID": 23,
+    "auth_token": "secretcode",
+    "locLat": -31.4062,
+    "locLon": -64.1632,
+    "downsample": true,
+    "gain": 39,
+    "numberOfPassesPerDay": 3,
+    "maxDistance": 2200000,
+    "daysToPropagate": 7,
+    "minElevation": 30,
+    "bufferMinutes": 2,
+    "sampleRate": "48k",
+    "noaaFrequencies": {
+        "NOAA 19": "137.1M",
+        "NOAA 15": "137.62M"
+    },
+    "passesFile": "passes.json",
+    "logFile": "log.txt",
+    "rtl_fm_path": "/usr/local/bin/rtl_fm",
+    "sox_path": "/usr/bin/sox"
+}

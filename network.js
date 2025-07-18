@@ -368,12 +368,13 @@ async function setRoutingPriority() {
  * Enhanced wifi check that respects ethernet priority
  */
 async function checkWifiConnection(config) {
-    console.log('Checking WiFi connection...');
+    console.log(`=== WiFi Connection Check Started ===`);
+    console.log(`Target network: "${config.wifiName}"`);
 
     // Check if ethernet is already working
     const ethernetStatus = await checkEthernetConnection();
     if (ethernetStatus.connected && ethernetStatus.internet) {
-        console.log('Ethernet already provides connectivity, skipping WiFi connection');
+        console.log(`Ethernet already provides connectivity, skipping WiFi connection to "${config.wifiName}"`);
         return { connected: false, reason: 'ethernet_available' };
     }
 
@@ -391,13 +392,14 @@ async function checkWifiConnection(config) {
         const wifiConnected = await verifyWifiConnection();
         if (wifiConnected) {
             const ip = await getInterfaceIP(WIFI_INTERFACE);
-            console.log(`WiFi connected with IP: ${ip}`);
+            console.log(`WiFi successfully connected to "${config.wifiName}" with IP: ${ip}`);
             return { connected: true, ip: ip, internet: true, reason: 'success' };
         }
 
+        console.log(`WiFi connection to "${config.wifiName}" failed verification`);
         return { connected: false, reason: 'verification_failed' };
     } catch (error) {
-        console.error(`WiFi connection failed: ${error.message}`);
+        console.error(`WiFi connection failed for "${config.wifiName}": ${error.message}`);
         return { connected: false, reason: 'connection_failed', error: error.message };
     }
 }
@@ -527,32 +529,55 @@ async function initializeNetwork(config) {
 
             // Step 2: Try WiFi if ethernet doesn't provide internet and WiFi is configured
             if (!networkEstablished && config.wifiName && config.wifiName.trim() !== '') {
-                console.log('Step 2: Setting up WiFi connection...');
+                console.log(`Step 2: Setting up WiFi connection to "${config.wifiName}"...`);
+
+                // Log USB information for debugging USB/WiFi interference issues
+                try {
+                    const { stdout: lsusbOutput } = await execAsync('lsusb');
+                    const usbDevices = lsusbOutput.split('\n').filter(line => line.trim());
+                    console.log(`USB devices currently connected: ${usbDevices.length}`);
+                    const storageDevices = usbDevices.filter(line =>
+                        line.includes('Storage') || line.includes('Mass') || line.includes('Flash')
+                    );
+                    if (storageDevices.length > 0) {
+                        console.log(`USB storage devices detected: ${storageDevices.length}`);
+                        console.log('Note: USB storage can sometimes interfere with WiFi on some hardware');
+                    }
+                } catch (error) {
+                    console.log('Could not enumerate USB devices for debugging');
+                }
 
                 const wifiPromise = checkWifiConnection(config);
                 const wifiTimeout = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('WiFi setup timeout')), 30000);
+                    setTimeout(() => reject(new Error('WiFi setup timeout after 30 seconds')), 30000);
                 });
 
                 let wifiResult;
                 try {
                     wifiResult = await Promise.race([wifiPromise, wifiTimeout]);
                 } catch (wifiError) {
-                    console.log(`WiFi setup failed: ${wifiError.message}`);
+                    console.log(`WiFi setup failed for "${config.wifiName}": ${wifiError.message}`);
+                    if (wifiError.message.includes('timeout')) {
+                        console.log('WiFi setup timed out - this may indicate hardware issues or USB interference');
+                    }
                     wifiResult = { connected: false, reason: 'setup_failed', error: wifiError.message };
                 }
 
                 if (wifiResult.connected && wifiResult.internet) {
-                    console.log('WiFi connection established with internet access');
+                    console.log(`WiFi connection established with internet access to "${config.wifiName}"`);
                     networkEstablished = true;
                 } else if (wifiResult.reason === 'ethernet_available') {
                     console.log('Skipped WiFi setup due to working ethernet connection');
                     networkEstablished = ethernetStatus.internet;
                 } else {
-                    console.log(`WiFi connection failed: ${wifiResult.reason}`);
+                    console.log(`WiFi connection failed for "${config.wifiName}": ${wifiResult.reason}`);
+                    if (wifiResult.error) {
+                        console.log(`WiFi error details: ${wifiResult.error}`);
+                    }
                 }
             } else if (!config.wifiName || config.wifiName.trim() === '') {
                 console.log('No WiFi configuration provided, skipping WiFi setup');
+                console.log('To enable WiFi, add "wifiName" and "wifiPassword" to your configuration');
             }
 
             // Step 3: Set routing priority and display final status
