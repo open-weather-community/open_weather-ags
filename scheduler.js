@@ -271,12 +271,32 @@ async function main() {
     } else {
         logger.info('No valid passes found to record.');
 
-        // Provide helpful information based on network status
+        // Check if there are passes available for tomorrow to provide better user feedback
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toLocaleDateString('en-CA');
+
+        const tomorrowPasses = passes.filter(pass => {
+            const passDate = new Date(`${pass.date} ${pass.time}`);
+            if (isNaN(passDate.getTime())) return false;
+            const passDay = passDate.toLocaleDateString('en-CA');
+            return passDay === tomorrowStr;
+        });
+
+        // Provide helpful information based on network status and future passes
         if (!networkResult.success) {
             logger.info('Network is unavailable and no cached passes found. The system will retry at the next daily reboot.');
             printLCD('No passes found', 'Network needed');
             setTimeout(() => {
                 printLCD('Will retry at', 'next reboot');
+            }, 5000);
+        } else if (tomorrowPasses.length > 0) {
+            // We have network and passes are available tomorrow
+            const nextPass = tomorrowPasses[0];
+            logger.info(`Network is available but no passes found for today. Next pass: ${nextPass.satellite} tomorrow at ${nextPass.time}`);
+            printLCD('No passes today', 'Wait for tomorrow');
+            setTimeout(() => {
+                printLCD(`Next: ${nextPass.satellite}`, `tomorrow ${nextPass.time}`);
             }, 5000);
         } else {
             logger.info('Network is available but no passes found for today. Check satellite schedule.');

@@ -94,7 +94,7 @@ bash <(curl -s https://gist.githubusercontent.com/prismspecs/17b3a23be1fc6afe79f
 ```
 
 ```bash
-git clone https://github.com/prismspecs/open_weather-ags.git
+git clone https://github.com/open-weather-community/open_weather-ags.git
 cd open_weather-ags
 chmod +x install.sh
 ./install.sh
