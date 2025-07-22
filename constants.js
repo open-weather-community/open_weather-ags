@@ -79,7 +79,7 @@ const VALIDATION = {
     LATITUDE: { min: -90, max: 90 },
     LONGITUDE: { min: -180, max: 180 },
     GAIN: { min: 0, max: 50 },
-    STATION_ID: { min: 1, max: 9999 },
+    STATION_ID: { min: 0, max: 9999 }, // Allow 0 as placeholder/test value
     ELEVATION: { min: 0, max: 90 },
     DISTANCE: { min: 100000, max: 5000000 }
 };

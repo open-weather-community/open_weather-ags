@@ -36,6 +36,11 @@ function validateConfig(config) {
         validateRange(config.gain, VALIDATION.GAIN.min, VALIDATION.GAIN.max, 'gain');
         validateRange(config.myID, VALIDATION.STATION_ID.min, VALIDATION.STATION_ID.max, 'myID');
 
+        // Special warning for myID of 0 (placeholder value)
+        if (config.myID === 0) {
+            console.log('WARNING: myID is set to 0 (placeholder value). Please update with your assigned station ID.');
+        }
+
         if (config.minElevation !== undefined) {
             validateRange(config.minElevation, VALIDATION.ELEVATION.min, VALIDATION.ELEVATION.max, 'minElevation');
         }
