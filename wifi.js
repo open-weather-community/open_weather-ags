@@ -331,7 +331,7 @@ async function checkWifiConnection(config) {
             console.log('Could not enumerate USB devices');
         }
 
-        // First, check if we're already connected to the target network
+        // First, check if we're already connected to the target network and it's working
         const { stdout } = await execAsync('/usr/bin/nmcli -t -f active,ssid dev wifi');
         const activeConnections = stdout.split('\n').filter(line => line.startsWith('yes'));
 
@@ -341,13 +341,15 @@ async function checkWifiConnection(config) {
             if (currentSSID === config.wifiName) {
                 console.log(`Already connected to target network: ${config.wifiName}`);
 
-                // Verify the connection is working
+                // Verify the connection is working before deciding to preserve it
                 const isVerified = await verifyWifiConnection();
                 if (isVerified) {
-                    console.log('Current wifi connection verified');
-                    return;
+                    console.log('Current wifi connection verified and working, preserving existing connection');
+                    printLCD('wifi connected', config.wifiName.substring(0, 16));
+                    return; // Exit early, preserving the existing connection
+                } else {
+                    console.log('Current connection failed verification, will reconnect...');
                 }
-                console.log('Current connection failed verification, reconnecting...');
             } else {
                 console.log(`Connected to different network: "${currentSSID}", need to switch to: "${config.wifiName}"`);
             }
@@ -369,7 +371,7 @@ async function checkWifiConnection(config) {
         console.log(`Proceeding with WiFi connection to: "${wifiName}"`);
         printLCD('connecting to', wifiName.substring(0, 16)); // Truncate for LCD display
 
-        // Step 1: Only reset wifi interface if we're not already connected or connection failed verification
+        // Step 1: Only reset wifi interface if we're not connected to the target network or connection failed verification
         console.log('Step 1: Checking if wifi interface reset is needed...');
         const needsReset = (activeConnections.length === 0) ||
             (activeConnections.length > 0 && activeConnections[0].split(':')[1] !== wifiName);
@@ -381,13 +383,13 @@ async function checkWifiConnection(config) {
             console.log('WiFi interface appears to be in good state, skipping reset');
         }
 
-        // Step 2: Clean up existing connections only if needed
+        // Step 2: Clean up existing connections only if we need to make a new connection
         console.log('Step 2: Checking if connection cleanup is needed...');
-        if (needsReset || activeConnections.length === 0) {
+        if (needsReset) {
             console.log('Cleaning up existing connections...');
             await cleanupWifiConnections(wifiName);
         } else {
-            console.log('Skipping connection cleanup - interface appears stable');
+            console.log('Skipping connection cleanup - preserving existing working connection');
         }
 
         // Step 3: Scan for target network

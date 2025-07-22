@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node scheduler.js",
     "diagnose": "node diagnose.js",
-    "test-usb-wifi": "node test-usb-wifi.js"
+    "test-usb-wifi": "node test-usb-wifi.js",
+    "test-wifi": "node test-wifi-connection.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

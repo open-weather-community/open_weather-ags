@@ -352,6 +352,7 @@ The system includes comprehensive diagnostic tools:
 ```bash
 npm run diagnose          # Full system health check
 npm run test-usb-wifi     # USB/WiFi interference testing
+npm run test-wifi         # WiFi connection diagnostics (new)
 ```
 
 **Key Diagnostic Features:**
@@ -360,6 +361,14 @@ npm run test-usb-wifi     # USB/WiFi interference testing
 - WiFi scanning and connection verification
 - TLE cache validation and Celestrak connectivity
 - System resource monitoring
+- **WiFi connection preservation** - Avoids unnecessary disconnections on startup
+- **Existing connection validation** - Verifies working connections before reconnecting
+
+**Enhanced WiFi Management:**
+- **Smart Connection Handling:** System now preserves existing WiFi connections if they're working properly
+- **Reduced Startup Disruption:** No longer disconnects from working WiFi during boot process
+- **Connection Verification:** Validates internet connectivity before deciding to reconnect
+- **Detailed WiFi Diagnostics:** New test-wifi command provides comprehensive WiFi troubleshooting
 
 **Enhanced WiFi Debugging:**
 - Detailed network discovery logging showing all available networks

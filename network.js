@@ -389,7 +389,7 @@ async function setRoutingPriority() {
 }
 
 /**
- * Enhanced wifi check that respects ethernet priority
+ * Enhanced wifi check that respects ethernet priority and existing connections
  */
 async function checkWifiConnection(config) {
     console.log(`=== WiFi Connection Check Started ===`);
@@ -408,8 +408,36 @@ async function checkWifiConnection(config) {
         verifyWifiConnection
     } = require('./wifi');
 
-    // Proceed with original wifi connection logic
     try {
+        // Ensure interfaces are detected
+        await ensureInterfacesDetected();
+
+        // Check if we're already properly connected to the target WiFi
+        console.log('Checking current WiFi status before attempting connection...');
+        const wifiStatus = await getNetworkStatus();
+
+        if (wifiStatus.wifi.connected) {
+            console.log(`Currently connected to WiFi: "${wifiStatus.wifi.ssid}"`);
+
+            if (wifiStatus.wifi.ssid === config.wifiName) {
+                console.log(`Already connected to target WiFi network: ${config.wifiName}`);
+
+                // Verify the connection is actually working
+                const connectionWorking = await verifyWifiConnection();
+                if (connectionWorking && wifiStatus.wifi.internet) {
+                    console.log('Current WiFi connection verified and has internet access, preserving connection');
+                    return { connected: true, internet: true, reason: 'already_connected' };
+                } else {
+                    console.log('Current WiFi connection failed verification or lacks internet, will reconnect');
+                }
+            } else {
+                console.log(`Connected to different WiFi (${wifiStatus.wifi.ssid}), switching to target: ${config.wifiName}`);
+            }
+        } else {
+            console.log('No active WiFi connection detected, proceeding with setup');
+        }
+
+        // Only proceed with WiFi setup if we need to connect/reconnect
         await originalCheckWifiConnection(config);
 
         // Verify wifi is working
