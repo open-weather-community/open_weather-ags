@@ -210,6 +210,33 @@ async function testConnectivity(interfaceName) {
 }
 
 /**
+ * Test internet connectivity through specific interface without logging
+ */
+async function testConnectivityQuiet(interfaceName) {
+    try {
+        // Ensure interfaces are detected if using generic names
+        if (!interfaceName || interfaceName === 'eth0' || interfaceName === 'wlan0') {
+            await ensureInterfacesDetected();
+            if (!interfaceName || interfaceName === 'eth0') {
+                interfaceName = ETHERNET_INTERFACE;
+            } else if (interfaceName === 'wlan0') {
+                interfaceName = WIFI_INTERFACE;
+            }
+        }
+
+        if (!interfaceName) {
+            return false;
+        }
+
+        // Ping Google DNS with a short timeout
+        await execAsync(`ping -c 1 -W 3 -I ${interfaceName} 8.8.8.8`);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
  * Check ethernet connection status
  */
 async function checkEthernetConnection(logger = null) {
@@ -250,32 +277,87 @@ async function checkEthernetConnection(logger = null) {
         console.log(`Ethernet IP: ${ip}`);
     }
 
-    const hasInternet = await testConnectivity(ethernetInterface);
-    if (!hasInternet) {
-        if (logger) {
-            logger.info('Ethernet has IP but no internet connectivity');
-        } else {
-            console.log('Ethernet has IP but no internet connectivity');
-        }
-        return {
-            connected: true,
-            ip: ip,
-            internet: false,
-            reason: 'no_internet'
-        };
-    }
+    // Test internet connectivity
+    const internet = await testConnectivity(ethernetInterface);
 
-    if (logger) {
-        logger.info('Ethernet connection verified with internet access');
-    } else {
-        console.log('Ethernet connection verified with internet access');
-    }
     return {
         connected: true,
         ip: ip,
-        internet: true,
-        reason: 'success'
+        internet: internet,
+        reason: internet ? 'success' : 'no_internet'
     };
+}
+
+/**
+ * Check ethernet connection status without verbose logging (for monitoring)
+ */
+async function checkEthernetConnectionQuiet() {
+    // Ensure interfaces are detected
+    await ensureInterfacesDetected();
+    const ethernetInterface = ETHERNET_INTERFACE;
+
+    const isUp = await isInterfaceUp(ethernetInterface);
+    if (!isUp) {
+        return { connected: false, reason: 'interface_down' };
+    }
+
+    const hasIP = await hasIPAddress(ethernetInterface);
+    if (!hasIP) {
+        return { connected: false, reason: 'no_ip' };
+    }
+
+    const ip = await getInterfaceIP(ethernetInterface);
+    const internet = await testConnectivityQuiet(ethernetInterface);
+
+    return {
+        connected: true,
+        ip: ip,
+        internet: internet,
+        reason: internet ? 'success' : 'no_internet'
+    };
+}
+
+/**
+ * Test internet connectivity through specific interface without logging
+ */
+
+/**
+ * Get network status from preferred interface without detailed logging
+ */
+async function getNetworkStatusQuiet() {
+    try {
+        await ensureInterfacesDetected();
+
+        // Check ethernet first
+        if (ETHERNET_INTERFACE) {
+            const ethConnected = await checkEthernetConnectionQuiet();
+            if (ethConnected.connected) {
+                const ethInternet = await testConnectivityQuiet(ETHERNET_INTERFACE);
+                if (ethInternet) {
+                    return { connected: true, interface: 'ethernet', internet: true };
+                }
+                return { connected: true, interface: 'ethernet', internet: false };
+            }
+        }
+
+        // Check wifi if ethernet not available
+        if (WIFI_INTERFACE) {
+            const wifiConnected = await checkWifiConnection();
+            if (wifiConnected.connected) {
+                const wifiInternet = await testConnectivityQuiet(WIFI_INTERFACE);
+                return {
+                    connected: true,
+                    interface: 'wifi',
+                    internet: wifiInternet,
+                    ssid: wifiConnected.ssid
+                };
+            }
+        }
+
+        return { connected: false, interface: 'none', internet: false };
+    } catch (error) {
+        return { connected: false, interface: 'error', internet: false, error: error.message };
+    }
 }
 
 /**
@@ -535,24 +617,34 @@ async function getNetworkStatus(logger = null) {
  * LCD display is handled by AGS READY message in scheduler
  */
 async function displayNetworkStatus(logger = null) {
-    const status = await getNetworkStatus(logger);
+    try {
+        // Get status without verbose logging during monitoring
+        const status = await getNetworkStatusQuiet();
 
-    if (status.primary) {
-        const connectionType = status.primary.toUpperCase();
-        if (logger) {
-            logger.info(`Network status: ${connectionType} connection active with IP ${status.ip}`);
+        if (status.primary) {
+            const connectionType = status.primary.toUpperCase();
+            if (logger) {
+                logger.info(`Network: ${connectionType} connection active (IP: ${status.ip})`);
+            } else {
+                console.log(`Network: ${connectionType} connection active (IP: ${status.ip})`);
+            }
         } else {
-            console.log(`Network status: ${connectionType} connection active with IP ${status.ip}`);
+            if (logger) {
+                logger.info('Network: No active connections');
+            } else {
+                console.log('Network: No active connections');
+            }
         }
-    } else {
+
+        return status;
+    } catch (error) {
         if (logger) {
-            logger.info('Network status: No active network connections');
+            logger.error(`Network monitoring error: ${error.message}`);
         } else {
-            console.log('Network status: No active network connections');
+            console.error(`Network monitoring error: ${error.message}`);
         }
+        return null;
     }
-
-    return status;
 }
 
 /**
@@ -785,15 +877,61 @@ function startNetworkMonitoring(intervalMinutes = 5, logger = null) {
     return monitor;
 }
 
+/**
+ * Monitor network status with quiet, condensed output
+ */
+function startNetworkMonitoringQuiet(intervalMinutes = 30, logger = null) {
+    if (logger) {
+        logger.info(`Starting quiet network monitoring (every ${intervalMinutes} minutes)`);
+    } else {
+        console.log(`Starting quiet network monitoring (every ${intervalMinutes} minutes)`);
+    }
+
+    const monitor = setInterval(async () => {
+        try {
+            const status = await getNetworkStatusQuiet();
+            let message = '';
+
+            if (status.connected) {
+                if (status.interface === 'ethernet') {
+                    message = `Network: Ethernet connected ${status.internet ? 'with internet' : 'no internet'}`;
+                } else if (status.interface === 'wifi') {
+                    message = `Network: WiFi connected ${status.ssid ? `(${status.ssid})` : ''} ${status.internet ? 'with internet' : 'no internet'}`;
+                }
+            } else {
+                message = 'Network: No connection available';
+            }
+
+            if (logger) {
+                logger.info(message);
+            } else {
+                console.log(message);
+            }
+        } catch (error) {
+            if (logger) {
+                logger.error(`Network monitoring error: ${error.message}`);
+            } else {
+                console.error(`Network monitoring error: ${error.message}`);
+            }
+        }
+    }, intervalMinutes * 60 * 1000);
+
+    return monitor;
+}
+
 module.exports = {
     initializeNetwork,
     checkEthernetConnection,
+    checkEthernetConnectionQuiet,
     checkWifiConnection,
     getNetworkStatus,
+    getNetworkStatusQuiet,
+    testConnectivityQuiet,
     getWifiSSID,
     displayNetworkStatus,
     getMyIP,
     startNetworkMonitoring,
+    startNetworkMonitoringQuiet,
     setNetworkPriority,
     setRoutingPriority,
     ensureInterfacesDetected

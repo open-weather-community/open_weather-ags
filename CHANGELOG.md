@@ -33,12 +33,31 @@ All notable changes to the Open-Weather AGS project will be documented in this f
 - **Developer experience** - Better documentation and code organization
 - **Maintainability** - Reduced technical debt and improved code quality
 
-## [1.4.2b3] - Previous Release
-- Configuration backup and recovery system
-- Enhanced WiFi management
-- USB/WiFi interference mitigation
-- Automatic system updates
-- Comprehensive logging system
+## [1.4.2b3] - 2025-07-22
+
+### Added
+- Comprehensive JSDoc documentation across all modules
+- `utils.js` module with centralized utility functions
+- `constants.js` module for system-wide configuration constants
+- `validate-system.js` script for pre-flight system checks
+- Quiet network monitoring with condensed logging
+
+### Fixed
+- Configuration validation now accepts `myID: 0` with warning (for placeholder configs)
+- Network monitoring reduced from 3 verbose log lines every 10 minutes to 1 condensed line every 30 minutes
+- Removed duplicate network status functions
+- Enhanced error handling and validation throughout codebase
+
+### Changed
+- Updated `package.json` to remove built-in Node.js modules from dependencies
+- Network monitoring interval increased from 10 to 30 minutes for reduced log noise
+- Improved configuration backup and recovery system
+- Enhanced validation with detailed error messages
+
+### Removed
+- References to non-existent npm scripts from documentation
+- Unnecessary verbose logging during network monitoring
+- Redundant dependency declarations
 
 ---
 

@@ -11,7 +11,7 @@ const Logger = require('./logger');
 const { isRecording, startRecording } = require('./recorder');
 const { printLCD, clearLCD, startMarquee } = require('./lcd');
 const { findConfigFile, loadConfig, saveConfig, getConfigPath } = require('./config');
-const { initializeNetwork, startNetworkMonitoring, displayNetworkStatus, getNetworkStatus } = require('./network');
+const { initializeNetwork, startNetworkMonitoringQuiet, displayNetworkStatus, getNetworkStatus } = require('./network');
 const { checkDisk, deleteOldestRecordings } = require('./disk');
 const {
     updatePasses,
@@ -133,7 +133,7 @@ async function main() {
         logger.info(`Network connected via ${networkResult.connection} with IP ${networkResult.ip}`);
 
         // Start network monitoring (reduced frequency since status is now in ready message)
-        const networkMonitor = startNetworkMonitoring(10, logger); // Update every 10 minutes for monitoring
+        const networkMonitor = startNetworkMonitoringQuiet(30, logger); // Quiet monitoring every 30 minutes
 
         // Store monitor reference for cleanup if needed
         process.networkMonitor = networkMonitor;
