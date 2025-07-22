@@ -350,9 +350,7 @@ The system includes comprehensive diagnostic tools:
 
 **Available Diagnostic Commands:**
 ```bash
-npm run diagnose          # Full system health check
-npm run test-usb-wifi     # USB/WiFi interference testing
-npm run test-wifi         # WiFi connection diagnostics (new)
+npm run usb-stability     # USB/WiFi interference testing and power optimization
 ```
 
 **Key Diagnostic Features:**

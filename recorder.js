@@ -1,47 +1,45 @@
+/**
+ * Recording module for Open-Weather AGS
+ * Handles automated satellite signal recording using RTL-SDR
+ * Manages audio processing, file naming, and upload coordination
+ */
+
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { printLCD, clearLCD } = require('./lcd');
 const { uploadFile, uploadFileWithRetries } = require('./upload');
+const { ensureDirectoryExists, formatTimestampForFilename, toLocalISOString } = require('./utils');
 
 let recording = false;
 
-// function to check if recording is in progress
+/**
+ * Check if a recording is currently in progress
+ * @returns {boolean} - True if recording is active
+ */
 function isRecording() {
     return recording;
 }
 
-// function to create directory recursively
-function ensureDirectoryExists(directory) {
-    if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory, { recursive: true });
-    }
-}
-
-// function to format the timestamp for filenames
+/**
+ * Format timestamp for filename use (delegates to utils)
+ * @param {Date|string} timestamp - Timestamp to format
+ * @returns {string} - Formatted timestamp
+ * @deprecated Use formatTimestampForFilename from utils instead
+ */
 function formatTimestamp(timestamp) {
-    return new Date(timestamp).toISOString().replace(/:/g, '-');
+    return formatTimestampForFilename(timestamp);
 }
 
-// convert to ISO 8601 format with timezone offset
-function toLocalISOString(date) {
-    const pad = (num) => String(num).padStart(2, '0'); // pads single digits with a leading zero
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1); // getMonth is zero-based
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-    const timezoneOffset = -date.getTimezoneOffset(); // minutes offset from UTC
-    const offsetSign = timezoneOffset >= 0 ? '+' : '-';
-    const offsetHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
-    const offsetMinutes = pad(Math.abs(timezoneOffset) % 60);
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetSign}${offsetHours}:${offsetMinutes}`;
-}
-
-// function to start recording
+/**
+ * Start recording a satellite pass
+ * @param {string} frequency - Satellite frequency (e.g., "137.1M")
+ * @param {Date} timestamp - Recording start time
+ * @param {string} satellite - Satellite name (e.g., "NOAA 19")
+ * @param {number} durationMinutes - Recording duration in minutes
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ */
 function startRecording(frequency, timestamp, satellite, durationMinutes, config, logger) {
     // check if a recording is already in progress
     if (recording) {

@@ -1,10 +1,22 @@
-// logger.js
-// This module logs messages to a file and the console
+/**
+ * Logger module for Open-Weather AGS
+ * Provides centralized logging with file and console output
+ * Handles fallback locations for read-only USB drives
+ */
 
 const fs = require("fs");
 const path = require("path");
 
+/**
+ * Logger class for handling application logging
+ * Automatically handles log file creation and fallback locations
+ * Supports multiple log levels (INFO, ERROR, NOTICE)
+ */
 class Logger {
+  /**
+   * Initialize logger with configuration
+   * @param {Object} config - Configuration object containing saveDir and logFile
+   */
   constructor(config) {
     // console.log("config: " + config);
     this.config = config;
@@ -37,6 +49,11 @@ class Logger {
 
   }
 
+  /**
+   * Get writable log path, falling back to home directory if USB is read-only
+   * @param {Object} config - Configuration object
+   * @returns {string} - Path to writable log file location
+   */
   getWritableLogPath(config) {
     const preferredPath = path.join(config.saveDir, config.logFile);
 
@@ -61,6 +78,11 @@ class Logger {
     }
   }
 
+  /**
+   * Log a message with specified level
+   * @param {string} message - Message to log
+   * @param {string} level - Log level (INFO, ERROR, NOTICE)
+   */
   log(message, level = "INFO") {
     const options = {
       year: "numeric",
@@ -85,14 +107,26 @@ class Logger {
     });
   }
 
+  /**
+   * Log an info message
+   * @param {string} message - Message to log
+   */
   info(message) {
     this.log(message, "INFO");
   }
 
+  /**
+   * Log an error message
+   * @param {string} message - Error message to log
+   */
   error(message) {
     this.log(message, "ERROR");
   }
 
+  /**
+   * Log a notice message
+   * @param {string} message - Notice message to log
+   */
   notice(message) {
     this.log(message, "NOTICE");
   }

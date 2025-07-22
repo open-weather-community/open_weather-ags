@@ -1,23 +1,69 @@
+/**
+ * Configuration management module for Open-Weather AGS
+ * Handles loading, saving, backup, and recovery of configuration files
+ * Implements atomic writes and corruption detection for robust config handling
+ */
+
 const fs = require('fs');
 const path = require('path');
+const { validateLatitude, validateLongitude, validateRange } = require('./utils');
+const { FILES, VALIDATION } = require('./constants');
 
-const configName = 'ow-config.json';
-const backupConfigName = 'ow-config-backup.json';
-const configPathFile = 'configPath.json';
+const configName = FILES.CONFIG_NAME;
+const backupConfigName = FILES.BACKUP_CONFIG_NAME;
+const configPathFile = FILES.CONFIG_PATH_FILE;
 
-// Function to validate config structure
+/**
+ * Validates the configuration structure for required fields and value ranges
+ * @param {Object} config - Configuration object to validate
+ * @returns {boolean} - True if config is valid, false otherwise
+ */
 function validateConfig(config) {
     const requiredFields = ['myID', 'locLat', 'locLon', 'gain', 'noaaFrequencies'];
+
+    // Check required fields exist
     for (const field of requiredFields) {
         if (config[field] === undefined || config[field] === null) {
             console.log(`Missing required config field: ${field}`);
             return false;
         }
     }
+
+    // Validate specific field values
+    try {
+        validateLatitude(config.locLat);
+        validateLongitude(config.locLon);
+        validateRange(config.gain, VALIDATION.GAIN.min, VALIDATION.GAIN.max, 'gain');
+        validateRange(config.myID, VALIDATION.STATION_ID.min, VALIDATION.STATION_ID.max, 'myID');
+
+        if (config.minElevation !== undefined) {
+            validateRange(config.minElevation, VALIDATION.ELEVATION.min, VALIDATION.ELEVATION.max, 'minElevation');
+        }
+
+        if (config.maxDistance !== undefined) {
+            validateRange(config.maxDistance, VALIDATION.DISTANCE.min, VALIDATION.DISTANCE.max, 'maxDistance');
+        }
+
+        // Validate NOAA frequencies structure
+        if (!config.noaaFrequencies || typeof config.noaaFrequencies !== 'object') {
+            console.log('noaaFrequencies must be an object with satellite frequencies');
+            return false;
+        }
+
+    } catch (validationError) {
+        console.log(`Config validation failed: ${validationError.message}`);
+        return false;
+    }
+
     return true;
 }
 
-// Function to safely read and parse JSON files with corruption detection
+/**
+ * Safely reads and parses JSON files with corruption detection
+ * Checks for null bytes, file size, and JSON structure validity
+ * @param {string} filePath - Path to the JSON file to read
+ * @returns {Object} - Result object with success flag, data, or error
+ */
 function safeReadJSONFile(filePath) {
     try {
         if (!fs.existsSync(filePath)) {
@@ -54,7 +100,12 @@ function safeReadJSONFile(filePath) {
     }
 }
 
-// Function to attempt corruption recovery
+/**
+ * Attempts to recover from config file corruption using backup files
+ * Creates a backup of the corrupted file and restores from the backup
+ * @param {string} configPath - Path to the corrupted config file
+ * @returns {Object|null} - Restored config object or null if recovery failed
+ */
 function attemptCorruptionRecovery(configPath) {
     console.log(`Attempting corruption recovery for: ${configPath}`);
 

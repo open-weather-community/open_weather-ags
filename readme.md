@@ -1,24 +1,43 @@
-# open-weather automated ground station
+# Open-Weather Automated Ground Station (AGS)
 
-## Usage
+An open-source hardware and software project for autonomous weather satellite reception from NOAA satellites using Automatic Picture Transmission (APT). This project enables distributed collection of weather satellite imagery for the open-weather Public Archive.
 
-If you have a fully assembled AGS, just plug it in after editing the ow-config.json file on the USB using a laptop or desktop you have handy.
+## Overview
 
-Assuming you have installed the project, the start_scheduler.sh script will be added as a cron job, which will automatically launch the app at startup.
+The Open-Weather AGS is designed to be:
+- **Autonomous** - Operates without manual intervention
+- **Educational** - Entry point for learning about satellites, radio, and weather
+- **Resilient** - Graceful handling of failures and network issues
+- **Open Source** - All hardware designs, software, and documentation freely available
 
-To start the node project manually:
-```sh
+## Quick Start
+
+If you have a fully assembled AGS:
+
+1. Edit the `ow-config.json` file on the USB drive with your station details
+2. Insert the USB drive into your AGS
+3. Power on the device
+4. The system will automatically start receiving satellite passes
+
+To manually start the application:
+```bash
 npm start
 ```
 
-## Adjusting the config
+To validate your system setup:
+```bash
+npm run validate
+```
 
-Create a file (or edit an existing one) named ow-config.json. Here is a template:
+## Configuration
+
+Create (or edit) a file named `ow-config.json` on your USB drive. Here's the configuration template:
 
 ```json
 {
-  "wifiName": "wifi name",
-  "wifiPassword": "wifi password",
+  "wifiName": "your_wifi_network",
+  "wifiPassword": "your_wifi_password",
+  "auth_token": "your_openweather_api_token",
   "myID": 1,
   "locLat": 52.49548,
   "locLon": 13.46843,
@@ -27,6 +46,9 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
   "daysToPropagate": 1,
   "minElevation": 30,
   "bufferMinutes": 0,
+  "numberOfPassesPerDay": 1,
+  "sampleRate": "48k",
+  "downsample": true,
   "noaaFrequencies": {
     "NOAA 19": "137.1M",
     "NOAA 15": "137.62M"
@@ -37,29 +59,59 @@ Create a file (or edit an existing one) named ow-config.json. Here is a template
   "rtl_fm_path": "/usr/local/bin/rtl_fm",
   "sox_path": "/usr/bin/sox"
 }
-
 ```
 
-The only settings you should really need to adjust are above noaaFrequencies in the config file. The rest is for advanced use. You should change the ID based on what open-weather provides you, and find your lat/long and enter those as well. The gain can be adjusted depending on the quality of the recordings. maxDistance is the maximum distance in meters (to the satelite from your location) to be considered a viable pass. daysToPropagate is how many dates in advance your device should predict NOAA passes. bufferMinutes gives a little buffer before and after the pass of X minutes.
+### Essential Configuration Parameters
 
-**Note:** NOAA-18 has been removed from the default configuration as it reached end-of-life in 2024 and is no longer operational. The configuration now only includes NOAA-19 and NOAA-15 by default.
+The following settings are the most important to configure for your station:
 
-## Explanation of files involved
+- **`myID`** - Unique station identifier (provided by open-weather)
+- **`locLat`** / **`locLon`** - Your station's latitude and longitude (decimal degrees)
+- **`wifiName`** / **`wifiPassword`** - Your WiFi network credentials
+- **`auth_token`** - Your open-weather API authentication token
+- **`gain`** - RTL-SDR gain setting (adjust based on signal quality)
 
-### Files
+### Advanced Configuration
 
+- **`maxDistance`** - Maximum satellite distance in meters to consider a viable pass
+- **`daysToPropagate`** - Days in advance to calculate satellite passes
+- **`minElevation`** - Minimum pass elevation in degrees (higher = better signal quality)
+- **`bufferMinutes`** - Recording buffer time before/after calculated pass times
+- **`numberOfPassesPerDay`** - Maximum number of recordings per day
 
-#### ow-config.json
+**Note:** NOAA-18 has been removed from the default configuration as it reached end-of-life in 2024 and is no longer operational.
 
-This holds the basic configuration for each ground station. Properties include latitude and longitude, maximum distance from satellite to consider a "good pass", etc.
+## System Architecture
 
-#### recordings
+### Core Components
 
-WAV files are stored to the recordings/ directory wherever the ow-config.json file is found.
+- **`scheduler.js`** - Main application orchestrator and recording scheduler
+- **`config.js`** - Configuration management with backup/recovery system
+- **`tle.js`** - Two-Line Element data processing and satellite pass calculation
+- **`recorder.js`** - Automated satellite signal recording using RTL-SDR
+- **`upload.js`** - Data transmission to open-weather Public Archive
+- **`network.js`** - Network connectivity management with ethernet priority
+- **`lcd.js`** - LCD display interface for status and error messages
+- **`logger.js`** - Centralized logging with file rotation
 
-#### passes.json
+### File Structure
 
-This file contains information for upcoming and past NOAA satellite passes. It is updated using tle.js, and a cron job checks every minute in app.js to see if it should be recording based on this info. When it finishes, the recorded flag should be set to true.
+```
+/home/openweather/open_weather-ags/     # Main application directory
+├── scheduler.js                        # Main entry point
+├── config.js                          # Configuration management
+├── *.js                               # Other core modules
+└── 3d/                                # 3D printing files
+    ├── ready-to-print/
+    └── design-and-archive/
+
+/media/[usb-device]/                    # USB storage
+├── ow-config.json                      # Station configuration
+├── ow-config-backup.json              # Automatic backup
+├── passes.json                         # Calculated satellite passes
+├── log.txt                            # System logs
+└── recordings/                         # Captured audio files
+```
 
 ## Setup
 
@@ -454,20 +506,34 @@ nmcli device wifi list          # Show available WiFi networks
 
 ## Troubleshooting
 
-### Quick Diagnostic Tool
+### System Validation
 
-Run the built-in diagnostic tool to check for common issues:
+First, run the system validation script to check for common setup issues:
 
 ```bash
-npm run diagnose
+npm run validate
 ```
 
 This checks for:
-- DNS resolution issues (EAI_AGAIN errors)
-- Network interface detection and connectivity
-- USB drive mounting and configuration files
-- System resources and load
-- TLE cache availability and validity
+- Node.js version compatibility
+- Required system dependencies (rtl-sdr, sox, git)
+- Hardware interfaces (I2C for LCD)
+- File structure integrity
+- Network tools availability
+
+### USB/WiFi Stability Tool
+
+Run the built-in USB stability tool to check for interference issues:
+
+```bash
+npm run usb-stability check
+```
+
+This checks for:
+- USB device enumeration and interference detection
+- WiFi connection stability during USB operations
+- Power optimization recommendations
+- Hardware compatibility issues
 
 ### Common Issues & Solutions
 
@@ -486,18 +552,95 @@ This checks for:
 **Symptoms:** "EAI_AGAIN celestrak.org" or "ENOTFOUND" errors in logs
 
 **Solutions:**
-1. Run `npm run diagnose` to check DNS resolution
+1. Check DNS resolution with `nslookup celestrak.org`
 2. Verify WiFi credentials and network settings in config
-3. Try `nslookup celestrak.org` to verify DNS resolution
-4. Restart network: `sudo systemctl restart NetworkManager`
+3. Restart network: `sudo systemctl restart NetworkManager`
+4. Check USB/WiFi interference with `npm run usb-stability check`
 
-#### Configuration File Problems
+#### Common Startup Issues
 
 **Symptoms:** "Config missing!" or "config error" on LCD
 
 **Solutions:**
 1. Check for backup config file (`ow-config-backup.json`) on USB drive
 2. System automatically attempts restoration from backup
+3. Verify USB drive is properly inserted and mounted
+4. Ensure `ow-config.json` contains valid JSON syntax
+
+#### USB/WiFi Interference
+
+**Symptoms:** WiFi disconnections when USB drive is inserted, poor signal quality
+
+**Solutions:**
+1. Run interference test: `npm run usb-stability check`
+2. Use powered USB hub to reduce Pi power load
+3. Use USB 3.0 devices instead of USB 2.0 (different frequency band)
+4. Physically separate USB devices from WiFi antenna
+5. Use shielded USB cables
+6. Switch to 5GHz WiFi networks to avoid 2.4GHz interference
+
+## Development
+
+### Code Structure
+
+The codebase follows a modular architecture with clear separation of concerns:
+
+- **Core modules** (`scheduler.js`, `config.js`, etc.) - Main application logic
+- **Hardware interfaces** (`lcd.js`, `recorder.js`) - Hardware abstraction
+- **Network services** (`network.js`, `upload.js`) - Network operations  
+- **Utilities** (`utils.js`, `constants.js`) - Shared functionality
+- **Diagnostics** (`usb-stability.js`) - System health monitoring
+
+### Configuration Management
+
+The system implements robust configuration handling:
+- **Atomic writes** - Prevents corruption during power loss
+- **Automatic backups** - Creates backup copies for recovery
+- **Validation** - Ensures configuration integrity
+- **Multi-location search** - Finds configs across mount points
+
+### Error Handling
+
+Comprehensive error handling includes:
+- **Network error detection** - Graceful fallback to cached data
+- **Timeout protection** - Prevents hanging operations
+- **Automatic recovery** - Self-healing from common failures
+- **User feedback** - Clear error messages on LCD display
+
+## Contributing
+
+We welcome contributions! Please:
+
+1. **Fork the repository** and create a feature branch
+2. **Follow the existing code style** and add JSDoc documentation
+3. **Test on actual hardware** - Pi development environment preferred
+4. **Update documentation** for any user-facing changes
+5. **Submit a pull request** with clear description of changes
+
+### Development Environment
+
+This project is designed for cross-platform development:
+- **Development machine** - For coding and version control
+- **Raspberry Pi target** - For testing hardware-specific features
+- **Remote deployment** - Git-based synchronization workflow
+
+### Code Quality
+
+- Use **JSDoc** for function documentation
+- Follow **modular design** principles
+- Implement **proper error handling**
+- Add **logging** for debugging and monitoring
+- **Validate inputs** to prevent runtime errors
+
+## License
+
+ISC License - See repository for details.
+
+## Support
+
+- **GitHub Issues** - Bug reports and feature requests
+- **Documentation** - See `plan.md` for detailed technical information
+- **Community** - Join the open-weather community discussions
 3. Create new `ow-config.json` file on USB drive if no backup available
 4. Verify USB drive is properly mounted and accessible
 

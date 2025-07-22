@@ -223,13 +223,13 @@ async function main() {
         const versionText = `v${VERSION}`;
         const line2 = (versionText + ' '.repeat(16 - versionText.length - connectionType.length) + connectionType).slice(0, 16);
 
-        printLCD('AGS Ready!', line2);
+        printLCD('Station ready!', line2);
         console.log(`Ground station ready with ${connectionType} connection`);
     } catch (error) {
         console.log('Could not determine network status for ready message');
         const versionText = `v${VERSION}`;
         const line2 = (versionText + ' '.repeat(16 - versionText.length - 6) + 'no net').slice(0, 16);
-        printLCD('AGS Ready!', line2);
+        printLCD('Station ready!', line2);
     }
 
     if (topMaxElevationPasses && topMaxElevationPasses.length > 0) {

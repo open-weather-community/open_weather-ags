@@ -1,16 +1,23 @@
-// tle.js
-// This module processes TLE data to find satellite passes over a specific location
-// It uses the satellite.js library to propagate satellite orbits and calculate passes
-// The passes are saved to a JSON file for use by the scheduler
+/**
+ * TLE (Two-Line Element) data processing module for Open-Weather AGS
+ * Handles downloading, caching, and processing of satellite orbital data
+ * Calculates satellite passes over a specific location using satellite.js
+ */
 
 const axios = require('axios');
 const satellite = require('satellite.js');
 const geolib = require('geolib');
 const { DateTime } = require('luxon');
 const fs = require('fs');
-const path = require('path'); // Add this line to import the path module
+const path = require('path');
+const { isNetworkError, withTimeout } = require('./utils');
 
-// Fetch TLE (Two-Line Element) data from Celestrak with fallback to cache
+/**
+ * Fetch TLE (Two-Line Element) data from Celestrak with fallback to cache
+ * Implements timeout and error handling for network requests
+ * @returns {Promise<string>} - TLE data as string
+ * @throws {Error} - If both network fetch and cache loading fail
+ */
 async function fetchTLEData() {
     const url = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=tle';
 
@@ -53,19 +60,7 @@ async function fetchTLEData() {
         logger.error('Error fetching TLE data: ' + error.message);
 
         // Check if this is a network-related error
-        const isNetworkError = error.message.includes('EAI_AGAIN') ||
-            error.message.includes('ENOTFOUND') ||
-            error.message.includes('ECONNREFUSED') ||
-            error.message.includes('timeout') ||
-            error.message.includes('ETIMEDOUT') ||
-            error.message.includes('ECONNRESET') ||
-            error.code === 'ENOTFOUND' ||
-            error.code === 'EAI_AGAIN' ||
-            error.code === 'ECONNREFUSED' ||
-            error.code === 'ETIMEDOUT' ||
-            error.code === 'ECONNRESET';
-
-        if (isNetworkError) {
+        if (isNetworkError(error)) {
             logger.warn('Network error detected, attempting to use cached TLE data...');
 
             if (cachedData) {
@@ -87,7 +82,11 @@ async function fetchTLEData() {
     }
 }
 
-// Save TLE data to cache file
+/**
+ * Save TLE data to cache file for offline use
+ * Creates a timestamped cache file to track data freshness
+ * @param {string} tleData - TLE data string to cache
+ */
 async function saveTLECache(tleData) {
     if (!config || !config.saveDir) {
         return;
@@ -107,7 +106,11 @@ async function saveTLECache(tleData) {
     }
 }
 
-// Load TLE data from cache file
+/**
+ * Load TLE data from cache file if available and not expired
+ * Cache expires after 7 days to ensure data freshness
+ * @returns {Promise<string|null>} - Cached TLE data or null if not available/expired
+ */
 async function loadTLECache() {
     if (!config || !config.saveDir) {
         return null;

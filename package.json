@@ -1,28 +1,47 @@
 {
   "name": "open-weather_ags",
   "version": "1.4.2b3",
-  "description": "open-weather automated ground station",
+  "description": "Open-weather Automated Ground Station - Autonomous weather satellite reception system",
   "main": "scheduler.js",
   "scripts": {
     "start": "node scheduler.js",
-    "usb-stability": "node usb-stability.js"
+    "usb-stability": "node usb-stability.js",
+    "validate": "node validate-system.js"
   },
   "dependencies": {
     "axios": "^1.7.7",
     "check-disk-space": "^3.4.0",
-    "child_process": "^1.0.2",
-    "cron": "^1.8.2",
-    "dotenv": "^16.4.5",
-    "fs": "^0.0.1-security",
     "geolib": "^3.3.4",
-    "https": "^1.0.0",
-    "install": "^0.13.0",
     "luxon": "^3.4.4",
     "node-cron": "^3.0.3",
-    "npm": "^10.8.0",
     "raspberrypi-liquid-crystal": "^1.20.0",
     "satellite.js": "^5.0.0"
   },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "satellite",
+    "weather",
+    "noaa",
+    "apt",
+    "sdr",
+    "rtl-sdr",
+    "raspberry-pi",
+    "ground-station",
+    "amateur-radio"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/open-weather-community/open_weather-ags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/open-weather-community/open_weather-ags/issues"
+  },
+  "homepage": "https://github.com/open-weather-community/open_weather-ags#readme",
   "author": "Grayson Earle",
   "license": "ISC"
 }
