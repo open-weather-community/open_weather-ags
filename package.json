@@ -5,10 +5,6 @@
   "main": "scheduler.js",
   "scripts": {
     "start": "node scheduler.js",
-    "diagnose": "node diagnose.js",
-    "test-usb-wifi": "node test-usb-wifi.js",
-    "test-wifi": "node test-wifi-connection.js",
-    "diagnose-usb-wifi": "node diagnose-usb-wifi.js",
     "usb-stability": "node usb-stability.js"
   },
   "dependencies": {

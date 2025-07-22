@@ -457,6 +457,27 @@ async function checkWifiConnection(config) {
 }
 
 /**
+ * Get the current WiFi SSID (if connected)
+ */
+async function getWifiSSID() {
+    try {
+        // Use nmcli to get the currently active WiFi SSID
+        const { stdout } = await execAsync('/usr/bin/nmcli -t -f active,ssid dev wifi');
+        const activeConnections = stdout.split('\n').filter(line => line.startsWith('yes'));
+
+        if (activeConnections.length > 0) {
+            const ssid = activeConnections[0].split(':')[1];
+            return ssid || null;
+        }
+
+        return null;
+    } catch (error) {
+        console.log(`Error getting WiFi SSID: ${error.message}`);
+        return null;
+    }
+}
+
+/**
  * Get current network status and display on LCD
  */
 async function getNetworkStatus(logger = null) {
@@ -480,10 +501,12 @@ async function getNetworkStatus(logger = null) {
         if (wifiHasIP) {
             const wifiIP = await getInterfaceIP(wifiInterface);
             const wifiInternet = await testConnectivity(wifiInterface);
+            const currentSSID = await getWifiSSID();
             status.wifi = {
                 connected: true,
                 ip: wifiIP,
                 internet: wifiInternet,
+                ssid: currentSSID,
                 reason: wifiInternet ? 'success' : 'no_internet'
             };
         }
@@ -763,6 +786,7 @@ module.exports = {
     checkEthernetConnection,
     checkWifiConnection,
     getNetworkStatus,
+    getWifiSSID,
     displayNetworkStatus,
     getMyIP,
     startNetworkMonitoring,
