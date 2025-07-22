@@ -362,21 +362,30 @@ async function getNetworkStatusQuiet() {
 
 /**
  * Set network interface priority (ethernet over wifi)
+ * Only sets priorities when both interfaces are available and connected
  */
 async function setNetworkPriority() {
     try {
-        console.log('Setting network priority (ethernet over wifi)...');
-
         // Use NetworkManager to set connection priorities if available
         try {
             // Check if NetworkManager is running
             await execAsync('systemctl is-active NetworkManager');
 
-            // Get connection UUIDs
+            // Get connection status for both interfaces
             const ethernetUp = await isInterfaceUp(ETHERNET_INTERFACE);
             const wifiUp = await isInterfaceUp(WIFI_INTERFACE);
 
+            // Check if ethernet also has internet connectivity
+            let ethernetHasInternet = false;
             if (ethernetUp) {
+                const ethernetStatus = await checkEthernetConnection();
+                ethernetHasInternet = ethernetStatus.connected && ethernetStatus.internet;
+            }
+
+            // Only set priorities if both interfaces are up and ethernet has internet
+            if (ethernetUp && ethernetHasInternet && wifiUp) {
+                console.log('Setting network priority (ethernet over wifi) - both interfaces active...');
+
                 // Set ethernet connection to high priority (lower number = higher priority)
                 try {
                     const { stdout } = await execAsync(`nmcli -t -f NAME,DEVICE connection show --active | grep ${ETHERNET_INTERFACE}`);
@@ -388,9 +397,7 @@ async function setNetworkPriority() {
                 } catch (error) {
                     console.log('Could not set ethernet priority via NetworkManager');
                 }
-            }
 
-            if (wifiUp) {
                 // Set wifi connection to lower priority
                 try {
                     const { stdout } = await execAsync(`nmcli -t -f NAME,DEVICE connection show --active | grep ${WIFI_INTERFACE}`);
@@ -402,13 +409,26 @@ async function setNetworkPriority() {
                 } catch (error) {
                     console.log('Could not set wifi priority via NetworkManager');
                 }
+            } else if (wifiUp && !ethernetHasInternet) {
+                console.log('WiFi is primary connection (ethernet not available or no internet) - maintaining default priority');
+            } else if (ethernetUp && ethernetHasInternet && !wifiUp) {
+                console.log('Ethernet is only connection - no priority adjustment needed');
+            } else {
+                console.log('No active network connections found for priority setting');
             }
 
         } catch (nmError) {
             console.log('NetworkManager not available, using routing table approach');
 
-            // Fallback to manual routing approach
-            await setRoutingPriority();
+            // Fallback to manual routing approach - but only if both interfaces are up
+            const ethernetUp = await isInterfaceUp(ETHERNET_INTERFACE);
+            const wifiUp = await isInterfaceUp(WIFI_INTERFACE);
+
+            if (ethernetUp && wifiUp) {
+                await setRoutingPriority();
+            } else {
+                console.log('Skipping routing priority - not both interfaces active');
+            }
         }
 
     } catch (error) {
@@ -419,9 +439,11 @@ async function setNetworkPriority() {
 
 /**
  * Set routing priority manually (fallback method)
+ * Should only be called when both ethernet and wifi are up and ethernet has internet
  */
 async function setRoutingPriority() {
     try {
+        console.log('Setting routing priority (ethernet over wifi) using ip route commands...');
         const ethernetUp = await isInterfaceUp(ETHERNET_INTERFACE);
         const wifiUp = await isInterfaceUp(WIFI_INTERFACE);
 

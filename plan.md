@@ -375,6 +375,12 @@ npm run usb-stability     # USB/WiFi interference testing and power optimization
 - Hardware status checking (rfkill, interface state)
 - Connection verification with IP assignment and internet testing
 
+**Smart Network Priority Management:**
+- Network priority is only set when both ethernet and WiFi are active and ethernet has internet
+- WiFi maintains default priority when it's the only working connection
+- Prevents unnecessary lowering of WiFi priority when ethernet is unavailable
+- Improved connection stability when operating with WiFi-only connectivity
+
 **Common USB/WiFi Interference Solutions:**
 1. Use powered USB hub to reduce Pi power load
 2. Use USB 3.0 devices instead of USB 2.0 (different frequency)
@@ -389,7 +395,15 @@ npm run usb-stability     # USB/WiFi interference testing and power optimization
 - Timeout protection on all network operations
 - Graceful degradation when network services fail
 
-## Recent Improvements (December 2024)
+## Recent Improvements (July 2025)
+
+**Network Priority Management Fix:**
+- Fixed network priority logic to only set WiFi as lower priority when ethernet is actually available and working
+- Prevents WiFi from being unnecessarily deprioritized when ethernet is down or unavailable
+- Maintains optimal connectivity when WiFi is the primary/only connection
+- Improved logging to clearly indicate when and why priority changes are made
+
+## Previous Improvements (December 2024)
 
 **WiFi Connection Management:**
 - Enhanced connection preservation logic to avoid unnecessary disconnections
