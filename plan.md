@@ -391,4 +391,17 @@ npm run test-wifi         # WiFi connection diagnostics (new)
 - Timeout protection on all network operations
 - Graceful degradation when network services fail
 
+## Recent Improvements (December 2024)
+
+**WiFi Connection Management:**
+- Enhanced connection preservation logic to avoid unnecessary disconnections
+- Improved startup behavior to verify existing connections before reconnecting
+- Added comprehensive WiFi diagnostic tool (`test-wifi-connection.js`)
+- Reduced aggressive network interface resets that caused stability issues
+
+**Logging System:**
+- Increased log retention by 50% (from 1000 to 1500 lines)
+- Extended deletion threshold to preserve more debugging information
+- Maintained rotation efficiency while providing longer troubleshooting history
+
 This system is designed for resilient, autonomous operation with comprehensive error handling and diagnostic capabilities.

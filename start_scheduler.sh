@@ -9,8 +9,8 @@ nvm use 22.3.0
 LOCAL_DIR="/home/openweather/open_weather-ags"
 RELEASE_API_URL="https://api.github.com/repos/open-weather-community/open_weather-ags/releases/latest"
 LOG_FILE="/home/openweather/cronlog.txt"
-LOG_MAX_LINES=1000
-LOG_LINES_TO_DELETE=800
+LOG_MAX_LINES=1500
+LOG_LINES_TO_DELETE=500
 
 # Acquire a lock to prevent concurrent executions
 exec 200>/home/openweather/openweather_startup.lockfile
@@ -75,6 +75,20 @@ echo "Checking network connectivity..." >> "$LOG_FILE"
 if ! check_network; then
     echo "Network check failed, continuing anyway..." >> "$LOG_FILE"
 fi
+
+# USB Stability Management - optimize power before mounting
+echo "Running USB stability optimization..." >> "$LOG_FILE"
+cd "$LOCAL_DIR" 2>/dev/null && {
+    if [ -f "usb-stability.js" ]; then
+        # Optimize USB power settings to prevent interference
+        /home/openweather/.nvm/versions/node/v22.3.0/bin/node usb-stability.js power >> "$LOG_FILE" 2>&1 || {
+            echo "USB power optimization failed, continuing..." >> "$LOG_FILE"
+        }
+        echo "USB power optimization completed" >> "$LOG_FILE"
+    else
+        echo "USB stability tool not found, skipping optimization" >> "$LOG_FILE"
+    fi
+}
 
 # Wait for USB block devices to appear first (kernel detection)
 wait_for_usb_hardware() {
@@ -488,6 +502,23 @@ echo "Launching Node.js application..." >> "$LOG_FILE"
 
 # Final check that USB drives are still accessible before launching app
 echo "Final check for USB accessibility before launching app..." >> "$LOG_FILE"
+
+# Run comprehensive USB stability check before app launch
+echo "Running comprehensive USB stability check..." >> "$LOG_FILE"
+cd "$LOCAL_DIR" 2>/dev/null && {
+    if [ -f "usb-stability.js" ]; then
+        /home/openweather/.nvm/versions/node/v22.3.0/bin/node usb-stability.js check >> "$LOG_FILE" 2>&1
+        USB_CHECK_RESULT=$?
+        if [ $USB_CHECK_RESULT -ne 0 ]; then
+            echo "WARNING: USB stability issues detected. Network may be unstable." >> "$LOG_FILE"
+        else
+            echo "USB stability check passed" >> "$LOG_FILE"
+        fi
+    else
+        echo "USB stability tool not found, skipping comprehensive check" >> "$LOG_FILE"
+    fi
+}
+
 for i in {1..10}; do
     # Check if the config file is actually accessible
     if [ -f "/media/openweather/O-W/ow-config.json" ]; then

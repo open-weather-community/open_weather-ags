@@ -17,6 +17,75 @@ function validateConfig(config) {
     return true;
 }
 
+// Function to safely read and parse JSON files with corruption detection
+function safeReadJSONFile(filePath) {
+    try {
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`File does not exist: ${filePath}`);
+        }
+
+        const rawData = fs.readFileSync(filePath, 'utf8');
+
+        // Check for null bytes (common corruption indicator)
+        if (rawData.includes('\0')) {
+            throw new Error(`File contains null bytes (corrupted): ${filePath}`);
+        }
+
+        // Check for minimal file size (empty files are usually corrupted)
+        if (rawData.trim().length < 2) {
+            throw new Error(`File is empty or too small: ${filePath}`);
+        }
+
+        // Check if it starts and ends with expected JSON characters
+        const trimmed = rawData.trim();
+        if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+            throw new Error(`File does not appear to be valid JSON: ${filePath}`);
+        }
+
+        // Parse JSON
+        const parsed = JSON.parse(rawData);
+
+        console.log(`Successfully parsed JSON file: ${filePath}`);
+        return { success: true, data: parsed, rawData: rawData };
+
+    } catch (err) {
+        console.log(`Error reading JSON file ${filePath}: ${err.message}`);
+        return { success: false, error: err.message };
+    }
+}
+
+// Function to attempt corruption recovery
+function attemptCorruptionRecovery(configPath) {
+    console.log(`Attempting corruption recovery for: ${configPath}`);
+
+    const configDir = path.dirname(configPath);
+    const backupPath = path.join(configDir, backupConfigName);
+
+    // Try backup file first
+    if (fs.existsSync(backupPath)) {
+        console.log(`Trying backup file: ${backupPath}`);
+        const backupResult = safeReadJSONFile(backupPath);
+        if (backupResult.success) {
+            console.log('Backup file is valid, restoring...');
+            try {
+                // Backup the corrupted file for analysis
+                const corruptedBackup = configPath + '.corrupted.' + Date.now();
+                fs.copyFileSync(configPath, corruptedBackup);
+                console.log(`Corrupted file backed up to: ${corruptedBackup}`);
+
+                // Restore from backup
+                fs.copyFileSync(backupPath, configPath);
+                console.log('Config file restored from backup');
+                return backupResult.data;
+            } catch (restoreErr) {
+                console.log(`Failed to restore from backup: ${restoreErr.message}`);
+            }
+        }
+    }
+
+    return null;
+}
+
 // Function to perform atomic file write (safer against power loss)
 function atomicWriteFile(filePath, data) {
     const tempPath = filePath + '.tmp';
@@ -232,8 +301,20 @@ function loadConfig() {
             if (fs.existsSync(configPath)) {
                 try {
                     console.log(`Trying direct USB path: ${configPath}`);
-                    const configData = fs.readFileSync(configPath, 'utf8');
-                    const configJson = JSON.parse(configData);
+                    const readResult = safeReadJSONFile(configPath);
+
+                    let configJson;
+                    if (!readResult.success) {
+                        // Attempt corruption recovery
+                        console.log(`Config file appears corrupted: ${readResult.error}`);
+                        configJson = attemptCorruptionRecovery(configPath);
+                        if (!configJson) {
+                            console.log(`Failed to recover corrupted config at: ${configPath}`);
+                            continue;
+                        }
+                    } else {
+                        configJson = readResult.data;
+                    }
 
                     // Validate the config
                     if (!validateConfig(configJson)) {
@@ -269,8 +350,20 @@ function loadConfig() {
         const configPath = findConfigFile(dir);
         if (configPath) {
             try {
-                const configData = fs.readFileSync(configPath, 'utf8');
-                const configJson = JSON.parse(configData);
+                const readResult = safeReadJSONFile(configPath);
+
+                let configJson;
+                if (!readResult.success) {
+                    // Attempt corruption recovery
+                    console.log(`Config file appears corrupted: ${readResult.error}`);
+                    configJson = attemptCorruptionRecovery(configPath);
+                    if (!configJson) {
+                        console.log(`Failed to recover corrupted config at: ${configPath}`);
+                        continue;
+                    }
+                } else {
+                    configJson = readResult.data;
+                }
 
                 // Validate the config
                 if (!validateConfig(configJson)) {
