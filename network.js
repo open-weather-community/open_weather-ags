@@ -655,7 +655,11 @@ async function initializeNetwork(config, logger = null) {
                 }
 
                 if (wifiResult.connected && wifiResult.internet) {
-                    console.log(`WiFi connection established with internet access to "${config.wifiName}"`);
+                    if (wifiResult.reason === 'already_connected') {
+                        console.log(`WiFi connection preserved to "${config.wifiName}" - already connected with internet access`);
+                    } else {
+                        console.log(`WiFi connection established with internet access to "${config.wifiName}"`);
+                    }
                     networkEstablished = true;
                 } else if (wifiResult.reason === 'ethernet_available') {
                     console.log('Skipped WiFi setup due to working ethernet connection');
