@@ -397,6 +397,12 @@ npm run usb-stability     # USB/WiFi interference testing and power optimization
 
 ## Recent Improvements (July 2025)
 
+**Network Status Detection Fix:**
+- Fixed critical bug in `getNetworkStatusQuiet()` function that was incorrectly calling `checkWifiConnection()` without required parameters
+- Improved network status detection to properly identify existing WiFi connections during system startup
+- Fixed inconsistency where network initialization would fail but WiFi was actually working
+- Enhanced status reporting to include proper `primary` and `ip` fields for consistent status display
+
 **Network Priority Management Fix:**
 - Fixed network priority logic to only set WiFi as lower priority when ethernet is actually available and working
 - Prevents WiFi from being unnecessarily deprioritized when ethernet is down or unavailable

@@ -334,29 +334,48 @@ async function getNetworkStatusQuiet() {
             if (ethConnected.connected) {
                 const ethInternet = await testConnectivityQuiet(ETHERNET_INTERFACE);
                 if (ethInternet) {
-                    return { connected: true, interface: 'ethernet', internet: true };
+                    return {
+                        connected: true,
+                        interface: 'ethernet',
+                        primary: 'ethernet',
+                        internet: true,
+                        ip: ethConnected.ip
+                    };
                 }
-                return { connected: true, interface: 'ethernet', internet: false };
+                return {
+                    connected: true,
+                    interface: 'ethernet',
+                    primary: 'ethernet',
+                    internet: false,
+                    ip: ethConnected.ip
+                };
             }
         }
 
         // Check wifi if ethernet not available
         if (WIFI_INTERFACE) {
-            const wifiConnected = await checkWifiConnection();
-            if (wifiConnected.connected) {
-                const wifiInternet = await testConnectivityQuiet(WIFI_INTERFACE);
-                return {
-                    connected: true,
-                    interface: 'wifi',
-                    internet: wifiInternet,
-                    ssid: wifiConnected.ssid
-                };
+            const wifiUp = await isInterfaceUp(WIFI_INTERFACE);
+            if (wifiUp) {
+                const wifiHasIP = await hasIPAddress(WIFI_INTERFACE);
+                if (wifiHasIP) {
+                    const wifiIP = await getInterfaceIP(WIFI_INTERFACE);
+                    const wifiInternet = await testConnectivityQuiet(WIFI_INTERFACE);
+                    const currentSSID = await getWifiSSID();
+                    return {
+                        connected: true,
+                        interface: 'wifi',
+                        primary: 'wifi',
+                        internet: wifiInternet,
+                        ip: wifiIP,
+                        ssid: currentSSID
+                    };
+                }
             }
         }
 
-        return { connected: false, interface: 'none', internet: false };
+        return { connected: false, interface: 'none', primary: null, internet: false };
     } catch (error) {
-        return { connected: false, interface: 'error', internet: false, error: error.message };
+        return { connected: false, interface: 'error', primary: null, internet: false, error: error.message };
     }
 }
 
